@@ -445,12 +445,14 @@ fun HomeTabContent(
     onDailyTrigger: () -> Unit,
     onLuckySpinTrigger: () -> Unit
 ) {
+    var selectedMode by remember { mutableStateOf(GameMode.CLASSIC) }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .statusBarsPadding()
             .padding(horizontal = 20.dp),
-        contentPadding = PaddingValues(top = 16.dp, bottom = 120.dp),
+        contentPadding = PaddingValues(top = 16.dp, bottom = 180.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -561,7 +563,13 @@ fun HomeTabContent(
                             ),
                             shape = RoundedCornerShape(24.dp)
                         )
-                        .clickable { onStartGame(GameMode.CLASSIC) },
+                        .clickable {
+                            if (selectedMode == GameMode.DAILY_CHALLENGE) {
+                                onDailyTrigger()
+                            } else {
+                                onStartGame(selectedMode)
+                            }
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     Row(
@@ -591,7 +599,7 @@ fun HomeTabContent(
                                 )
                             )
                             Text(
-                                text = "CLASSIC",
+                                text = selectedMode.title.uppercase(),
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White.copy(alpha = 0.7f),
@@ -615,31 +623,36 @@ fun HomeTabContent(
                         label = "CLASSIC",
                         icon = Icons.Default.EmojiEvents,
                         iconColor = GoldAccent,
-                        onClick = { onStartGame(GameMode.CLASSIC) }
+                        isSelected = selectedMode == GameMode.CLASSIC,
+                        onClick = { selectedMode = GameMode.CLASSIC }
                     )
                     ModeQuickButton(
                         label = "TIME",
                         icon = Icons.Default.FlashOn,
                         iconColor = Color(0xFF29B6F6),
-                        onClick = { onStartGame(GameMode.TIME_ATTACK) }
+                        isSelected = selectedMode == GameMode.TIME_ATTACK,
+                        onClick = { selectedMode = GameMode.TIME_ATTACK }
                     )
                     ModeQuickButton(
                         label = "ENDLESS",
                         icon = Icons.Default.Whatshot,
                         iconColor = Color(0xFFFF7043),
-                        onClick = { onStartGame(GameMode.ENDLESS) }
+                        isSelected = selectedMode == GameMode.ENDLESS,
+                        onClick = { selectedMode = GameMode.ENDLESS }
                     )
                     ModeQuickButton(
                         label = "PERFECT",
                         icon = Icons.Default.Adjust,
                         iconColor = Color(0xFFFFCA28),
-                        onClick = { onStartGame(GameMode.PERFECT_RUN) }
+                        isSelected = selectedMode == GameMode.PERFECT_RUN,
+                        onClick = { selectedMode = GameMode.PERFECT_RUN }
                     )
                     ModeQuickButton(
                         label = "DAILY",
                         icon = Icons.Default.DateRange,
                         iconColor = Color(0xFF66BB6A),
-                        onClick = onDailyTrigger
+                        isSelected = selectedMode == GameMode.DAILY_CHALLENGE,
+                        onClick = { selectedMode = GameMode.DAILY_CHALLENGE }
                     )
                 }
             }
@@ -720,7 +733,7 @@ fun StatsTabContent(stats: PlayerStats) {
             .fillMaxSize()
             .statusBarsPadding()
             .padding(horizontal = 20.dp),
-        contentPadding = PaddingValues(top = 16.dp, bottom = 120.dp),
+        contentPadding = PaddingValues(top = 16.dp, bottom = 180.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Header
@@ -926,7 +939,7 @@ fun ThemesTabContent(
             .fillMaxSize()
             .statusBarsPadding()
             .padding(horizontal = 20.dp),
-        contentPadding = PaddingValues(top = 16.dp, bottom = 120.dp),
+        contentPadding = PaddingValues(top = 16.dp, bottom = 180.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Header
@@ -1130,7 +1143,7 @@ fun SettingsTabContent(
             .fillMaxSize()
             .statusBarsPadding()
             .padding(horizontal = 20.dp),
-        contentPadding = PaddingValues(top = 16.dp, bottom = 120.dp),
+        contentPadding = PaddingValues(top = 16.dp, bottom = 180.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         // Header
@@ -1945,12 +1958,13 @@ fun ModeQuickButton(
     label: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     iconColor: Color,
+    isSelected: Boolean = false,
     onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.92f else 1f,
+        targetValue = if (isPressed) 0.92f else if (isSelected) 1.08f else 1f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
         label = "press_scale"
     )
@@ -1976,29 +1990,30 @@ fun ModeQuickButton(
                     drawCircle(
                         brush = Brush.radialGradient(
                             colors = listOf(
-                                iconColor.copy(alpha = 0.25f),
+                                iconColor.copy(alpha = if (isSelected) 0.45f else 0.25f),
                                 Color.Transparent
                             ),
-                            radius = size.width * 0.7f
+                            radius = size.width * (if (isSelected) 0.9f else 0.7f)
                         )
                     )
                 }
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            PurpleNightSurface,
-                            Color.Black
+                            PurpleNightSurface.copy(alpha = if (isSelected) 0.95f else 0.8f),
+                            if (isSelected) iconColor.copy(alpha = 0.25f) else Color.Black
                         )
                     ),
                     shape = CircleShape
                 )
                 .border(
-                    width = 1.5.dp,
+                    width = if (isSelected) 2.5.dp else 1.5.dp,
                     brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color.White.copy(alpha = 0.3f),
-                            iconColor.copy(alpha = 0.8f)
-                        )
+                        colors = if (isSelected) {
+                            listOf(Color.White, iconColor)
+                        } else {
+                            listOf(Color.White.copy(alpha = 0.3f), iconColor.copy(alpha = 0.8f))
+                        }
                     ),
                     shape = CircleShape
                 ),
@@ -2007,7 +2022,7 @@ fun ModeQuickButton(
             Icon(
                 imageVector = icon,
                 contentDescription = label,
-                tint = iconColor,
+                tint = if (isSelected) iconColor else iconColor.copy(alpha = 0.85f),
                 modifier = Modifier.size(24.dp)
             )
         }
@@ -2015,9 +2030,19 @@ fun ModeQuickButton(
         Text(
             text = label,
             fontSize = 9.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = Color.White.copy(alpha = 0.65f),
-            letterSpacing = 0.5.sp
+            fontWeight = if (isSelected) FontWeight.Black else FontWeight.ExtraBold,
+            color = if (isSelected) iconColor else Color.White.copy(alpha = 0.65f),
+            letterSpacing = 0.5.sp,
+            style = if (isSelected) {
+                TextStyle(
+                    shadow = Shadow(
+                        color = iconColor.copy(alpha = 0.5f),
+                        blurRadius = 4f
+                    )
+                )
+            } else {
+                TextStyle.Default
+            }
         )
     }
 }
@@ -2403,11 +2428,24 @@ fun LuckySpinWheelCard(
     val cyanAccent = Color(0xFF00E5FF)
     val cyanDark = Color(0xFF006064)
     val infiniteTransition = rememberInfiniteTransition(label = "spin_pulse")
-    val borderAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.4f,
-        targetValue = 0.95f,
+    
+    // Smooth infinite rotation for the Wheel Emoji
+    val rotationAngle by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1500, easing = FastOutSlowInEasing),
+            animation = tween(8000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "rotation"
+    )
+
+    // Pulse animation for 3D border glow
+    val borderAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.5f,
+        targetValue = 1.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "border_pulse"
@@ -2417,32 +2455,33 @@ fun LuckySpinWheelCard(
         modifier = Modifier
             .fillMaxWidth()
             .drawBehind {
-                drawRect(
+                drawRoundRect(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            cyanAccent.copy(alpha = borderAlpha * 0.18f),
+                            cyanAccent.copy(alpha = borderAlpha * 0.25f),
                             Color.Transparent
                         ),
-                        radius = size.width * 0.6f
-                    )
+                        radius = size.width * 0.7f
+                    ),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(20.dp.toPx(), 20.dp.toPx())
                 )
             }
             .clip(RoundedCornerShape(20.dp))
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        cyanDark.copy(alpha = 0.25f),
-                        Color.Black.copy(alpha = 0.8f)
+                        Color(0xFF0A192F), // Deep space blue/cyan
+                        Color(0xFF020813)
                     )
                 )
             )
             .border(
-                width = 1.5.dp,
-                brush = Brush.horizontalGradient(
+                width = 2.dp, // Thicker border for better 3D definition
+                brush = Brush.verticalGradient(
                     colors = listOf(
+                        Color.White.copy(alpha = 0.4f),
                         cyanAccent.copy(alpha = borderAlpha),
-                        cyanAccent.copy(alpha = borderAlpha * 0.3f),
-                        cyanAccent.copy(alpha = borderAlpha)
+                        cyanAccent.copy(alpha = 0.1f)
                     )
                 ),
                 shape = RoundedCornerShape(20.dp)
@@ -2450,7 +2489,7 @@ fun LuckySpinWheelCard(
             .clickable(onClick = onClick)
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(18.dp), // Generous padding
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -2459,14 +2498,26 @@ fun LuckySpinWheelCard(
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
                 modifier = Modifier.weight(1f)
             ) {
+                // Rotatable Wheel Emoji with 3D Inner Shadow / Ring
                 Box(
                     modifier = Modifier
-                        .size(44.dp)
-                        .background(cyanAccent.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
-                        .border(1.dp, cyanAccent.copy(alpha = 0.3f), RoundedCornerShape(12.dp)),
+                        .size(48.dp)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(cyanAccent.copy(alpha = 0.25f), Color.Transparent)
+                            ),
+                            shape = CircleShape
+                        )
+                        .border(1.5.dp, cyanAccent.copy(alpha = 0.5f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("🎡", fontSize = 24.sp)
+                    Box(
+                        modifier = Modifier.graphicsLayer {
+                            rotationZ = rotationAngle
+                        }
+                    ) {
+                        Text("🎡", fontSize = 26.sp)
+                    }
                 }
 
                 Column {
@@ -2479,44 +2530,84 @@ fun LuckySpinWheelCard(
                             fontSize = 14.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = Color.White,
-                            letterSpacing = 0.5.sp
+                            letterSpacing = 0.7.sp,
+                            style = TextStyle(
+                                shadow = Shadow(
+                                    color = cyanAccent.copy(alpha = 0.5f),
+                                    offset = Offset(0f, 0f),
+                                    blurRadius = 6f
+                                )
+                            )
                         )
                         if (isCompleted) {
                             Box(
                                 modifier = Modifier
-                                    .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(6.dp))
+                                    .background(Color.White.copy(alpha = 0.12f), RoundedCornerShape(6.dp))
+                                    .border(0.5.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(6.dp))
                                     .padding(horizontal = 6.dp, vertical = 2.dp)
                             ) {
-                                Text("COMPLETED", color = Color.White.copy(alpha = 0.6f), fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                Text("COMPLETED", color = Color.White.copy(alpha = 0.7f), fontSize = 8.sp, fontWeight = FontWeight.Bold)
                             }
                         } else {
                             Box(
                                 modifier = Modifier
-                                    .background(cyanAccent.copy(alpha = 0.2f), RoundedCornerShape(6.dp))
+                                    .background(cyanAccent.copy(alpha = 0.25f), RoundedCornerShape(6.dp))
+                                    .border(1.dp, cyanAccent.copy(alpha = 0.6f), RoundedCornerShape(6.dp))
                                     .padding(horizontal = 6.dp, vertical = 2.dp)
                             ) {
                                 Text("READY", color = cyanAccent, fontSize = 8.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = if (isCompleted) 
                             "Spun! Active Shields: ${stats.shieldCount} 🛡️ | 2X Multi: ${if (stats.doubleScoreActive) "Active 🔥" else "Inactive"}"
                             else "Win free Endless Mode Shields & 2X Score Multipliers!",
                         fontSize = 11.sp,
-                        color = Color.White.copy(alpha = 0.6f),
-                        lineHeight = 14.sp
+                        color = Color.White.copy(alpha = 0.8f), // Clearer color
+                        lineHeight = 14.sp,
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }
 
-            Text(
-                text = "SPIN ➔",
-                color = cyanAccent,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Black
-            )
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Premium 3D Pill Button
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = if (isCompleted) {
+                                listOf(Color.White.copy(alpha = 0.15f), Color.White.copy(alpha = 0.05f))
+                            } else {
+                                listOf(cyanAccent, Color(0xFF0091EA))
+                            }
+                        )
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = if (isCompleted) Color.White.copy(alpha = 0.2f) else Color.White,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .padding(horizontal = 14.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = if (isCompleted) "CLAIMED" else "SPIN ➔",
+                    color = if (isCompleted) Color.White.copy(alpha = 0.5f) else Color.White,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    style = TextStyle(
+                        shadow = Shadow(
+                            color = Color.Black.copy(alpha = 0.4f),
+                            offset = Offset(0f, 1f),
+                            blurRadius = 2f
+                        )
+                    )
+                )
+            }
         }
     }
 }
