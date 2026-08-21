@@ -458,6 +458,368 @@
         }
 
         /* ----------------------------------------------------
+           SCREENSHOTS SHOWCASE & GALLERY SYSTEM
+           ---------------------------------------------------- */
+        .showcase-section {
+            background: var(--card-bg);
+            border: 1px solid rgba(213, 0, 249, 0.15);
+            border-radius: 28px;
+            padding: 35px 24px;
+            margin-bottom: 55px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        .showcase-title {
+            font-size: 1.8rem;
+            font-weight: 850;
+            color: #ffffff;
+            margin-top: 0;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #ffffff, var(--neon-purple), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .showcase-desc {
+            font-size: 0.98rem;
+            color: #94a3b8;
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .showcase-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 35px;
+            flex-wrap: wrap;
+        }
+
+        .showcase-tab {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #94a3b8;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .showcase-tab:hover {
+            background: rgba(213, 0, 249, 0.08);
+            color: #ffffff;
+            border-color: rgba(213, 0, 249, 0.3);
+        }
+
+        .showcase-tab.active {
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: 0 0 20px rgba(213, 0, 249, 0.4);
+        }
+
+        .showcase-content {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            animation: tabFadeIn 0.4s ease;
+        }
+
+        .showcase-content.active {
+            display: flex;
+        }
+
+        @keyframes tabFadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Phone mockup simulation for Screenshots */
+        .phone-mockup {
+            width: 320px;
+            height: 560px;
+            background: #090d1f;
+            border: 8px solid #1e293b;
+            border-radius: 40px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(213, 0, 249, 0.15);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        /* Phone camera notch */
+        .phone-mockup::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 20px;
+            background: #1e293b;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            z-index: 100;
+        }
+
+        /* Mock status bar */
+        .mock-status-bar {
+            height: 25px;
+            padding: 8px 24px 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.65rem;
+            color: #64748b;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        .mock-app-header {
+            padding: 10px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .mock-app-title {
+            font-size: 1rem;
+            font-weight: 900;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Phone Content: Tab 1 Shuffle Board */
+        .mock-game-body {
+            flex: 1;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .mock-level-badge {
+            background: rgba(0, 229, 255, 0.1);
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            display: inline-block;
+            align-self: flex-start;
+        }
+
+        .mock-coin-count {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #ffe082;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        .mock-3d-track {
+            height: 160px;
+            border: 1px dashed rgba(0, 229, 255, 0.2);
+            border-radius: 16px;
+            position: relative;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            padding-bottom: 15px;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 229, 255, 0.03) 0%, transparent 80%);
+            margin: 15px 0;
+        }
+
+        .mock-cup {
+            width: 50px;
+            height: 70px;
+            background: linear-gradient(to right, #7c3aed, #d500f9, #7c3aed);
+            border-radius: 8px 8px 4px 4px;
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+        }
+
+        .mock-cup::after {
+            content: "";
+            position: absolute;
+            top: 25%;
+            width: 100%;
+            height: 4px;
+            background: var(--neon-cyan);
+            box-shadow: 0 0 8px var(--neon-cyan);
+        }
+
+        .mock-cup.lifted {
+            transform: translateY(-25px);
+        }
+
+        .mock-btn-action {
+            background: linear-gradient(135deg, var(--neon-cyan), #00bcd4);
+            color: #000;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 0.8rem;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+            text-transform: uppercase;
+        }
+
+        /* Phone Content: Tab 2 Lucky Spin */
+        .spin-wheel-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            padding: 15px;
+            position: relative;
+        }
+
+        .spin-pin {
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 18px solid var(--neon-pink);
+            position: absolute;
+            top: 25px;
+            z-index: 15;
+            filter: drop-shadow(0 0 4px var(--neon-pink));
+        }
+
+        .spin-wheel-mock {
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
+            border: 6px solid #1e293b;
+            box-shadow: 0 0 25px rgba(213, 0, 249, 0.2), inset 0 0 10px rgba(0,0,0,0.5);
+            background: conic-gradient(
+                #d500f9 0deg 45deg,
+                #311b92 45deg 90deg,
+                #00e5ff 90deg 135deg,
+                #1b5e20 135deg 180deg,
+                #ff1744 180deg 225deg,
+                #ff6f00 225deg 270deg,
+                #ffd600 270deg 315deg,
+                #4a148c 315deg 360deg
+            );
+            position: relative;
+            margin-bottom: 20px;
+            animation: slowRotate 15s linear infinite;
+        }
+
+        @keyframes slowRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .spin-inner-core {
+            width: 40px;
+            height: 40px;
+            background: #ffffff;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        .mock-spin-btn {
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+            color: #ffffff;
+            font-weight: 800;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 24px;
+            font-size: 0.8rem;
+            box-shadow: 0 0 15px rgba(213, 0, 249, 0.4);
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        /* Phone Content: Tab 3 Career Achievements */
+        .mock-stats-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+
+        .mock-stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-size: 0.8rem;
+        }
+
+        .mock-stats-row:last-child {
+            border-bottom: none;
+        }
+
+        .mock-stats-label {
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .mock-stats-value {
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .mock-badge-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .mock-badge-item {
+            background: rgba(213, 0, 249, 0.05);
+            border: 1px solid rgba(213, 0, 249, 0.15);
+            border-radius: 10px;
+            padding: 8px 4px;
+            text-align: center;
+        }
+
+        .mock-badge-icon {
+            font-size: 1.2rem;
+            margin-bottom: 4px;
+        }
+
+        .mock-badge-name {
+            font-size: 0.55rem;
+            color: #cbd5e1;
+            font-weight: bold;
+        }
+
+        /* ----------------------------------------------------
            FOOTER SECTION
            ---------------------------------------------------- */
         .footer {
@@ -658,6 +1020,144 @@
                 <span class="feature-icon">📅</span>
                 <h4 class="feature-title">Daily Challenge Streaks</h4>
                 <p class="feature-desc">Play unique daily cup arrangements, build your daily streak, and directly share stats with friends.</p>
+            </div>
+        </div>
+
+        <!-- ----------------------------------------------------
+           🔥 GAME SCREENSHOTS & GAMEPLAY SHOWCASE
+           ---------------------------------------------------- -->
+        <div class="showcase-section">
+            <h3 class="showcase-title">📱 IN-GAME SCREENSHOTS & FEATURES</h3>
+            <p class="showcase-desc">Take a look inside the modern, colorful glow interface of Cup Shuffle 3D! Check out our game screens and daily features.</p>
+            
+            <div class="showcase-tabs">
+                <button class="showcase-tab active" id="tab-btn-board" onclick="switchShowcaseTab('board')">
+                    🎮 3D Shuffle Board
+                </button>
+                <button class="showcase-tab" id="tab-btn-spin" onclick="switchShowcaseTab('spin')">
+                    🎡 Daily Lucky Spin
+                </button>
+                <button class="showcase-tab" id="tab-btn-career" onclick="switchShowcaseTab('career')">
+                    📊 Career Stats & Achievements
+                </button>
+            </div>
+
+            <!-- Tab Content 1: Shuffle Board -->
+            <div class="showcase-content active" id="showcase-board">
+                <div class="phone-mockup">
+                    <div class="mock-status-bar">
+                        <span>09:41 AM</span>
+                        <span>📶 🔋 100%</span>
+                    </div>
+                    <div class="mock-app-header">
+                        <span class="mock-app-title">🥤 Cup Shuffle 3D</span>
+                        <span class="mock-coin-count">🪙 1,250</span>
+                    </div>
+                    <div class="mock-game-body">
+                        <div>
+                            <span class="mock-level-badge">LEVEL 24 (HARD)</span>
+                            <h4 style="margin: 8px 0 0 0; color: white; font-size: 1rem; font-weight: 800;">Double Spiral Shuffle</h4>
+                            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.7rem;">Track the coin closely! Speed is increasing...</p>
+                        </div>
+                        
+                        <div class="mock-3d-track">
+                            <div class="mock-cup" style="transform: rotate(10deg);"></div>
+                            <div class="mock-cup lifted" style="border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);">
+                                <div style="width: 14px; height: 14px; background: #ffe082; border-radius: 50%; position: absolute; bottom: -20px; left: 18px; box-shadow: 0 0 10px #ffe082;"></div>
+                            </div>
+                            <div class="mock-cup" style="transform: rotate(-10deg);"></div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: #94a3b8;">
+                                <span>Streak: 🔥 14 Days</span>
+                                <span>Active Shield: 🛡️ Active</span>
+                            </div>
+                            <button class="mock-btn-action" onclick="alert('Install the app on your phone to play Level 24!')">⚡ Shuffling...</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content 2: Lucky Spin -->
+            <div class="showcase-content" id="showcase-spin">
+                <div class="phone-mockup">
+                    <div class="mock-status-bar">
+                        <span>09:41 AM</span>
+                        <span>📶 🔋 100%</span>
+                    </div>
+                    <div class="mock-app-header">
+                        <span class="mock-app-title">🎡 Daily Lucky Spin</span>
+                        <span class="mock-coin-count">🪙 1,250</span>
+                    </div>
+                    <div class="spin-wheel-container">
+                        <div class="spin-pin"></div>
+                        <div class="spin-wheel-mock">
+                            <div class="spin-inner-core">🎁</div>
+                        </div>
+                        <p style="color: #cbd5e1; font-size: 0.8rem; font-weight: bold; margin-bottom: 12px; text-align: center;">Spin the daily wheel to win FREE Protective Shields & Coin Boosters!</p>
+                        <button class="mock-spin-btn" onclick="alert('Spin the wheel in the Android app to claim rewards!')">🎰 Spin Now</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content 3: Career Stats -->
+            <div class="showcase-content" id="showcase-career">
+                <div class="phone-mockup">
+                    <div class="mock-status-bar">
+                        <span>09:41 AM</span>
+                        <span>📶 🔋 100%</span>
+                    </div>
+                    <div class="mock-app-header">
+                        <span class="mock-app-title">📊 Career Statistics</span>
+                        <span class="mock-coin-count">🪙 1,250</span>
+                    </div>
+                    <div class="mock-game-body" style="justify-content: flex-start; gap: 15px;">
+                        <div>
+                            <h4 style="margin: 0; color: white; font-size: 1rem; font-weight: 800;">Your Focus Summary</h4>
+                            <p style="margin: 2px 0 0 0; color: #64748b; font-size: 0.7rem;">Directly share your focus progress on social media!</p>
+                        </div>
+
+                        <div class="mock-stats-card">
+                            <div class="mock-stats-row">
+                                <span class="mock-stats-label">🏆 Best High Score</span>
+                                <span class="mock-stats-value" style="color: var(--neon-cyan);">4,820 Pts</span>
+                            </div>
+                            <div class="mock-stats-row">
+                                <span class="mock-stats-label">🚀 Highest Level Reached</span>
+                                <span class="mock-stats-value">Level 42</span>
+                            </div>
+                            <div class="mock-stats-row">
+                                <span class="mock-stats-label">📅 Current Daily Streak</span>
+                                <span class="mock-stats-value" style="color: var(--neon-pink);">🔥 14 Days</span>
+                            </div>
+                            <div class="mock-stats-row">
+                                <span class="mock-stats-label">🎮 Total Shuffles Played</span>
+                                <span class="mock-stats-value">312 Games</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h5 style="margin: 0 0 6px 0; color: #94a3b8; font-size: 0.75rem; text-transform: uppercase;">Unlocked Focus Badges</h5>
+                            <div class="mock-badge-grid">
+                                <div class="mock-badge-item">
+                                    <div class="mock-badge-icon">👁️</div>
+                                    <div class="mock-badge-name">Eagle Eye</div>
+                                </div>
+                                <div class="mock-badge-item">
+                                    <div class="mock-badge-icon">⚡</div>
+                                    <div class="mock-badge-name">Speed Tracker</div>
+                                </div>
+                                <div class="mock-badge-item" style="opacity: 0.5;">
+                                    <div class="mock-badge-icon">👑</div>
+                                    <div class="mock-badge-name">Zen Master</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="mock-btn-action" style="margin-top: auto; background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink)); color: white; box-shadow: 0 0 15px rgba(213, 0, 249, 0.3);" onclick="alert('Direct sharing is fully functional in the Android APK!')">📤 Share Career Progress</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -907,6 +1407,33 @@
 
         // Initialize stage on load
         window.addEventListener('DOMContentLoaded', resetGameStage);
+
+        // ----------------------------------------------------
+        // SCREENSHOTS SHOWCASE TAB SWITCHER
+        // ----------------------------------------------------
+        function switchShowcaseTab(tabId) {
+            // Deactivate all tab buttons
+            document.getElementById('tab-btn-board').classList.remove('active');
+            document.getElementById('tab-btn-spin').classList.remove('active');
+            document.getElementById('tab-btn-career').classList.remove('active');
+
+            // Hide all tab contents
+            document.getElementById('showcase-board').classList.remove('active');
+            document.getElementById('showcase-spin').classList.remove('active');
+            document.getElementById('showcase-career').classList.remove('active');
+
+            // Activate selected
+            if (tabId === 'board') {
+                document.getElementById('tab-btn-board').classList.add('active');
+                document.getElementById('showcase-board').classList.add('active');
+            } else if (tabId === 'spin') {
+                document.getElementById('tab-btn-spin').classList.add('active');
+                document.getElementById('showcase-spin').classList.add('active');
+            } else if (tabId === 'career') {
+                document.getElementById('tab-btn-career').classList.add('active');
+                document.getElementById('showcase-career').classList.add('active');
+            }
+        }
 
         // ----------------------------------------------------
         // POPSTATE ROUTING & MODAL CONTROL (BACK-BUTTON PROOF)
