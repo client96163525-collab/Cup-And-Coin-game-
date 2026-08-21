@@ -272,6 +272,49 @@ fun DailyChallengeDialog(
                         }
                     }
 
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Premium Share Progress Button
+                    val context = androidx.compose.ui.platform.LocalContext.current
+                    OutlinedButton(
+                        onClick = {
+                            val appUrl = "https://ais-pre-zd2ct6cs36h4qk7rq4htax-95295274561.asia-southeast1.run.app"
+                            val completedCount = completedDates.size
+                            val shareMsg = """
+                                📅 *Cup Shuffle 3D Daily Focus Completed!* 🏆
+                                
+                                I am training my focus and tracking the vortex/orbital loops! 🧠
+                                ⭐ Total Daily Levels completed this month: $completedCount Days
+                                
+                                🥤 Watch vertical orbit shuffles, dodge speed-ups, and keep your focus sharp!
+                                📥 Download & Play the direct APK here:
+                                $appUrl
+                            """.trimIndent()
+                            com.example.util.ShareUtils.shareText(context, shareMsg, "Share Daily Progress")
+                        },
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = LavenderAccent),
+                        border = androidx.compose.foundation.BorderStroke(1.5.dp, LavenderAccent.copy(alpha = 0.6f)),
+                        shape = RoundedCornerShape(18.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text("📤", fontSize = 16.sp)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                "SHARE DAILY PROGRESS",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp,
+                                color = LavenderLight
+                            )
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(6.dp))
                 }
             }

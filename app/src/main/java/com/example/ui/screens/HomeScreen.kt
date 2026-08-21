@@ -820,6 +820,63 @@ fun StatsTabContent(stats: PlayerStats) {
             }
         }
 
+        // Share Stats Action Button
+        item {
+            val context = androidx.compose.ui.platform.LocalContext.current
+            Button(
+                onClick = {
+                    val appUrl = "https://ais-pre-zd2ct6cs36h4qk7rq4htax-95295274561.asia-southeast1.run.app"
+                    val shareMsg = """
+                        🏆 *Cup Shuffle 3D Career Stats! Can you beat me?* 🧠
+                        
+                        ⭐ *Best Score*: ${stats.bestScore} pts
+                        ⚡ *Highest Level Cleared*: Level ${stats.highestLevel}
+                        🔥 *Win Rate*: ${stats.winRatePercent}%
+                        📅 *Daily Challenge Streak*: ${stats.dailyStreak} Days
+                        ⚔️ *Total Games Played*: ${stats.gamesPlayed} Matches
+                        
+                        🌀 Master 3D vertical orbital orbits, helical twists, and rapid cup vortex shuffles!
+                        📥 Download the official Android game directly here:
+                        $appUrl
+                    """.trimIndent()
+                    com.example.util.ShareUtils.shareText(context, shareMsg, "Share Career Stats")
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                shape = RoundedCornerShape(18.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp)
+                    .border(
+                        width = 1.5.dp,
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(EmeraldGreen, NeonCyan)
+                        ),
+                        shape = RoundedCornerShape(18.dp)
+                    )
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(EmeraldGreen.copy(alpha = 0.15f), NeonCyan.copy(alpha = 0.15f))
+                        ),
+                        shape = RoundedCornerShape(18.dp)
+                    )
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text("⚔️", fontSize = 18.sp)
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = "SHARE CAREER ACHIEVEMENTS",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.White,
+                        letterSpacing = 1.sp
+                    )
+                }
+            }
+        }
+
         // Quote badge
         item {
             Glowing3DCard(
