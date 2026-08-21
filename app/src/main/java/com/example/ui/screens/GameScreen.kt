@@ -1499,6 +1499,71 @@ private fun GameModeTableArena(
                         )
                     }
                 }
+
+                // Temporary Streak Notification Toast Overlay (Appears on correct guess)
+                var showStreakToast by remember { mutableStateOf(false) }
+                LaunchedEffect(uiState.gameState, uiState.winStreak) {
+                    if (uiState.gameState == GameState.WIN && uiState.winStreak >= 1) {
+                        showStreakToast = true
+                        kotlinx.coroutines.delay(2600)
+                        showStreakToast = false
+                    } else {
+                        showStreakToast = false
+                    }
+                }
+
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = showStreakToast,
+                    enter = androidx.compose.animation.fadeIn(tween(300)) + androidx.compose.animation.slideInVertically(initialOffsetY = { -it }),
+                    exit = androidx.compose.animation.fadeOut(tween(300)) + androidx.compose.animation.slideOutVertically(targetOffsetY = { -it }),
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 90.dp)
+                        .testTag("streak_toast_overlay")
+                ) {
+                    Card(
+                        shape = RoundedCornerShape(24.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFF141923).copy(alpha = 0.94f)
+                        ),
+                        border = BorderStroke(2.dp, Brush.linearGradient(listOf(Color(0xFFFFD700), Color(0xFFFF8C00)))),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(42.dp)
+                                    .background(
+                                        brush = Brush.linearGradient(listOf(Color(0xFFFFD700), Color(0xFFFF5722))),
+                                        shape = CircleShape
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = "🔥", fontSize = 22.sp)
+                            }
+                            Column {
+                                Text(
+                                    text = "${uiState.winStreak} WIN STREAK!",
+                                    color = Color(0xFFFFD700),
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 1.sp
+                                )
+                                Text(
+                                    text = "+${uiState.roundScoreEarned} PTS • ${uiState.streakMultiplier}x Multiplier Boost",
+                                    color = Color.White.copy(alpha = 0.88f),
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
