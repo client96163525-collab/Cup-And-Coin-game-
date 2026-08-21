@@ -230,6 +230,7 @@ fun HomeScreen(
     onToggleSound: () -> Unit,
     onToggleVibration: () -> Unit,
     onToggleReducedMotion: () -> Unit,
+    onAppThemeChange: (AppTheme) -> Unit,
     onResetProgress: () -> Unit,
     onPlaySound: (String) -> Unit = {},
     modifier: Modifier = Modifier
@@ -331,6 +332,10 @@ fun HomeScreen(
                         },
                         onToggleReducedMotion = {
                             onToggleReducedMotion()
+                            onPlaySound("tap")
+                        },
+                        onAppThemeChange = { theme ->
+                            onAppThemeChange(theme)
                             onPlaySound("tap")
                         },
                         onResetProgress = {
@@ -855,9 +860,9 @@ fun StatsTabContent(stats: PlayerStats) {
             val context = androidx.compose.ui.platform.LocalContext.current
             Button(
                 onClick = {
-                    val appUrl = "https://ais-pre-zd2ct6cs36h4qk7rq4htax-95295274561.asia-southeast1.run.app"
+                    val appUrl = "https://cupandcoin.vercel.app"
                     val shareMsg = """
-                        🏆 *Cup Shuffle 3D Career Stats! Can you beat me?* 🧠
+                        🏆 *Cup and Coin Career Stats! Can you beat me?* 🧠
                         
                         ⭐ *Best Score*: ${stats.bestScore} pts
                         ⚡ *Highest Level Cleared*: Level ${stats.highestLevel}
@@ -1456,9 +1461,11 @@ fun SettingsTabContent(
     onToggleSound: () -> Unit,
     onToggleVibration: () -> Unit,
     onToggleReducedMotion: () -> Unit,
+    onAppThemeChange: (AppTheme) -> Unit,
     onResetProgress: () -> Unit
 ) {
     var showResetConfirm by remember { mutableStateOf(false) }
+    var expandedThemeDropdown by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = Modifier
@@ -1549,6 +1556,60 @@ fun SettingsTabContent(
                         checked = settings.reducedMotion,
                         onCheckedChange = { onToggleReducedMotion() }
                     )
+                    Divider(color = Color.White.copy(alpha = 0.05f))
+                    
+                    // App Theme Selector
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = "App Theme",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Choose the overall app appearance",
+                            fontSize = 12.sp,
+                            color = Color.White.copy(alpha = 0.6f)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            OutlinedButton(
+                                onClick = { expandedThemeDropdown = true },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                                border = borderStrokeGradient()
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(settings.appTheme.displayName)
+                                    Icon(Icons.Default.ArrowDropDown, contentDescription = "Select Theme")
+                                }
+                            }
+                            
+                            DropdownMenu(
+                                expanded = expandedThemeDropdown,
+                                onDismissRequest = { expandedThemeDropdown = false },
+                                modifier = Modifier.background(PurpleNightSurfaceElevated)
+                            ) {
+                                AppTheme.values().forEach { theme ->
+                                    DropdownMenuItem(
+                                        text = { Text(theme.displayName, color = Color.White) },
+                                        onClick = {
+                                            onAppThemeChange(theme)
+                                            expandedThemeDropdown = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                 }
             }
         }
@@ -1593,8 +1654,8 @@ fun SettingsTabContent(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("About Developer & Game", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                            Text("App version, credits & technology", fontSize = 12.sp, color = Color.White.copy(alpha = 0.5f))
+                            Text("About Us", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                            Text("App version & details", fontSize = 12.sp, color = Color.White.copy(alpha = 0.5f))
                         }
                         Icon(imageVector = Icons.Default.ChevronRight, contentDescription = null, tint = Color.White.copy(alpha = 0.4f))
                     }
@@ -1659,7 +1720,7 @@ fun SettingsTabContent(
                     title = {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             Text("ℹ️", fontSize = 24.sp)
-                            Text("About Cup Shuffle 3D", fontWeight = FontWeight.Black, color = Color.White, fontSize = 20.sp)
+                            Text("About Cup and Coin", fontWeight = FontWeight.Black, color = Color.White, fontSize = 20.sp)
                         }
                     },
                     text = {
@@ -1668,26 +1729,14 @@ fun SettingsTabContent(
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             Text(
-                                "Cup Shuffle 3D: Brain Trainer is a premium concentration and memory building shell game designed to test your focus limits.",
+                                "Cup and Coin is a premium concentration and memory building shell game designed to test your focus limits.",
                                 color = Color.White.copy(alpha = 0.85f),
                                 fontSize = 14.sp
                             )
                             Divider(color = Color.White.copy(alpha = 0.1f))
                             Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                                Text("Developer Studio:", fontWeight = FontWeight.Bold, color = NeonCyan, fontSize = 13.sp)
-                                Text("Abhix Official", color = Color.White, fontSize = 13.sp)
-                            }
-                            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                                Text("Creator Username:", fontWeight = FontWeight.Bold, color = NeonCyan, fontSize = 13.sp)
-                                Text("Abhixofficial01", color = Color.White, fontSize = 13.sp)
-                            }
-                            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                                Text("Version Info:", fontWeight = FontWeight.Bold, color = NeonCyan, fontSize = 13.sp)
-                                Text("v1.0.0 (Production-Ready)", color = Color.White, fontSize = 13.sp)
-                            }
-                            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                                Text("Tech Stack:", fontWeight = FontWeight.Bold, color = NeonCyan, fontSize = 13.sp)
-                                Text("Kotlin, Jetpack Compose", color = Color.White, fontSize = 13.sp)
+                                Text("Version:", fontWeight = FontWeight.Bold, color = NeonCyan, fontSize = 13.sp)
+                                Text("v1.0.0", color = Color.White, fontSize = 13.sp)
                             }
                         }
                     },
@@ -1788,7 +1837,7 @@ fun SettingsTabContent(
                                         val intent = Intent(Intent.ACTION_SENDTO).apply {
                                             data = Uri.parse("mailto:")
                                             putExtra(Intent.EXTRA_EMAIL, arrayOf("Abhixofficial01@gmail.com"))
-                                            putExtra(Intent.EXTRA_SUBJECT, "Cup Shuffle 3D Support Request")
+                                            putExtra(Intent.EXTRA_SUBJECT, "Cup and Coin Support Request")
                                         }
                                         context.startActivity(intent)
                                     } catch (e: Exception) {
@@ -1827,7 +1876,7 @@ fun SettingsTabContent(
                             }
                             item {
                                 Text(
-                                    "Your privacy is absolutely vital to us. Cup Shuffle 3D has been designed with strict safety regulations in mind:",
+                                    "Your privacy is absolutely vital to us. Cup and Coin has been designed with strict safety regulations in mind:",
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White,
                                     fontSize = 13.sp
@@ -1900,7 +1949,7 @@ fun SettingsTabContent(
                             }
                             item {
                                 Text(
-                                    "By using or playing Cup Shuffle 3D, you consent and agree to the following terms of usage:",
+                                    "By using or playing Cup and Coin, you consent and agree to the following terms of usage:",
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White,
                                     fontSize = 13.sp
@@ -2149,6 +2198,7 @@ fun ModeShowcaseCard3D(
         GameMode.ENDLESS -> Color(0xFFFF5722)
         GameMode.PERFECT_RUN -> Color(0xFFFFD54F)
         GameMode.DAILY_CHALLENGE -> EmeraldGreen
+        else -> Color.Gray
     }
 
     val modeGradient = when (mode) {
@@ -2157,6 +2207,7 @@ fun ModeShowcaseCard3D(
         GameMode.ENDLESS -> listOf(Color(0xFF33140A), Color(0xFF140502))
         GameMode.PERFECT_RUN -> listOf(Color(0xFF2F240A), Color(0xFF120E02))
         GameMode.DAILY_CHALLENGE -> listOf(Color(0xFF0A2B1D), Color(0xFF02120C))
+        else -> listOf(Color.Gray, Color.DarkGray)
     }
 
     val modeIcon = when (mode) {
@@ -2165,6 +2216,7 @@ fun ModeShowcaseCard3D(
         GameMode.ENDLESS -> Icons.Default.Whatshot
         GameMode.PERFECT_RUN -> Icons.Default.Adjust
         GameMode.DAILY_CHALLENGE -> Icons.Default.DateRange
+        else -> Icons.Default.Star
     }
 
     val modeTagline = when (mode) {
@@ -2173,6 +2225,7 @@ fun ModeShowcaseCard3D(
         GameMode.ENDLESS -> "ENDLESS SURVIVAL ARENA • 3 LIVES"
         GameMode.PERFECT_RUN -> "FLAWLESS RUN • ZERO MISTAKES"
         GameMode.DAILY_CHALLENGE -> "DAILY PUZZLE SEED ARENA"
+        else -> "TUTORIAL"
     }
 
     val modeDescription = when (mode) {
@@ -2181,6 +2234,7 @@ fun ModeShowcaseCard3D(
         GameMode.ENDLESS -> "Infinite survival run! Speed multiplies every 3 rounds. Shields absorb incorrect guesses."
         GameMode.PERFECT_RUN -> "Strict perfection gauntlet! A single incorrect guess ends your run immediately."
         GameMode.DAILY_CHALLENGE -> "Unique daily seed for all players worldwide. Solve daily to stack continuous streaks!"
+        else -> "Learn how to play"
     }
 
     val buttonText = when (mode) {
@@ -2188,7 +2242,8 @@ fun ModeShowcaseCard3D(
         GameMode.TIME_ATTACK -> "START TIME ATTACK BLITZ ⚡"
         GameMode.ENDLESS -> "ENTER ENDLESS SURVIVAL 🔥"
         GameMode.PERFECT_RUN -> "LAUNCH PERFECT RUN 💎"
-        GameMode.DAILY_CHALLENGE -> if (isDailyCompleted) "REPLAY DAILY CHALLENGE 📅" else "PLAY TODAY'S PUZZLE ➔"
+        GameMode.DAILY_CHALLENGE -> if (isDailyCompleted) "REPLAY DAILY CHALLENGE 📅" else "PLAY TODAY.S PUZZLE ➔"
+        else -> "PLAY"
     }
 
     val infiniteTransition = rememberInfiniteTransition(label = "pulse_mode_btn")
@@ -2282,7 +2337,9 @@ fun ModeShowcaseCard3D(
                             GameMode.TIME_ATTACK -> "${stats.timeAttackStats.bestScore} PTS"
                             GameMode.ENDLESS -> "🛡️ ${stats.shieldCount} SHIELDS"
                             GameMode.PERFECT_RUN -> "BEST ${stats.bestStreak}"
+                            
                             GameMode.DAILY_CHALLENGE -> "${stats.dailyStreak}D STREAK"
+                            else -> ""
                         },
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black,
@@ -2334,6 +2391,10 @@ fun ModeShowcaseCard3D(
                         ModeStatBadge("ACTIVE STREAK", "${stats.dailyStreak} Days", GoldAccent)
                         ModeStatBadge("TODAY'S PUZZLE", if (isDailyCompleted) "SOLVED ✓" else "READY ⚡", if (isDailyCompleted) EmeraldGreen else Color(0xFF00E5FF))
                         ModeStatBadge("REWARDS", "Badge + Streak", EmeraldGreen)
+                    }
+                    GameMode.TUTORIAL -> {
+                        ModeStatBadge("MODULES", "3 Steps", Color(0xFF00E5FF))
+                        ModeStatBadge("COMPLETED", if (stats.isTutorialCompleted) "YES ✓" else "NO", if (stats.isTutorialCompleted) EmeraldGreen else RubyRed)
                     }
                 }
             }

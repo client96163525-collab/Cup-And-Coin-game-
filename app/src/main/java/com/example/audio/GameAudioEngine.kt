@@ -151,6 +151,16 @@ class GameAudioEngine(private val context: Context) {
                 }
                 triggerVibrate(14, 60)
             }
+            GameMode.TUTORIAL -> {
+                // Crystal Clear, Gentle Educational Whoosh
+                playTone(0.20) { t ->
+                    val env = exp(-t * 14.0)
+                    val tone = sin(2.0 * PI * (320.0 + sin(t * 20.0) * 40.0) * t)
+                    val chime = sin(2.0 * PI * 640.0 * t) * 0.2
+                    (tone + chime) * env * 0.35
+                }
+                triggerVibrate(10, 40)
+            }
         }
     }
 
@@ -222,6 +232,18 @@ class GameAudioEngine(private val context: Context) {
                 }
                 triggerPatternVibrate(longArrayOf(0, 50, 40, 60, 40, 160))
             }
+            GameMode.TUTORIAL -> {
+                // Uplifting, Encouraging Educational Melody (C5 -> E5 -> G5 -> C6 Arpeggio)
+                playTone(0.70) { t ->
+                    val env = exp(-t * 3.0)
+                    val step = (t * 8.0).toInt()
+                    val freqs = doubleArrayOf(523.25, 659.25, 783.99, 1046.50)
+                    val f = if (step < freqs.size) freqs[step] else freqs.last()
+                    val tone = sin(2.0 * PI * f * t) + sin(2.0 * PI * (f * 2.0) * t) * 0.2
+                    tone * env * 0.35
+                }
+                triggerPatternVibrate(longArrayOf(0, 30, 30, 30, 30, 70))
+            }
         }
     }
 
@@ -280,6 +302,15 @@ class GameAudioEngine(private val context: Context) {
                     (bell + shadow) * env * 0.35
                 }
                 triggerPatternVibrate(longArrayOf(0, 80, 40, 120))
+            }
+            GameMode.TUTORIAL -> {
+                // Soft, Gentle Encouraging Tone
+                playTone(0.40) { t ->
+                    val env = exp(-t * 4.0)
+                    val softTone = sin(2.0 * PI * 261.63 * t) * 0.8 + sin(2.0 * PI * 220.00 * t) * 0.5
+                    softTone * env * 0.30
+                }
+                triggerPatternVibrate(longArrayOf(0, 40, 30, 50))
             }
         }
     }

@@ -98,7 +98,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         timerJob?.cancel()
 
         val currentState = _uiState.value
-        val resumeLevel = if (mode == GameMode.CLASSIC) repository.stats.value.highestLevel.coerceAtLeast(1) else 1
+        val resumeLevel = when (mode) {
+            GameMode.CLASSIC -> repository.stats.value.highestLevel.coerceAtLeast(1)
+            GameMode.TUTORIAL -> 1
+            else -> 1
+        }
         
         val cupCount = when {
             mode == GameMode.ENDLESS && resumeLevel > 50 -> 5
@@ -136,7 +140,17 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     fun nextRound() {
         audioEngine.playTap()
-        val nextLevel = _uiState.value.currentLevel + 1
+        val currentMode = _uiState.value.gameMode
+        val currentLevel = _uiState.value.currentLevel
+
+        // If completed tutorial round 3, graduate player to Classic Mode
+        if (currentMode == GameMode.TUTORIAL && currentLevel >= 3) {
+            repository.recordTutorialCompleted()
+            startGame(GameMode.CLASSIC)
+            return
+        }
+
+        val nextLevel = currentLevel + 1
         val cupCount = when {
             _uiState.value.gameMode == GameMode.ENDLESS && nextLevel > 50 -> 5
             _uiState.value.gameMode == GameMode.ENDLESS && nextLevel > 20 -> 4
@@ -221,7 +235,21 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             val cupCount = currentState.cupCount
 
             // If retry, keep exact same winning coin slot so the coin stays in the same box!
-            val initialCoinSlot = if (isRetry) currentState.coinSlotIndex else kotlin.random.Random.nextInt(cupCount)
+            val initialCoinSlot = when {
+                isRetry -> currentState.coinSlotIndex
+                mode == GameMode.TUTORIAL -> when (level) {
+                    1 -> 1 // Middle cup for first tutorial step
+                    2 -> 0 // Left cup for second tutorial step
+                    else -> 1 // Middle cup for 3rd step
+                }
+                else -> kotlin.random.Random.nextInt(cupCount)
+            }
+
+            val tutorialShowText = when (level) {
+                1 -> "👀 STEP 1/3: Watch the middle cup closely!"
+                2 -> "👀 STEP 2/3: Now track 2 smooth swaps!"
+                else -> "👀 STEP 3/3: Final Training! Track 3 fluid swaps!"
+            }
 
             if (!skipInitialCoinShow) {
                 // Subtle skeleton loading staging state before the first reveal/shuffle
@@ -232,7 +260,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                         coinSlotIndex = initialCoinSlot,
                         selectedSlotIndex = null,
                         isRevealingWinningSlot = false,
-                        roundStatusText = "PREPARING ARENA...",
+                        roundStatusText = if (mode == GameMode.TUTORIAL) "GETTING PRACTICE READY..." else "PREPARING ARENA...",
                         cupLiftAmounts = List(cupCount) { 0f },
                         cupOffsetXs = List(cupCount) { 0f },
                         cupOffsetYs = List(cupCount) { 0f },
@@ -249,7 +277,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                     coinSlotIndex = initialCoinSlot,
                     selectedSlotIndex = null,
                     isRevealingWinningSlot = false,
-                    roundStatusText = if (skipInitialCoinShow) "GET READY..." else "WATCH THE COIN! 👀",
+                    roundStatusText = if (skipInitialCoinShow) "GET READY..." else (if (mode == GameMode.TUTORIAL) tutorialShowText else "WATCH THE COIN! 👀"),
                     cupLiftAmounts = List(cupCount) { i -> if (!skipInitialCoinShow && initialCoinSlot == i) 1f else 0f },
                     cupOffsetXs = List(cupCount) { 0f },
                     cupOffsetYs = List(cupCount) { 0f },
@@ -259,15 +287,16 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
             if (!skipInitialCoinShow) {
                 audioEngine.playCoinReveal()
-                // Coin is visible for ~1.2 seconds
-                delay(1200)
+                // Coin is visible longer in tutorial for comfortable learning
+                val showDelay = if (mode == GameMode.TUTORIAL) 1700L else 1200L
+                delay(showDelay)
             }
 
             // Step: Smooth coin sliding/dropping animation phase before cup covers it
             _uiState.update {
                 it.copy(
                     gameState = GameState.HIDE_COIN,
-                    roundStatusText = "COIN DROPPING..."
+                    roundStatusText = if (mode == GameMode.TUTORIAL) "COIN IS HIDDEN INSIDE..." else "COIN DROPPING..."
                 )
             }
             delay(350)
@@ -276,7 +305,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.update {
                 it.copy(
                     cupLiftAmounts = listOf(0f, 0f, 0f),
-                    roundStatusText = "GET READY..."
+                    roundStatusText = if (mode == GameMode.TUTORIAL) "PREPARE TO TRACK..." else "GET READY..."
                 )
             }
             audioEngine.playCupLand()
@@ -287,7 +316,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 it.copy(
                     gameState = GameState.SHUFFLING,
                     isShuffling = true,
-                    roundStatusText = "FOLLOW THE COIN 👁️"
+                    roundStatusText = if (mode == GameMode.TUTORIAL) "👀 FOLLOW THE MOVING CUP..." else "FOLLOW THE COIN 👁️"
                 )
             }
 
@@ -302,13 +331,19 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
 
+            val tutorialGuessText = when (level) {
+                1 -> "👉 STEP 1/3: Tap the cup where the coin moved!"
+                2 -> "👉 STEP 2/3: Followed both moves? Tap your pick!"
+                else -> "👉 STEP 3/3: Where is the coin hidden? Make your pick!"
+            }
+
             // Shuffle finished!
             _uiState.update {
                 it.copy(
                     gameState = GameState.WAITING_FOR_GUESS,
                     isShuffling = false,
                     coinSlotIndex = currentCoinPos,
-                    roundStatusText = "WHERE IS THE COIN? 🤔",
+                    roundStatusText = if (mode == GameMode.TUTORIAL) tutorialGuessText else "WHERE IS THE COIN? 🤔",
                     timeAttackRemainingSec = 5.0f
                 )
             }
@@ -398,6 +433,63 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun generateShuffleSequence(level: Int, mode: GameMode, cupCount: Int, initialCoin: Int): List<SwapMove> {
+        // Special case: 3 slow, crystal-clear practice rounds for Tutorial Mode
+        if (mode == GameMode.TUTORIAL) {
+            return when (level) {
+                1 -> listOf(
+                    // Round 1: 1 slow, deliberate swap from Middle (1) to Right (2)
+                    SwapMove(
+                        cup1 = 1,
+                        cup2 = 2,
+                        durationMs = 950L,
+                        isFakeShake = false,
+                        arcHeightRatio = 0.35f
+                    )
+                )
+                2 -> listOf(
+                    // Round 2: 2 clear sequential swaps (Left 0 <-> Middle 1, then Middle 1 <-> Right 2)
+                    SwapMove(
+                        cup1 = 0,
+                        cup2 = 1,
+                        durationMs = 850L,
+                        isFakeShake = false,
+                        arcHeightRatio = 0.35f
+                    ),
+                    SwapMove(
+                        cup1 = 1,
+                        cup2 = 2,
+                        durationMs = 850L,
+                        isFakeShake = false,
+                        arcHeightRatio = -0.35f
+                    )
+                )
+                else -> listOf(
+                    // Round 3: 3 smooth 3D swaps to master all cup positions
+                    SwapMove(
+                        cup1 = 1,
+                        cup2 = 0,
+                        durationMs = 780L,
+                        isFakeShake = false,
+                        arcHeightRatio = 0.38f
+                    ),
+                    SwapMove(
+                        cup1 = 0,
+                        cup2 = 2,
+                        durationMs = 780L,
+                        isFakeShake = false,
+                        arcHeightRatio = -0.38f
+                    ),
+                    SwapMove(
+                        cup1 = 2,
+                        cup2 = 1,
+                        durationMs = 780L,
+                        isFakeShake = false,
+                        arcHeightRatio = 0.35f
+                    )
+                )
+            }
+        }
+
         val moves = mutableListOf<SwapMove>()
         
         // Use date-based seed for Daily Challenge
@@ -588,6 +680,14 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             val resultTitle = when {
+                mode == GameMode.TUTORIAL -> when {
+                    isWin && level == 1 -> "STEP 1 COMPLETE! 🎯"
+                    isWin && level == 2 -> "STEP 2 COMPLETE! 🌟"
+                    isWin && level >= 3 -> "🎓 TRAINING COMPLETED!"
+                    level == 1 -> "STEP 1: NICE TRY!"
+                    level == 2 -> "STEP 2: SO CLOSE!"
+                    else -> "STEP 3: ALMOST THERE!"
+                }
                 isGameOver -> "GAME OVER"
                 isWin && newWinStreak >= 2 -> "🔥 ${newMultiplier}x STREAK MULTIPLIER!"
                 isWin -> "ROUND COMPLETE!"
@@ -596,6 +696,14 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             val resultMessage = when {
+                mode == GameMode.TUTORIAL -> when {
+                    isWin && level == 1 -> "Great eye! You tracked 1 slow swap. Ready for Step 2 with 2 swaps?"
+                    isWin && level == 2 -> "Awesome focus! You tracked two consecutive swaps. Final test next!"
+                    isWin && level >= 3 -> "Mastered! You've learned how to track moving cups and spot the coin. +300 Beginner Coins rewarded!"
+                    level == 1 -> "Keep your eyes locked on the moving cup base. Tap Retry to try Step 1 again!"
+                    level == 2 -> "Watch the trajectory of both swaps closely. Tap Retry to practice Step 2!"
+                    else -> "Take a deep breath and follow the 3D orbital swaps. Tap Retry to master Step 3!"
+                }
                 isWin && newWinStreak >= 2 -> "+$roundScore PTS • $newWinStreak-Win Streak (${newMultiplier}x Boost)"
                 isWin -> "+$roundScore PTS Earned • Great guess!"
                 isShieldUsed -> "Shield protected your streak! Safe to continue."
@@ -637,6 +745,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             if (isWin && mode == GameMode.DAILY_CHALLENGE) {
                 repository.recordDailyChallengeCompletion()
                 _uiState.update { it.copy(isDailyCompletedToday = true) }
+            }
+
+            if (isWin && mode == GameMode.TUTORIAL && level >= 3) {
+                repository.recordTutorialCompleted()
             }
             
             // Record game round stats in local storage
@@ -683,6 +795,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     fun selectShuffleTheme(theme: ShuffleTheme) {
         val updated = settings.value.copy(selectedShuffleTheme = theme)
+        repository.updateSettings(updated)
+        audioEngine.playTap()
+    }
+
+    fun selectAppTheme(theme: com.example.model.AppTheme) {
+        val updated = settings.value.copy(appTheme = theme)
         repository.updateSettings(updated)
         audioEngine.playTap()
     }

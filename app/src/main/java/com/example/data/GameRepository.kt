@@ -40,7 +40,8 @@ class GameRepository(context: Context) {
             bestPerfectStreak = prefs.getInt("bestPerfectStreak", 0),
             shieldCount = prefs.getInt("shieldCount", 0),
             doubleScoreActive = prefs.getBoolean("doubleScoreActive", false),
-            lastSpinDate = prefs.getString("lastSpinDate", "") ?: ""
+            lastSpinDate = prefs.getString("lastSpinDate", "") ?: "",
+            isTutorialCompleted = prefs.getBoolean("isTutorialCompleted", false)
             // ModeStats persistence would go here in a full implementation
         )
     }
@@ -177,6 +178,16 @@ class GameRepository(context: Context) {
         val current = _stats.value
         val updated = current.copy(doubleScoreActive = false)
         prefs.edit().putBoolean("doubleScoreActive", false).apply()
+        _stats.value = updated
+    }
+
+    fun recordTutorialCompleted() {
+        val current = _stats.value
+        val updated = current.copy(isTutorialCompleted = true, bestScore = maxOf(current.bestScore, current.bestScore + 300))
+        prefs.edit()
+            .putBoolean("isTutorialCompleted", true)
+            .putInt("bestScore", updated.bestScore)
+            .apply()
         _stats.value = updated
     }
 

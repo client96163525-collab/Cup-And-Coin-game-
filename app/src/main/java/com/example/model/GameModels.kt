@@ -9,6 +9,12 @@ enum class GameMode(
     val description: String,
     val iconName: String
 ) {
+    TUTORIAL(
+        title = "Tutorial",
+        subtitle = "3 Practice Rounds",
+        description = "Step-by-step interactive practice with slow, clear shuffles and visual guidance!",
+        iconName = "🎓"
+    ),
     CLASSIC(
         title = "Classic",
         subtitle = "Levels 1 to 50+",
@@ -242,6 +248,7 @@ data class PlayerStats(
     val shieldCount: Int = 0,
     val doubleScoreActive: Boolean = false,
     val lastSpinDate: String = "",
+    val isTutorialCompleted: Boolean = false,
     // Mode-specific granular statistics
     val endlessStats: ModeStats = ModeStats(),
     val classicStats: ModeStats = ModeStats(),
@@ -275,11 +282,18 @@ data class RunRecord(
     val timestamp: Long
 )
 
+enum class AppTheme(val displayName: String) {
+    ORIGINAL("Original (System)"),
+    BLACK("Black (Dark)"),
+    WHITE("White (Light)")
+}
+
 data class GameSettings(
     val soundEnabled: Boolean = true,
     val vibrationEnabled: Boolean = true,
     val reducedMotion: Boolean = false,
     val selectedCupTheme: CupTheme = CupTheme.MINIMAL_VIOLET,
     val selectedCoinTheme: CoinTheme = CoinTheme.GOLD_STAR,
-    val selectedShuffleTheme: ShuffleTheme = ShuffleTheme.CLASSIC_SLIDE
+    val selectedShuffleTheme: ShuffleTheme = ShuffleTheme.CLASSIC_SLIDE,
+    val appTheme: AppTheme = AppTheme.ORIGINAL
 )

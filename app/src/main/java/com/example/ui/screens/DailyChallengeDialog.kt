@@ -509,7 +509,7 @@ fun DailyChallengeDialog(
                     val context = LocalContext.current
                     OutlinedButton(
                         onClick = {
-                            val appUrl = "https://ais-pre-zd2ct6cs36h4qk7rq4htax-95295274561.asia-southeast1.run.app"
+                            val appUrl = "https://cupandcoin.vercel.app"
                             val completedCount = completedDates.size
                             val shareMsg = """
                                 📅 *Cup & Coin 3D Daily Challenge!* 🏆

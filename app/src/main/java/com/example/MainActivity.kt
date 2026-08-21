@@ -43,10 +43,20 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val viewModel: GameViewModel = viewModel()
+            val settings by viewModel.settings.collectAsStateWithLifecycle()
+            val appTheme = settings.appTheme
+            
+            val backgroundColor = when (appTheme) {
+                com.example.model.AppTheme.BLACK -> Color.Black
+                com.example.model.AppTheme.WHITE -> Color.White
+                else -> MidnightNavy
+            }
+
             MyApplicationTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MidnightNavy
+                    color = backgroundColor
                 ) {
                     var showSplash by remember { mutableStateOf(true) }
 
@@ -58,10 +68,8 @@ class MainActivity : ComponentActivity() {
                     if (showSplash) {
                         SplashScreen()
                     } else {
-                        val viewModel: GameViewModel = viewModel()
                         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                         val stats by viewModel.stats.collectAsStateWithLifecycle()
-                        val settings by viewModel.settings.collectAsStateWithLifecycle()
 
                         var showHowToPlay by remember { mutableStateOf(false) }
                         var showAppExitConfirm by remember { mutableStateOf(false) }
@@ -95,6 +103,7 @@ class MainActivity : ComponentActivity() {
                                 onToggleSound = { viewModel.toggleSound() },
                                 onToggleVibration = { viewModel.toggleVibration() },
                                 onToggleReducedMotion = { viewModel.toggleReducedMotion() },
+                                onAppThemeChange = { theme -> viewModel.selectAppTheme(theme) },
                                 onResetProgress = { viewModel.resetProgress() },
                                 onPlaySound = { sound ->
                                     when (sound) {
