@@ -1,0 +1,6 @@
+{
+  "name": "Cup & Coin",
+  "description": "An offline suspense mini-game where players track and guess the golden coin under 3 shuffling cups.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
