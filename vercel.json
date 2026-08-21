@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
+    { "source": "/robots.txt", "destination": "/robots.txt" },
+    { "source": "/cup-and-coin.apk", "destination": "/cup-and-coin.apk" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
