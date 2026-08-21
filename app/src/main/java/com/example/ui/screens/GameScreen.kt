@@ -1,7 +1,9 @@
 package com.example.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -50,6 +52,15 @@ fun GameScreen(
     modifier: Modifier = Modifier
 ) {
     var showExitConfirmDialog by remember { mutableStateOf(false) }
+
+    // Intercept back button during gameplay to safely confirm quit
+    BackHandler(enabled = true) {
+        if (showExitConfirmDialog) {
+            showExitConfirmDialog = false
+        } else {
+            showExitConfirmDialog = true
+        }
+    }
 
     Box(
         modifier = modifier
@@ -128,10 +139,18 @@ fun GameScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Combo Banner (Clean Minimalism Hero Stat)
+            // Win-Streak Multiplier Hero Header
             when (uiState.gameMode) {
-                GameMode.PERFECT_RUN -> PerfectStreakCounter(streak = uiState.perfectStreak)
-                else -> ComboCounterHeader(combo = uiState.combo)
+                GameMode.PERFECT_RUN -> PerfectStreakCounter(
+                    streak = uiState.perfectStreak,
+                    multiplier = uiState.streakMultiplier
+                )
+                else -> WinStreakMultiplierHero(
+                    winStreak = uiState.winStreak,
+                    multiplier = uiState.streakMultiplier,
+                    combo = uiState.combo,
+                    gameMode = uiState.gameMode
+                )
             }
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -246,45 +265,160 @@ fun GameScreen(
 }
 
 @Composable
-private fun ComboCounterHeader(combo: Int) {
+private fun WinStreakMultiplierHero(
+    winStreak: Int,
+    multiplier: Float,
+    combo: Int,
+    gameMode: GameMode
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "streak_pulse")
+    val flameScale by infiniteTransition.animateFloat(
+        initialValue = 1.0f,
+        targetValue = 1.15f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(650, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "flame_scale"
+    )
+
+    val tierColor = when {
+        multiplier >= 3.5f -> VioletPrimary
+        multiplier >= 3.0f -> RubyRed
+        multiplier >= 2.5f -> GoldAccent
+        multiplier >= 2.0f -> GoldAccent
+        multiplier >= 1.5f -> EmeraldGreen
+        else -> LavenderAccent
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(vertical = 4.dp)
+        modifier = Modifier.padding(vertical = 2.dp)
     ) {
-        Text(
-            text = "CURRENT COMBO",
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            color = LavenderAccent.copy(alpha = 0.85f),
-            letterSpacing = 2.sp
-        )
-        Text(
-            text = "x${combo.coerceAtLeast(1)}",
-            fontSize = 44.sp,
-            fontWeight = FontWeight.Black,
-            color = Color.White,
-            letterSpacing = (-1.5).sp,
-            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
-        )
+        // Upper Streak Indicator Row
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            if (winStreak >= 2) {
+                Text(
+                    text = "🔥",
+                    fontSize = 18.sp,
+                    modifier = Modifier.graphicsLayer {
+                        scaleX = flameScale
+                        scaleY = flameScale
+                    }
+                )
+            }
+            Text(
+                text = if (winStreak >= 2) "$winStreak-WIN STREAK" else "WIN STREAK MULTIPLIER",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (winStreak >= 2) tierColor else TextMuted,
+                letterSpacing = 1.5.sp
+            )
+            if (winStreak >= 2) {
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = tierColor.copy(alpha = 0.15f),
+                    border = BorderStroke(1.dp, tierColor.copy(alpha = 0.35f))
+                ) {
+                    Text(
+                        text = "ACTIVE",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Black,
+                        color = tierColor,
+                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
+                        letterSpacing = 0.5.sp
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(2.dp))
+
+        // Center Big Multiplier Display
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                text = "${String.format("%.1f", multiplier)}x",
+                fontSize = 42.sp,
+                fontWeight = FontWeight.Black,
+                color = if (winStreak >= 2) tierColor else Color.White,
+                letterSpacing = (-1.5).sp,
+                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+            )
+            Text(
+                text = "SCORE BOOST",
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextMuted,
+                modifier = Modifier.padding(bottom = 8.dp),
+                letterSpacing = 1.sp
+            )
+        }
+
+        // Subtitle Tip / Next Boost Threshold
+        if (multiplier < 5.0f) {
+            val nextTargetStreak = when {
+                winStreak < 2 -> 2
+                winStreak < 3 -> 3
+                winStreak < 4 -> 4
+                winStreak < 5 -> 5
+                winStreak < 6 -> 6
+                else -> winStreak + 1
+            }
+            val nextBoost = String.format("%.1fx", (multiplier + 0.5f).coerceAtMost(5.0f))
+            val remaining = (nextTargetStreak - winStreak).coerceAtLeast(1)
+
+            Text(
+                text = if (winStreak == 0) "Win 2 in a row to start multiplier boost" else "Next boost ($nextBoost) in $remaining win${if (remaining > 1) "s" else ""}",
+                fontSize = 10.sp,
+                color = TextMuted,
+                fontWeight = FontWeight.Medium
+            )
+        }
     }
 }
 
 @Composable
-private fun PerfectStreakCounter(streak: Int) {
+private fun PerfectStreakCounter(streak: Int, multiplier: Float) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(vertical = 4.dp)
+        modifier = Modifier.padding(vertical = 2.dp)
     ) {
-        Text(
-            text = "PERFECT STREAK",
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            color = VegasGold.copy(alpha = 0.85f),
-            letterSpacing = 2.sp
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                text = "PERFECT STREAK",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = VegasGold.copy(alpha = 0.9f),
+                letterSpacing = 1.5.sp
+            )
+            if (streak >= 2) {
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = VegasGold.copy(alpha = 0.15f),
+                    border = BorderStroke(1.dp, VegasGold.copy(alpha = 0.35f))
+                ) {
+                    Text(
+                        text = "${String.format("%.1f", multiplier)}x BOOST",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Black,
+                        color = VegasGold,
+                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                    )
+                }
+            }
+        }
         Text(
             text = "🔥 $streak",
-            fontSize = 44.sp,
+            fontSize = 42.sp,
             fontWeight = FontWeight.Black,
             color = VegasGold,
             letterSpacing = (-1.5).sp
@@ -325,22 +459,55 @@ private fun GameHeader(
             )
         }
 
-        // High Score / Mode Header Info
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = "HIGH SCORE",
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextMuted,
-                letterSpacing = 1.5.sp
+        // High Score & Highest Streak Header Pill
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier
+                .background(MinimalSurface, RoundedCornerShape(16.dp))
+                .border(1.dp, MinimalBorder, RoundedCornerShape(16.dp))
+                .padding(horizontal = 12.dp, vertical = 6.dp)
+        ) {
+            // High Score
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "BEST SCORE",
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextMuted,
+                    letterSpacing = 1.sp
+                )
+                Text(
+                    text = "${stats.bestScore.coerceAtLeast(uiState.score)}",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Black,
+                    color = VegasGold
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(18.dp)
+                    .background(MinimalBorder)
             )
-            Text(
-                text = "${stats.bestScore.coerceAtLeast(uiState.score)}",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Medium,
-                color = LavenderAccent,
-                letterSpacing = (-0.5).sp
-            )
+
+            // Best Streak
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "BEST STREAK",
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextMuted,
+                    letterSpacing = 1.sp
+                )
+                Text(
+                    text = "🔥 ${stats.bestStreak}",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Black,
+                    color = RubyRed
+                )
+            }
         }
 
         // Level Pill (Clean Minimalism Badge)
@@ -467,6 +634,134 @@ private fun StatusPromptBanner(
 }
 
 @Composable
+private fun ArenaSkeletonLoading(
+    cupCount: Int,
+    modifier: Modifier = Modifier
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "skeleton_shimmer")
+    val shimmerAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 0.85f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(650, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "shimmer_alpha"
+    )
+    val floatOffset by infiniteTransition.animateFloat(
+        initialValue = -4f,
+        targetValue = 4f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(750, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "float_offset"
+    )
+
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        // Pedestals & Skeleton Cups
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            repeat(cupCount) { index ->
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.padding(bottom = 12.dp)
+                ) {
+                    // Skeleton Cup Silhouette
+                    Box(
+                        modifier = Modifier
+                            .graphicsLayer { translationY = if (index % 2 == 0) floatOffset else -floatOffset }
+                            .size(width = 80.dp, height = 106.dp)
+                            .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 8.dp, bottomEnd = 8.dp))
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    listOf(
+                                        Color.White.copy(alpha = 0.08f * shimmerAlpha),
+                                        Color.White.copy(alpha = 0.02f * shimmerAlpha)
+                                    )
+                                )
+                            )
+                            .border(
+                                width = 1.dp,
+                                brush = Brush.verticalGradient(
+                                    listOf(
+                                        LavenderAccent.copy(alpha = 0.45f * shimmerAlpha),
+                                        Color.White.copy(alpha = 0.08f * shimmerAlpha)
+                                    )
+                                ),
+                                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 8.dp, bottomEnd = 8.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        // Subtle center pulsing glow
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .background(LavenderAccent.copy(alpha = 0.15f * shimmerAlpha), CircleShape)
+                        )
+                    }
+
+                    // Skeleton Table Ring / Pedestal
+                    Box(
+                        modifier = Modifier
+                            .size(width = 64.dp, height = 18.dp)
+                            .border(
+                                width = 1.dp,
+                                brush = Brush.radialGradient(
+                                    listOf(
+                                        LavenderAccent.copy(alpha = 0.5f * shimmerAlpha),
+                                        Color.Transparent
+                                    )
+                                ),
+                                shape = CircleShape
+                            )
+                    )
+                }
+            }
+        }
+
+        // Center Initializing Staging Pill
+        Surface(
+            shape = CircleShape,
+            color = MinimalSurface.copy(alpha = 0.9f),
+            border = BorderStroke(1.dp, LavenderAccent.copy(alpha = 0.45f * shimmerAlpha)),
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 14.dp)
+                .shadow(6.dp, CircleShape)
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(12.dp),
+                    strokeWidth = 1.5.dp,
+                    color = LavenderAccent
+                )
+                Text(
+                    text = "PREPARING ARENA...",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = LavenderLight,
+                    letterSpacing = 1.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun FeltTableArena(
     uiState: GameUiState,
     settings: GameSettings,
@@ -554,86 +849,94 @@ private fun FeltTableArena(
                         )
                 )
 
-                // 3 Cup Slots Row
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    for (slotIndex in 0 until uiState.cupCount) {
-                        // Calculate physics-based trajectory offsets & dynamics
-                        var computedOffsetX = uiState.cupOffsetXs.getOrElse(slotIndex) { 0f }
-                        var computedOffsetY = uiState.cupOffsetYs.getOrElse(slotIndex) { 0f }
-                        var computedTilt = uiState.cupTilts.getOrElse(slotIndex) { 0f }
-                        var computedZIndex = 1f
+                // Subtle Loading Skeleton State before initial coin show / shuffle
+                if (uiState.gameState == GameState.PREPARING || uiState.isArenaPreparing) {
+                    ArenaSkeletonLoading(
+                        cupCount = uiState.cupCount,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    // Cup Slots Row
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        for (slotIndex in 0 until uiState.cupCount) {
+                            // Calculate physics-based trajectory offsets & dynamics
+                            var computedOffsetX = uiState.cupOffsetXs.getOrElse(slotIndex) { 0f }
+                            var computedOffsetY = uiState.cupOffsetYs.getOrElse(slotIndex) { 0f }
+                            var computedTilt = uiState.cupTilts.getOrElse(slotIndex) { 0f }
+                            var computedZIndex = 1f
 
-                        if (activeSwap != null) {
-                            if (activeSwap.isFakeShake && slotIndex == activeSwap.slotA) {
-                                val sProg = shakeProgress.value
-                                computedTilt = (Math.sin(sProg.toDouble() * Math.PI * 4).toFloat()) * 8f
-                                computedZIndex = 2f
-                            } else if (!activeSwap.isFakeShake) {
-                                val p = swapProgress.value
-                                if (slotIndex == activeSwap.slotA || slotIndex == activeSwap.slotB) {
-                                    val isSlotA = slotIndex == activeSwap.slotA
-                                    val startSlot = if (isSlotA) activeSwap.slotA else activeSwap.slotB
-                                    val endSlot = if (isSlotA) activeSwap.slotB else activeSwap.slotA
-                                    val distance = (endSlot - startSlot).toFloat()
+                            if (activeSwap != null) {
+                                if (activeSwap.isFakeShake && slotIndex == activeSwap.slotA) {
+                                    val sProg = shakeProgress.value
+                                    computedTilt = (Math.sin(sProg.toDouble() * Math.PI * 4).toFloat()) * 8f
+                                    computedZIndex = 2f
+                                } else if (!activeSwap.isFakeShake) {
+                                    val p = swapProgress.value
+                                    if (slotIndex == activeSwap.slotA || slotIndex == activeSwap.slotB) {
+                                        val isSlotA = slotIndex == activeSwap.slotA
+                                        val startSlot = if (isSlotA) activeSwap.slotA else activeSwap.slotB
+                                        val endSlot = if (isSlotA) activeSwap.slotB else activeSwap.slotA
+                                        val distance = (endSlot - startSlot).toFloat()
 
-                                    when (settings.selectedShuffleTheme) {
-                                        ShuffleTheme.CLASSIC_SLIDE -> {
-                                            computedOffsetX = p * distance
-                                            val directionFactor = if (isSlotA) 1f else -1f
-                                            val arc = (Math.sin(Math.PI * p).toFloat()) * activeSwap.arcHeightRatio * directionFactor
-                                            computedOffsetY = arc * 0.45f
-                                            computedTilt = (Math.sin(Math.PI * p).toFloat()) * (if (distance > 0) 12f else -12f)
-                                            computedZIndex = if (arc > 0) 3f else 1f
-                                        }
-                                        ShuffleTheme.DOUBLE_SPIN_WAVE -> {
-                                            // Circular loop/orbit
-                                            computedOffsetX = p * distance
-                                            val directionFactor = if (isSlotA) 1f else -1f
-                                            val loopHeight = (Math.sin(Math.PI * p).toFloat()) * 1.5f * activeSwap.arcHeightRatio * directionFactor
-                                            computedOffsetY = loopHeight
-                                            // Continuous full spin
-                                            computedTilt = p * 360f * (if (distance > 0) 1f else -1f)
-                                            computedZIndex = if (loopHeight > 0) 3f else 1f
-                                        }
-                                        ShuffleTheme.COSMIC_ZIG_ZAG -> {
-                                            // Rapid bounciness
-                                            computedOffsetX = p * distance
-                                            val bounce = (Math.sin(Math.PI * p * 3.0).toFloat()) * 0.35f
-                                            computedOffsetY = bounce
-                                            computedTilt = (Math.sin(Math.PI * p * 3.0).toFloat()) * 15f
-                                            computedZIndex = if (bounce > 0) 3f else 1f
-                                        }
-                                        ShuffleTheme.CHAOS_VORTEX -> {
-                                            // Spiral inwards to center, then slide back out
-                                            val inwardScale = (Math.sin(Math.PI * p).toFloat())
-                                            computedOffsetX = p * distance - (inwardScale * distance * 0.22f)
-                                            val spiralHeight = inwardScale * 0.75f * (if (isSlotA) 1f else -1f)
-                                            computedOffsetY = spiralHeight
-                                            computedTilt = inwardScale * 35f * (if (distance > 0) 1f else -1f)
-                                            computedZIndex = if (spiralHeight > 0) 3f else 1f
+                                        when (settings.selectedShuffleTheme) {
+                                            ShuffleTheme.CLASSIC_SLIDE -> {
+                                                computedOffsetX = p * distance
+                                                val directionFactor = if (isSlotA) 1f else -1f
+                                                val arc = (Math.sin(Math.PI * p).toFloat()) * activeSwap.arcHeightRatio * directionFactor
+                                                computedOffsetY = arc * 0.45f
+                                                computedTilt = (Math.sin(Math.PI * p).toFloat()) * (if (distance > 0) 12f else -12f)
+                                                computedZIndex = if (arc > 0) 3f else 1f
+                                            }
+                                            ShuffleTheme.DOUBLE_SPIN_WAVE -> {
+                                                // Circular loop/orbit
+                                                computedOffsetX = p * distance
+                                                val directionFactor = if (isSlotA) 1f else -1f
+                                                val loopHeight = (Math.sin(Math.PI * p).toFloat()) * 1.5f * activeSwap.arcHeightRatio * directionFactor
+                                                computedOffsetY = loopHeight
+                                                // Continuous full spin
+                                                computedTilt = p * 360f * (if (distance > 0) 1f else -1f)
+                                                computedZIndex = if (loopHeight > 0) 3f else 1f
+                                            }
+                                            ShuffleTheme.COSMIC_ZIG_ZAG -> {
+                                                // Rapid bounciness
+                                                computedOffsetX = p * distance
+                                                val bounce = (Math.sin(Math.PI * p * 3.0).toFloat()) * 0.35f
+                                                computedOffsetY = bounce
+                                                computedTilt = (Math.sin(Math.PI * p * 3.0).toFloat()) * 15f
+                                                computedZIndex = if (bounce > 0) 3f else 1f
+                                            }
+                                            ShuffleTheme.CHAOS_VORTEX -> {
+                                                // Spiral inwards to center, then slide back out
+                                                val inwardScale = (Math.sin(Math.PI * p).toFloat())
+                                                computedOffsetX = p * distance - (inwardScale * distance * 0.22f)
+                                                val spiralHeight = inwardScale * 0.75f * (if (isSlotA) 1f else -1f)
+                                                computedOffsetY = spiralHeight
+                                                computedTilt = inwardScale * 35f * (if (distance > 0) 1f else -1f)
+                                                computedZIndex = if (spiralHeight > 0) 3f else 1f
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
 
-                        CupSlotContainer(
-                            slotIndex = slotIndex,
-                            uiState = uiState,
-                            settings = settings,
-                            slotWidth = cupSlotWidth,
-                            offsetX = computedOffsetX,
-                            offsetY = computedOffsetY,
-                            tilt = computedTilt,
-                            cupZIndex = computedZIndex,
-                            onCupSelected = { onCupSelected(slotIndex) }
-                        )
+                            CupSlotContainer(
+                                slotIndex = slotIndex,
+                                uiState = uiState,
+                                settings = settings,
+                                slotWidth = cupSlotWidth,
+                                offsetX = computedOffsetX,
+                                offsetY = computedOffsetY,
+                                tilt = computedTilt,
+                                cupZIndex = computedZIndex,
+                                onCupSelected = { onCupSelected(slotIndex) }
+                            )
+                        }
                     }
                 }
 
@@ -825,7 +1128,7 @@ private fun BottomGameControls(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         when (uiState.gameState) {
-            GameState.SHOW_COIN, GameState.HIDE_COIN, GameState.SHUFFLING -> {
+            GameState.SHOW_COIN, GameState.HIDE_COIN, GameState.SHUFFLING, GameState.PREPARING -> {
                 Text(
                     text = "Track the cup carefully...",
                     fontSize = 13.sp,
@@ -834,7 +1137,12 @@ private fun BottomGameControls(
                     fontWeight = FontWeight.Medium
                 )
                 Spacer(modifier = Modifier.height(14.dp))
-                CleanFooterMetadataRow(score = uiState.score, bestScore = stats.bestScore)
+                CleanFooterMetadataRow(
+                    score = uiState.score,
+                    bestScore = stats.bestScore,
+                    winStreak = uiState.winStreak,
+                    multiplier = uiState.streakMultiplier
+                )
             }
 
             GameState.WAITING_FOR_GUESS -> {
@@ -856,7 +1164,12 @@ private fun BottomGameControls(
                     )
                 }
                 Spacer(modifier = Modifier.height(12.dp))
-                CleanFooterMetadataRow(score = uiState.score, bestScore = stats.bestScore)
+                CleanFooterMetadataRow(
+                    score = uiState.score,
+                    bestScore = stats.bestScore,
+                    winStreak = uiState.winStreak,
+                    multiplier = uiState.streakMultiplier
+                )
             }
 
             GameState.REVEALING -> {
@@ -866,7 +1179,12 @@ private fun BottomGameControls(
                     strokeWidth = 3.dp
                 )
                 Spacer(modifier = Modifier.height(12.dp))
-                CleanFooterMetadataRow(score = uiState.score, bestScore = stats.bestScore)
+                CleanFooterMetadataRow(
+                    score = uiState.score,
+                    bestScore = stats.bestScore,
+                    winStreak = uiState.winStreak,
+                    multiplier = uiState.streakMultiplier
+                )
             }
 
             GameState.WIN -> {
@@ -874,6 +1192,8 @@ private fun BottomGameControls(
                     title = uiState.roundResultTitle,
                     message = uiState.roundResultMessage,
                     isWin = true,
+                    multiplier = uiState.streakMultiplier,
+                    winStreak = uiState.winStreak,
                     actionButtonText = if (uiState.gameMode == GameMode.DAILY_CHALLENGE) "FINISH CHALLENGE" else "NEXT ROUND ➔",
                     onAction = {
                         if (uiState.gameMode == GameMode.DAILY_CHALLENGE) {
@@ -891,6 +1211,8 @@ private fun BottomGameControls(
                     title = uiState.roundResultTitle,
                     message = uiState.roundResultMessage,
                     isWin = false,
+                    multiplier = 1.0f,
+                    winStreak = 0,
                     actionButtonText = "TRY AGAIN ↻",
                     onAction = onRetryRound,
                     onMenu = onReturnToHome
@@ -902,19 +1224,26 @@ private fun BottomGameControls(
                     title = "GAME OVER",
                     message = "Final Score: ${uiState.score} • Reached Level ${uiState.currentLevel}",
                     isWin = false,
+                    multiplier = 1.0f,
+                    winStreak = 0,
                     actionButtonText = "PLAY AGAIN ↻",
                     onAction = onRestartGame,
                     onMenu = onReturnToHome
                 )
             }
 
-            GameState.HOME, GameState.ROUND_RESULT -> {}
+            GameState.HOME, GameState.ROUND_RESULT, GameState.PREPARING -> {}
         }
     }
 }
 
 @Composable
-private fun CleanFooterMetadataRow(score: Int, bestScore: Int) {
+private fun CleanFooterMetadataRow(
+    score: Int,
+    bestScore: Int,
+    winStreak: Int = 0,
+    multiplier: Float = 1.0f
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -936,6 +1265,32 @@ private fun CleanFooterMetadataRow(score: Int, bestScore: Int) {
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary
             )
+        }
+
+        if (winStreak >= 2) {
+            Surface(
+                shape = RoundedCornerShape(10.dp),
+                color = GoldAccent.copy(alpha = 0.15f),
+                border = CardDefaults.outlinedCardBorder().copy(
+                    brush = Brush.horizontalGradient(
+                        listOf(GoldAccent.copy(alpha = 0.5f), GoldAccent.copy(alpha = 0.3f))
+                    )
+                )
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text("🔥", fontSize = 11.sp)
+                    Text(
+                        text = "${String.format("%.1f", multiplier)}x BOOST",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        color = GoldAccent
+                    )
+                }
+            }
         }
 
         Surface(
@@ -971,6 +1326,8 @@ private fun RoundResultCard(
     message: String,
     isWin: Boolean,
     actionButtonText: String,
+    multiplier: Float = 1.0f,
+    winStreak: Int = 0,
     onAction: () -> Unit,
     onMenu: () -> Unit
 ) {
@@ -1000,6 +1357,29 @@ private fun RoundResultCard(
                 color = if (isWin) LavenderLight else LoseRed,
                 letterSpacing = 0.5.sp
             )
+
+            if (isWin && multiplier > 1.0f) {
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = GoldAccent.copy(alpha = 0.15f),
+                    border = BorderStroke(1.dp, GoldAccent.copy(alpha = 0.4f))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text("🔥", fontSize = 12.sp)
+                        Text(
+                            text = "${String.format("%.1fx", multiplier)} WIN-STREAK MULTIPLIER APPLIED",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = GoldAccent,
+                            letterSpacing = 0.5.sp
+                        )
+                    }
+                }
+            }
 
             Text(
                 text = message,

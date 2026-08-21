@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -238,6 +239,24 @@ fun HomeScreen(
     var showLuckySpinDialog by remember { mutableStateOf(false) }
     var currentTab by remember { mutableStateOf(HomeTab.HOME) }
 
+    // Intercept Back button within HomeScreen: close open dialogs or return to HOME tab
+    BackHandler(enabled = showDailyChallengeDialog || showLuckySpinDialog || currentTab != HomeTab.HOME) {
+        when {
+            showDailyChallengeDialog -> {
+                onPlaySound("tap")
+                showDailyChallengeDialog = false
+            }
+            showLuckySpinDialog -> {
+                onPlaySound("tap")
+                showLuckySpinDialog = false
+            }
+            currentTab != HomeTab.HOME -> {
+                onPlaySound("tab")
+                currentTab = HomeTab.HOME
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
         isVisible = true
     }
@@ -406,6 +425,7 @@ fun HomeScreen(
         if (showDailyChallengeDialog) {
             DailyChallengeDialog(
                 completedDates = stats.completedDailyDates,
+                dailyStreak = stats.dailyStreak,
                 onPlayToday = {
                     onPlaySound("jackpot")
                     showDailyChallengeDialog = false
@@ -457,39 +477,93 @@ fun HomeTabContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Top Bar: CUP & COIN title left, Settings right
+        // Top Bar: CUP & COIN title left, Highest Score & Streak Header Pill center, Settings right
         item {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.EmojiEvents,
                         contentDescription = null,
                         tint = GoldAccent,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                     Text(
                         text = "CUP & COIN",
-                        fontSize = 14.sp,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = Color.White.copy(alpha = 0.8f),
-                        letterSpacing = 1.5.sp
+                        color = Color.White.copy(alpha = 0.85f),
+                        letterSpacing = 1.2.sp
                     )
                 }
+
+                // Header Badges for Best Streak & Highest Score (Loaded from Local Storage)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .background(
+                            brush = Brush.horizontalGradient(
+                                listOf(PurpleNightSurfaceElevated, Color.Black.copy(alpha = 0.6f))
+                            ),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(16.dp))
+                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                ) {
+                    // Highest Score Badge
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text("🏆", fontSize = 11.sp)
+                        Text(
+                            text = String.format("%,d", stats.bestScore),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            color = GoldAccent
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .width(1.dp)
+                            .height(12.dp)
+                            .background(Color.White.copy(alpha = 0.2f))
+                    )
+
+                    // Highest Streak Badge
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text("🔥", fontSize = 11.sp)
+                        Text(
+                            text = "${stats.bestStreak}",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            color = RubyRed
+                        )
+                    }
+                }
+
                 IconButton(
                     onClick = onOpenSettings,
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(36.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = "Settings",
                         tint = Color.White.copy(alpha = 0.8f),
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(22.dp)
                     )
                 }
             }

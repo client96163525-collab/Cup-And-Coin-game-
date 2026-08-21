@@ -18,6 +18,8 @@ data class GameUiState(
     val currentLevel: Int = 1,
     val score: Int = 0,
     val combo: Int = 0,
+    val winStreak: Int = 0,
+    val streakMultiplier: Float = 1.0f,
     val coinSlotIndex: Int = 1, // 0 = Left, 1 = Center, 2 = Right
     val selectedSlotIndex: Int? = null,
     val isRevealingWinningSlot: Boolean = false,
@@ -28,6 +30,7 @@ data class GameUiState(
     val activeSwapPair: Pair<Int, Int>? = null,
     val currentSwap: ActiveSwap? = null,
     val isShuffling: Boolean = false,
+    val isArenaPreparing: Boolean = false,
     val roundStatusText: String = "Watch the coin! 👀",
     val timeAttackRemainingSec: Float = 5.0f,
     val timeAttackTotalSec: Float = 5.0f,
@@ -35,17 +38,19 @@ data class GameUiState(
     val roundResultTitle: String = "",
     val roundResultMessage: String = "",
     val roundScoreEarned: Int = 0,
+    val roundMultiplierEarned: Float = 1.0f,
     val isDailyCompletedToday: Boolean = false,
     val isLuckySpinCompletedToday: Boolean = false,
     val perfectStreak: Int = 0,
     val cupCount: Int = 3
 ) {
     /**
-     * High-level phase classification: Home, Shuffling, Guessing, Result
+     * High-level phase classification: Home, Preparing, Shuffling, Guessing, Result
      */
     val currentPhase: GamePhase
         get() = when (gameState) {
             GameState.HOME -> GamePhase.HOME
+            GameState.PREPARING -> GamePhase.PREPARING
             GameState.SHOW_COIN, GameState.HIDE_COIN, GameState.SHUFFLING -> GamePhase.SHUFFLING
             GameState.WAITING_FOR_GUESS -> GamePhase.GUESSING
             GameState.REVEALING, GameState.WIN, GameState.LOSE, GameState.GAME_OVER, GameState.ROUND_RESULT -> GamePhase.RESULT
@@ -55,7 +60,7 @@ data class GameUiState(
      * Strict rule enforcement: Input is only allowed during WAITING_FOR_GUESS and when not shuffling
      */
     val isInputAllowed: Boolean
-        get() = gameState == GameState.WAITING_FOR_GUESS && !isShuffling && currentSwap == null
+        get() = gameState == GameState.WAITING_FOR_GUESS && !isShuffling && currentSwap == null && !isArenaPreparing
 }
 
 class GameViewModel(application: Application) : AndroidViewModel(application) {
@@ -108,9 +113,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 cupCount = cupCount,
                 score = 0,
                 combo = 0,
+                winStreak = 0,
+                streakMultiplier = 1.0f,
                 perfectStreak = if (mode == GameMode.PERFECT_RUN) 0 else currentState.perfectStreak,
                 timeAttackRemainingSec = if (mode == GameMode.DAILY_CHALLENGE) 10f else 5f,
-                gameState = GameState.SHOW_COIN,
+                gameState = GameState.PREPARING,
+                isArenaPreparing = true,
                 selectedSlotIndex = null,
                 isRevealingWinningSlot = false,
                 cupLiftAmounts = List(cupCount) { 0f },
@@ -118,7 +126,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 cupOffsetYs = List(cupCount) { 0f },
                 cupTilts = List(cupCount) { 0f },
                 activeSwapPair = null,
-                roundScoreEarned = 0
+                roundScoreEarned = 0,
+                roundMultiplierEarned = 1.0f
             )
         }
 
@@ -188,6 +197,19 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    private fun calculateStreakMultiplier(streak: Int): Float {
+        return when {
+            streak <= 1 -> 1.0f
+            streak == 2 -> 1.5f
+            streak == 3 -> 2.0f
+            streak == 4 -> 2.5f
+            streak == 5 -> 3.0f
+            streak == 6 -> 3.5f
+            streak == 7 -> 4.0f
+            else -> (4.0f + (streak - 7) * 0.5f).coerceAtMost(5.0f)
+        }
+    }
+
     private fun startRound(isRetry: Boolean = false, skipInitialCoinShow: Boolean = false) {
         gameLoopJob?.cancel()
         timerJob?.cancel()
@@ -201,9 +223,29 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             // If retry, keep exact same winning coin slot so the coin stays in the same box!
             val initialCoinSlot = if (isRetry) currentState.coinSlotIndex else kotlin.random.Random.nextInt(cupCount)
 
+            if (!skipInitialCoinShow) {
+                // Subtle skeleton loading staging state before the first reveal/shuffle
+                _uiState.update {
+                    it.copy(
+                        gameState = GameState.PREPARING,
+                        isArenaPreparing = true,
+                        coinSlotIndex = initialCoinSlot,
+                        selectedSlotIndex = null,
+                        isRevealingWinningSlot = false,
+                        roundStatusText = "PREPARING ARENA...",
+                        cupLiftAmounts = List(cupCount) { 0f },
+                        cupOffsetXs = List(cupCount) { 0f },
+                        cupOffsetYs = List(cupCount) { 0f },
+                        cupTilts = List(cupCount) { 0f }
+                    )
+                }
+                delay(450)
+            }
+
             _uiState.update {
                 it.copy(
                     gameState = if (skipInitialCoinShow) GameState.HIDE_COIN else GameState.SHOW_COIN,
+                    isArenaPreparing = false,
                     coinSlotIndex = initialCoinSlot,
                     selectedSlotIndex = null,
                     isRevealingWinningSlot = false,
@@ -281,7 +323,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private suspend fun performSwap(move: SwapMove, currentCoinPos: Int): Int {
         val (slotA, slotB) = move.cup1 to move.cup2
         val duration = if (settings.value.reducedMotion) (move.durationMs * 1.3f).toLong() else move.durationMs
-        audioEngine.playCupMove()
+        audioEngine.playShuffle(_uiState.value.gameMode)
 
         val swap = ActiveSwap(
             id = System.nanoTime(),
@@ -483,15 +525,23 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         var score = currentState.score
         var isGameOver = false
         var isShieldUsed = false
+        var roundScore = 0
+        var newWinStreak = currentState.winStreak
+        var newMultiplier = currentState.streakMultiplier
 
         if (isWin) {
             newCombo++
             newPerfectStreak++
-            val basePoints = 100
-            val multiplier = if (repository.stats.value.doubleScoreActive) 2 else 1
-            val comboBonus = (newCombo - 1).coerceAtLeast(0) * 50
+            newWinStreak++
+            newMultiplier = calculateStreakMultiplier(newWinStreak)
+
+            val basePoints = 100 + (level * 10)
+            val comboBonus = (newCombo - 1).coerceAtLeast(0) * 25
             val timeBonus = if (mode == GameMode.TIME_ATTACK) (currentState.timeAttackRemainingSec * 30).toInt() else 0
-            score += (basePoints + comboBonus + timeBonus) * multiplier
+            val powerupMultiplier = if (repository.stats.value.doubleScoreActive) 2 else 1
+            
+            roundScore = (((basePoints + comboBonus + timeBonus) * newMultiplier) * powerupMultiplier).toInt()
+            score += roundScore
             
             if (repository.stats.value.doubleScoreActive) {
                 repository.consumeDoubleScore()
@@ -511,28 +561,67 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 // Deduct 3 seconds
                 _uiState.update { it.copy(timeAttackRemainingSec = (it.timeAttackRemainingSec - 3f).coerceAtLeast(0f)) }
             }
-            newCombo = 0
-            newPerfectStreak = 0
+            
+            if (!isShieldUsed) {
+                newCombo = 0
+                newPerfectStreak = 0
+                newWinStreak = 0
+                newMultiplier = 1.0f
+            }
         }
 
         viewModelScope.launch {
             // Lift the selected cup (or timeout auto-reveal)
-            val lifts = MutableList(3) { 0f }
-            if (slotIndex in 0..2) {
+            val lifts = MutableList(currentState.cupCount) { 0f }
+            if (slotIndex in 0 until currentState.cupCount) {
                 lifts[slotIndex] = 1f
+            }
+
+            if (isWin) {
+                audioEngine.playWin(mode)
+                if (newWinStreak >= 2) {
+                    delay(150)
+                    audioEngine.playComboMultiplier()
+                }
+            } else {
+                audioEngine.playLose(mode)
+            }
+
+            val resultTitle = when {
+                isGameOver -> "GAME OVER"
+                isWin && newWinStreak >= 2 -> "🔥 ${newMultiplier}x STREAK MULTIPLIER!"
+                isWin -> "ROUND COMPLETE!"
+                isTimeout -> "TIME EXPIRED!"
+                else -> "MISS!"
+            }
+
+            val resultMessage = when {
+                isWin && newWinStreak >= 2 -> "+$roundScore PTS • $newWinStreak-Win Streak (${newMultiplier}x Boost)"
+                isWin -> "+$roundScore PTS Earned • Great guess!"
+                isShieldUsed -> "Shield protected your streak! Safe to continue."
+                isGameOver -> "Final Score: $score • Reached Level $level"
+                else -> "The coin was under Cup ${currentState.coinSlotIndex + 1}"
             }
 
             _uiState.update {
                 it.copy(
                     gameState = if (isGameOver) GameState.GAME_OVER else (if (isWin) GameState.WIN else GameState.LOSE),
-                    selectedSlotIndex = if (slotIndex in 0..2) slotIndex else null,
+                    selectedSlotIndex = if (slotIndex in 0 until currentState.cupCount) slotIndex else null,
                     cupLiftAmounts = lifts,
                     combo = newCombo,
                     perfectStreak = newPerfectStreak,
+                    winStreak = newWinStreak,
+                    streakMultiplier = newMultiplier,
+                    roundScoreEarned = roundScore,
+                    roundMultiplierEarned = newMultiplier,
+                    roundResultTitle = resultTitle,
+                    roundResultMessage = resultMessage,
                     score = score,
+                    particleTrigger = if (isWin) System.currentTimeMillis() else it.particleTrigger,
                     roundStatusText = when {
                         isShieldUsed -> "🛡️ SHIELD SAVED YOU! 🛡️"
                         isGameOver -> "GAME OVER!"
+                        isWin && newWinStreak >= 2 -> "🔥 ${newWinStreak}X STREAK! +$roundScore PTS"
                         isWin -> "YOU FOUND IT! 🎉" 
                         isTimeout -> "TIME EXPIRED! ⏱️" 
                         else -> "MISS! ❌"
@@ -550,12 +639,15 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 _uiState.update { it.copy(isDailyCompletedToday = true) }
             }
             
-            if (!isGameOver) {
-                // Keep the result visible briefly before potentially moving to next round
-            } else {
-                // Record Game Over stats for Endless/Perfect Run
-                repository.recordGameRound(isWin = false, score = score, level = level, combo = 0, mode = mode, streak = newPerfectStreak)
-            }
+            // Record game round stats in local storage
+            repository.recordGameRound(
+                isWin = isWin,
+                score = score,
+                level = level,
+                combo = newCombo,
+                mode = mode,
+                streak = if (mode == GameMode.PERFECT_RUN) newPerfectStreak else (if (isWin) repository.stats.value.currentStreak + 1 else 0)
+            )
         }
     }
 

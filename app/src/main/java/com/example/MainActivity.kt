@@ -69,6 +69,7 @@ class MainActivity : ComponentActivity() {
                         // System Back Button Handling
                         BackHandler(enabled = true) {
                             when {
+                                showAppExitConfirm -> showAppExitConfirm = false
                                 showHowToPlay -> showHowToPlay = false
                                 uiState.gameState != GameState.HOME -> {
                                     viewModel.returnToHome()

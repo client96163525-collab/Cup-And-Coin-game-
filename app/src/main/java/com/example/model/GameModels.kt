@@ -43,6 +43,7 @@ enum class GameMode(
 
 enum class GameState {
     HOME,
+    PREPARING,
     SHOW_COIN,
     HIDE_COIN,
     SHUFFLING,
@@ -59,6 +60,7 @@ enum class GameState {
  */
 enum class GamePhase {
     HOME,
+    PREPARING,
     SHUFFLING,
     GUESSING,
     RESULT

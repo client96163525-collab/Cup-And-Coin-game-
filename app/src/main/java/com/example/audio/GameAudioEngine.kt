@@ -8,8 +8,10 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import com.example.model.GameMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.PI
 import kotlin.math.exp
@@ -33,6 +35,9 @@ class GameAudioEngine(private val context: Context) {
 
     private val sampleRate = 44100
 
+    /**
+     * Synthesizes audio samples in real-time and streams via AudioTrack
+     */
     private fun playTone(
         durationSec: Double,
         generator: (timeSec: Double) -> Double
@@ -40,7 +45,7 @@ class GameAudioEngine(private val context: Context) {
         if (!isSoundEnabled) return
         scope.launch {
             try {
-                val numSamples = (durationSec * sampleRate).toInt()
+                val numSamples = (durationSec * sampleRate).toInt().coerceAtLeast(1)
                 val samples = ShortArray(numSamples)
                 for (i in 0 until numSamples) {
                     val t = i.toDouble() / sampleRate
@@ -75,27 +80,225 @@ class GameAudioEngine(private val context: Context) {
                 audioTrack.write(samples, 0, samples.size)
                 audioTrack.play()
 
-                // Release track after playback completes
+                // Release track safely after playback completes
                 launch {
-                    kotlinx.coroutines.delay((durationSec * 1000).toLong() + 100)
+                    delay((durationSec * 1000).toLong() + 120)
                     try {
                         audioTrack.stop()
                         audioTrack.release()
                     } catch (_: Exception) {}
                 }
             } catch (_: Exception) {
-                // Audio synthesis fallback safety
+                // Safe audio generation fallback
             }
         }
     }
 
-    fun playCupMove() {
-        // Subtle smooth whoosh
-        playTone(0.12) { t ->
-            val env = exp(-t * 25.0)
-            val freq = 220.0 + sin(t * 40.0) * 80.0
-            sin(2.0 * PI * freq * t) * env * 0.35
+    // ==========================================
+    // 🔀 MODE-SPECIFIC SHUFFLE SOUNDS
+    // ==========================================
+
+    fun playShuffle(mode: GameMode = GameMode.CLASSIC, swapIndex: Int = 0) {
+        when (mode) {
+            GameMode.CLASSIC -> {
+                // Classic Acoustic Wooden Whoosh & Cup Friction
+                playTone(0.13) { t ->
+                    val env = exp(-t * 22.0)
+                    val baseFreq = 240.0 + sin(t * 35.0) * 90.0
+                    val woodTexture = sin(2.0 * PI * 680.0 * t) * 0.18
+                    (sin(2.0 * PI * baseFreq * t) + woodTexture) * env * 0.38
+                }
+                triggerVibrate(12, 50)
+            }
+            GameMode.TIME_ATTACK -> {
+                // Snappy Laser Hyper-Speed Electric Whoosh
+                playTone(0.09) { t ->
+                    val env = exp(-t * 32.0)
+                    val freq = 520.0 + (t * 2400.0) // Rapid pitch sweep up
+                    val synth = sin(2.0 * PI * freq * t) + sin(2.0 * PI * (freq * 2.0) * t) * 0.25
+                    synth * env * 0.42
+                }
+                triggerVibrate(8, 70)
+            }
+            GameMode.ENDLESS -> {
+                // Deep Reverberant Metallic Echo Shuffle
+                playTone(0.16) { t ->
+                    val env = exp(-t * 16.0)
+                    val lowBase = sin(2.0 * PI * 160.0 * t)
+                    val metallicOvertone = sin(2.0 * PI * 480.0 * t) * 0.35 + sin(2.0 * PI * 960.0 * t) * 0.15
+                    (lowBase + metallicOvertone) * env * 0.4
+                }
+                triggerVibrate(15, 65)
+            }
+            GameMode.PERFECT_RUN -> {
+                // Crystalline Glass Pure Glide with high shimmer
+                playTone(0.12) { t ->
+                    val env = exp(-t * 24.0)
+                    val crystal1 = sin(2.0 * PI * 784.0 * t) // G5
+                    val crystal2 = sin(2.0 * PI * 1174.66 * t) * 0.3 // D6
+                    val sparkle = sin(2.0 * PI * 2093.0 * t) * 0.15 // C7
+                    (crystal1 + crystal2 + sparkle) * env * 0.35
+                }
+                triggerVibrate(10, 45)
+            }
+            GameMode.DAILY_CHALLENGE -> {
+                // Majestic Mystical Ancient Golden Vessel Shuffle
+                playTone(0.15) { t ->
+                    val env = exp(-t * 18.0)
+                    val goldFreq = 349.23 + sin(t * 50.0) * 120.0 // F4 base with vibrato
+                    val gongTone = sin(2.0 * PI * 880.0 * t) * 0.2
+                    (sin(2.0 * PI * goldFreq * t) + gongTone) * env * 0.4
+                }
+                triggerVibrate(14, 60)
+            }
         }
+    }
+
+    // ==========================================
+    // 🏆 MODE-SPECIFIC WIN SOUNDS
+    // ==========================================
+
+    fun playWin(mode: GameMode = GameMode.CLASSIC) {
+        when (mode) {
+            GameMode.CLASSIC -> {
+                // Triumphant Warm Brass Fanfare Progression (C5 -> E5 -> G5 -> C6)
+                playTone(0.70) { t ->
+                    val env = exp(-t * 3.2)
+                    val chord = when {
+                        t < 0.18 -> sin(2.0 * PI * 523.25 * t) + sin(2.0 * PI * 659.25 * t) * 0.7 // C5, E5
+                        t < 0.36 -> sin(2.0 * PI * 659.25 * t) + sin(2.0 * PI * 783.99 * t) * 0.8 // E5, G5
+                        else -> sin(2.0 * PI * 1046.50 * t) * 1.2 + sin(2.0 * PI * 1318.51 * t) * 0.8 + sin(2.0 * PI * 1567.98 * t) * 0.6 // C6 + E6 + G6
+                    }
+                    (chord * 0.28) * env
+                }
+                triggerPatternVibrate(longArrayOf(0, 40, 50, 80, 50, 120))
+            }
+            GameMode.TIME_ATTACK -> {
+                // High-Octane Hyper-Pop Arcade Synth Victory
+                playTone(0.55) { t ->
+                    val env = exp(-t * 4.0)
+                    val step = (t * 14.0).toInt()
+                    val freqs = doubleArrayOf(587.33, 739.99, 880.00, 1174.66, 1479.98, 1760.00, 2349.32)
+                    val f = if (step < freqs.size) freqs[step] else freqs.last()
+                    val synth = sin(2.0 * PI * f * t) + sin(2.0 * PI * (f * 1.5) * t) * 0.35
+                    synth * env * 0.35
+                }
+                triggerPatternVibrate(longArrayOf(0, 30, 30, 30, 30, 60, 30, 100))
+            }
+            GameMode.ENDLESS -> {
+                // Epic Survival Resonance & Rising Power Surge
+                playTone(0.75) { t ->
+                    val env = exp(-t * 2.8)
+                    val subBass = sin(2.0 * PI * 130.81 * t) * 1.3 // C3 sub
+                    val midBrass = sin(2.0 * PI * 392.00 * t) // G4
+                    val topPower = if (t > 0.25) sin(2.0 * PI * 783.99 * t) * 0.9 else 0.0
+                    (subBass + midBrass + topPower) * 0.26 * env
+                }
+                triggerPatternVibrate(longArrayOf(0, 60, 40, 80, 40, 150))
+            }
+            GameMode.PERFECT_RUN -> {
+                // Sparkling Celestial Glockenspiel & Crystal Chime Cascade
+                playTone(0.80) { t ->
+                    val env = exp(-t * 2.5)
+                    val step = (t * 10.0).toInt()
+                    val chimeFreqs = doubleArrayOf(1046.50, 1318.51, 1567.98, 2093.00, 2637.02, 3135.96)
+                    val f = if (step < chimeFreqs.size) chimeFreqs[step] else chimeFreqs.last()
+                    val shimmer = sin(2.0 * PI * f * t) + sin(2.0 * PI * (f * 2.0) * t) * 0.25
+                    shimmer * env * 0.32
+                }
+                triggerPatternVibrate(longArrayOf(0, 25, 30, 25, 30, 40, 30, 120))
+            }
+            GameMode.DAILY_CHALLENGE -> {
+                // Royal Golden Grand Fanfare & Golden Bells Celebration
+                playTone(0.85) { t ->
+                    val env = exp(-t * 2.6)
+                    val base = when {
+                        t < 0.20 -> sin(2.0 * PI * 440.0 * t) + sin(2.0 * PI * 554.37 * t) // A4, C#5
+                        t < 0.40 -> sin(2.0 * PI * 554.37 * t) + sin(2.0 * PI * 659.25 * t) // C#5, E5
+                        else -> sin(2.0 * PI * 880.0 * t) * 1.3 + sin(2.0 * PI * 1108.73 * t) * 0.9 + sin(2.0 * PI * 1318.51 * t) * 0.7
+                    }
+                    val sparkle = sin(2.0 * PI * 2217.46 * t) * 0.2
+                    (base + sparkle) * 0.25 * env
+                }
+                triggerPatternVibrate(longArrayOf(0, 50, 40, 60, 40, 160))
+            }
+        }
+    }
+
+    // ==========================================
+    // ❌ MODE-SPECIFIC LOSE SOUNDS
+    // ==========================================
+
+    fun playLose(mode: GameMode = GameMode.CLASSIC) {
+        when (mode) {
+            GameMode.CLASSIC -> {
+                // Smooth Acoustic Descending Minor Glissando
+                playTone(0.48) { t ->
+                    val env = exp(-t * 4.5)
+                    val freq = (360.0 - t * 220.0).coerceAtLeast(110.0)
+                    val wave = sin(2.0 * PI * freq * t) + sin(2.0 * PI * (freq * 0.5) * t) * 0.4
+                    wave * env * 0.36
+                }
+                triggerPatternVibrate(longArrayOf(0, 70, 40, 110))
+            }
+            GameMode.TIME_ATTACK -> {
+                // Electronic Dual Detuned Warning Buzzer Plunge
+                playTone(0.38) { t ->
+                    val env = exp(-t * 6.0)
+                    val f1 = (580.0 - t * 380.0).coerceAtLeast(120.0)
+                    val f2 = f1 * 1.05 // Slight detune for harsh buzzer bite
+                    val buzzer = (sin(2.0 * PI * f1 * t) + sin(2.0 * PI * f2 * t) * 0.8)
+                    buzzer * env * 0.4
+                }
+                triggerPatternVibrate(longArrayOf(0, 100, 30, 100))
+            }
+            GameMode.ENDLESS -> {
+                // Dramatic Deep Sub-Bass Plunge & Heavy Gong Fade
+                playTone(0.60) { t ->
+                    val env = exp(-t * 3.5)
+                    val deepSub = sin(2.0 * PI * (220.0 - t * 165.0).coerceAtLeast(45.0) * t) * 1.5
+                    val gongClang = sin(2.0 * PI * 440.0 * t) * exp(-t * 12.0) * 0.6
+                    (deepSub + gongClang) * env * 0.38
+                }
+                triggerPatternVibrate(longArrayOf(0, 120, 50, 160))
+            }
+            GameMode.PERFECT_RUN -> {
+                // Delicate Crystal Glass Tone Dampened to Silence
+                playTone(0.42) { t ->
+                    val env = exp(-t * 8.0)
+                    val crystalChime = sin(2.0 * PI * (1200.0 - t * 800.0).coerceAtLeast(200.0) * t)
+                    crystalChime * env * 0.32
+                }
+                triggerPatternVibrate(longArrayOf(0, 50, 30, 70))
+            }
+            GameMode.DAILY_CHALLENGE -> {
+                // Mystical Temple Dusk Gong Descending Minor Cadence
+                playTone(0.55) { t ->
+                    val env = exp(-t * 4.0)
+                    val bell = sin(2.0 * PI * (330.0 - t * 180.0).coerceAtLeast(90.0) * t)
+                    val shadow = sin(2.0 * PI * 185.0 * t) * 0.4
+                    (bell + shadow) * env * 0.35
+                }
+                triggerPatternVibrate(longArrayOf(0, 80, 40, 120))
+            }
+        }
+    }
+
+    // ==========================================
+    // 🔘 INTERACTIVE UI CLICKS & REWARD SOUNDS
+    // ==========================================
+
+    fun playTap() {
+        // Ultra-crisp, snappy 0.035s responsive click
+        playTone(0.035) { t ->
+            val env = exp(-t * 110.0)
+            sin(2.0 * PI * 980.0 * t) * env * 0.35
+        }
+        triggerVibrate(8, 45)
+    }
+
+    fun playCupMove() {
+        playShuffle(GameMode.CLASSIC)
     }
 
     fun playCupLand() {
@@ -128,19 +331,11 @@ class GameAudioEngine(private val context: Context) {
         triggerVibrate(25, 100)
     }
 
-    fun playTap() {
-        playTone(0.04) { t ->
-            val env = exp(-t * 90.0)
-            sin(2.0 * PI * 920.0 * t) * env * 0.3
-        }
-        triggerVibrate(10, 40)
-    }
-
     fun playTabSwitch() {
         // Crisp, snappy, modern synth bubble sound
         playTone(0.08) { t ->
             val env = exp(-t * 50.0)
-            val freq = 587.33 + sin(t * 150.0) * 350.0 // Snappy D5 base
+            val freq = 587.33 + sin(t * 150.0) * 350.0
             sin(2.0 * PI * freq * t) * env * 0.25
         }
         triggerVibrate(6, 45)
@@ -150,7 +345,7 @@ class GameAudioEngine(private val context: Context) {
         // High-energy rising arcade pitch-bend sound
         playTone(0.35) { t ->
             val env = exp(-t * 8.0)
-            val freq = 600.0 + (t * 2200.0) // Swift upward sweep
+            val freq = 600.0 + (t * 2200.0)
             (sin(2.0 * PI * freq * t) + sin(2.0 * PI * (freq * 1.5) * t) * 0.3) * env * 0.25
         }
         triggerPatternVibrate(longArrayOf(0, 30, 20, 30, 20, 50))
@@ -160,7 +355,6 @@ class GameAudioEngine(private val context: Context) {
         // Majestic cosmic ambient sweeping chord progression
         playTone(0.7) { t ->
             val env = exp(-t * 2.5)
-            // Luminous golden major chord sweep
             val baseFreq = 523.25 // C5
             val c1 = sin(2.0 * PI * baseFreq * t)
             val c2 = sin(2.0 * PI * (baseFreq * 1.25) * t) // E5
@@ -181,41 +375,6 @@ class GameAudioEngine(private val context: Context) {
             sin(2.0 * PI * freq * t) * env * 0.35
         }
         triggerPatternVibrate(longArrayOf(0, 50, 50, 50, 50, 50, 50, 150))
-    }
-
-    fun playWin() {
-        // Triumphant fanfare chord progression
-        playTone(0.65) { t ->
-            val env = exp(-t * 3.5)
-            val chord1 = if (t < 0.2) {
-                sin(2.0 * PI * 523.25 * t) + sin(2.0 * PI * 659.25 * t) + sin(2.0 * PI * 783.99 * t)
-            } else if (t < 0.4) {
-                sin(2.0 * PI * 659.25 * t) + sin(2.0 * PI * 783.99 * t) + sin(2.0 * PI * 1046.5 * t)
-            } else {
-                sin(2.0 * PI * 1046.5 * t) * 1.5 + sin(2.0 * PI * 1318.5 * t) + sin(2.0 * PI * 1567.98 * t)
-            }
-            (chord1 * 0.25) * env
-        }
-        triggerPatternVibrate(longArrayOf(0, 40, 50, 80, 50, 120))
-    }
-
-    fun playLose() {
-        // Subtle descending suspense minor tone
-        playTone(0.45) { t ->
-            val env = exp(-t * 5.0)
-            val freq = (380.0 - t * 240.0).coerceAtLeast(100.0)
-            (sin(2.0 * PI * freq * t) + sin(2.0 * PI * (freq * 0.5) * t) * 0.5) * env * 0.35
-        }
-        triggerPatternVibrate(longArrayOf(0, 80, 40, 120))
-    }
-
-    fun playLevelUp() {
-        playTone(0.5) { t ->
-            val env = exp(-t * 4.0)
-            val f = if (t < 0.15) 587.33 else if (t < 0.3) 880.0 else 1174.66
-            sin(2.0 * PI * f * t) * env * 0.4
-        }
-        triggerPatternVibrate(longArrayOf(0, 30, 40, 60, 40, 100))
     }
 
     fun playCountdownTick() {

@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -11,10 +12,9 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -36,22 +37,32 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.ui.theme.*
+import com.example.util.ShareUtils
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle as JavaTextStyle
+import java.util.Locale
 
 @Composable
 fun DailyChallengeDialog(
     completedDates: Set<String>,
+    dailyStreak: Int = 0,
     onPlayToday: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    // Intercept back button press when this dialog is open
+    BackHandler(enabled = true) {
+        onDismiss()
+    }
+
     var animateTrigger by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         animateTrigger = true
     }
 
     val scaleState by animateFloatAsState(
-        targetValue = if (animateTrigger) 1f else 0.85f,
+        targetValue = if (animateTrigger) 1f else 0.88f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessLow
@@ -61,9 +72,15 @@ fun DailyChallengeDialog(
 
     val alphaState by animateFloatAsState(
         targetValue = if (animateTrigger) 1f else 0f,
-        animationSpec = tween(durationMillis = 350, easing = EaseOutQuad),
+        animationSpec = tween(durationMillis = 300, easing = EaseOutQuad),
         label = "dialog_alpha"
     )
+
+    val today = remember { LocalDate.now() }
+    var displayedMonth by remember { mutableStateOf(YearMonth.now()) }
+    var selectedDate by remember { mutableStateOf(today) }
+
+    val isCurrentMonth = displayedMonth == YearMonth.now()
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -72,15 +89,16 @@ fun DailyChallengeDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.6f))
+                .background(Color.Black.copy(alpha = 0.7f))
                 .clickable { onDismiss() },
             contentAlignment = Alignment.Center
         ) {
             // Elegant Frosted 3D Glowing Container
             Box(
                 modifier = Modifier
-                    .width(360.dp)
-                    .padding(24.dp)
+                    .fillMaxWidth(0.92f)
+                    .widthIn(max = 400.dp)
+                    .padding(vertical = 16.dp)
                     .graphicsLayer {
                         scaleX = scaleState
                         scaleY = scaleState
@@ -92,30 +110,30 @@ fun DailyChallengeDialog(
                         drawCircle(
                             brush = Brush.radialGradient(
                                 colors = listOf(
-                                    LavenderAccent.copy(alpha = 0.18f),
+                                    VioletPrimary.copy(alpha = 0.22f),
                                     Color.Transparent
                                 ),
                                 center = Offset(size.width / 4f, size.height / 3f),
-                                radius = size.width * 0.9f
+                                radius = size.width * 0.85f
                             )
                         )
                         drawCircle(
                             brush = Brush.radialGradient(
                                 colors = listOf(
-                                    EmeraldGreen.copy(alpha = 0.15f),
+                                    EmeraldGreen.copy(alpha = 0.18f),
                                     Color.Transparent
                                 ),
-                                center = Offset(size.width * 0.75f, size.height * 0.8f),
-                                radius = size.width * 0.8f
+                                center = Offset(size.width * 0.8f, size.height * 0.75f),
+                                radius = size.width * 0.85f
                             )
                         )
                     }
-                    .clip(RoundedCornerShape(28.dp))
+                    .clip(RoundedCornerShape(26.dp))
                     .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(
-                                PurpleNightSurface.copy(alpha = 0.95f),
-                                Color.Black.copy(alpha = 0.98f)
+                                PurpleNightSurface.copy(alpha = 0.97f),
+                                Color(0xFF0D0A14)
                             )
                         )
                     )
@@ -123,29 +141,29 @@ fun DailyChallengeDialog(
                         width = 1.5.dp,
                         brush = Brush.verticalGradient(
                             colors = listOf(
-                                Color.White.copy(alpha = 0.3f),
-                                LavenderAccent.copy(alpha = 0.4f),
-                                EmeraldGreen.copy(alpha = 0.2f)
+                                Color.White.copy(alpha = 0.35f),
+                                VioletPrimary.copy(alpha = 0.5f),
+                                EmeraldGreen.copy(alpha = 0.25f)
                             )
                         ),
-                        shape = RoundedCornerShape(28.dp)
+                        shape = RoundedCornerShape(26.dp)
                     )
-                    .padding(20.dp)
+                    .padding(horizontal = 18.dp, vertical = 18.dp)
             ) {
                 // Close button top right
                 IconButton(
                     onClick = onDismiss,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .size(36.dp)
-                        .background(Color.White.copy(alpha = 0.05f), CircleShape)
+                        .size(34.dp)
+                        .background(Color.White.copy(alpha = 0.06f), CircleShape)
                         .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close Dialog",
                         tint = Color.White.copy(alpha = 0.8f),
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(16.dp)
                     )
                 }
 
@@ -153,69 +171,280 @@ fun DailyChallengeDialog(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    // Title with trophy illustration
-                    Box(
+                    // Header Badge
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier
-                            .size(54.dp)
                             .background(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(GoldAccent.copy(alpha = 0.25f), Color.Transparent)
+                                Brush.horizontalGradient(
+                                    listOf(GoldAccent.copy(alpha = 0.15f), VioletPrimary.copy(alpha = 0.15f))
                                 ),
-                                shape = CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
+                                RoundedCornerShape(20.dp)
+                            )
+                            .border(1.dp, GoldAccent.copy(alpha = 0.35f), RoundedCornerShape(20.dp))
+                            .padding(horizontal = 12.dp, vertical = 4.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.EmojiEvents,
                             contentDescription = null,
                             tint = GoldAccent,
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(18.dp)
                         )
+                        Text(
+                            text = "DAILY CHALLENGE & STREAK",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            color = GoldAccent,
+                            letterSpacing = 1.sp
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Month Navigator Bar with Prev/Next buttons
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Previous Month Button
+                        IconButton(
+                            onClick = {
+                                displayedMonth = displayedMonth.minusMonths(1)
+                            },
+                            modifier = Modifier
+                                .size(34.dp)
+                                .background(Color.White.copy(alpha = 0.06f), RoundedCornerShape(10.dp))
+                                .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(10.dp))
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Previous Month",
+                                tint = Color.White,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+
+                        // Current Month Display + Jump to Today Button
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            val monthName = displayedMonth.month.getDisplayName(JavaTextStyle.FULL, Locale.US)
+                            Text(
+                                text = "$monthName ${displayedMonth.year}",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color.White,
+                                letterSpacing = 0.8.sp,
+                                style = TextStyle(
+                                    shadow = Shadow(
+                                        color = VioletPrimary.copy(alpha = 0.6f),
+                                        offset = Offset(0f, 1f),
+                                        blurRadius = 4f
+                                    )
+                                )
+                            )
+
+                            if (!isCurrentMonth) {
+                                Text(
+                                    text = "Tap to jump to Today",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = LavenderAccent,
+                                    modifier = Modifier
+                                        .clickable {
+                                            displayedMonth = YearMonth.now()
+                                            selectedDate = today
+                                        }
+                                        .padding(top = 1.dp)
+                                )
+                            }
+                        }
+
+                        // Next Month Button
+                        IconButton(
+                            onClick = {
+                                displayedMonth = displayedMonth.plusMonths(1)
+                            },
+                            modifier = Modifier
+                                .size(34.dp)
+                                .background(Color.White.copy(alpha = 0.06f), RoundedCornerShape(10.dp))
+                                .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(10.dp))
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = "Next Month",
+                                tint = Color.White,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Streak Summary Banner
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(PurpleNightSurfaceElevated, Color.Black.copy(alpha = 0.6f))
+                                ),
+                                RoundedCornerShape(14.dp)
+                            )
+                            .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp))
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.SpaceAround,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Active Streak
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text("🔥", fontSize = 14.sp)
+                            Text(
+                                text = "STREAK: $dailyStreak DAYS",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = GoldAccent
+                            )
+                        }
+
+                        // Month Completed Count
+                        val completedInMonthCount = (1..displayedMonth.lengthOfMonth()).count { day ->
+                            val dateStr = displayedMonth.atDay(day).format(DateTimeFormatter.ISO_DATE)
+                            completedDates.contains(dateStr)
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text("⭐", fontSize = 14.sp)
+                            Text(
+                                text = "$completedInMonthCount/${displayedMonth.lengthOfMonth()} DAYS",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = EmeraldGreen
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Text(
-                        text = "DAILY CHALLENGE",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color.White,
-                        letterSpacing = 1.5.sp,
-                        style = TextStyle(
-                            shadow = Shadow(
-                                color = LavenderAccent.copy(alpha = 0.5f),
-                                offset = Offset(0f, 2f),
-                                blurRadius = 8f
+                    // Colorful Calendar Grid
+                    CalendarGrid(
+                        yearMonth = displayedMonth,
+                        completedDates = completedDates,
+                        selectedDate = selectedDate,
+                        onDateSelected = { date -> selectedDate = date }
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Color Legend Guide
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        LegendPill(color = EmeraldGreen, icon = "🔥", label = "Completed")
+                        LegendPill(color = RubyRed, icon = "✕", label = "Missed")
+                        LegendPill(color = VioletPrimary, icon = "⚡", label = "Today")
+                        LegendPill(color = Color.White.copy(alpha = 0.35f), icon = "🔒", label = "Upcoming")
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Selected Date Detail Card
+                    val selectedDateStr = selectedDate.format(DateTimeFormatter.ISO_DATE)
+                    val isSelectedCompleted = completedDates.contains(selectedDateStr)
+                    val isSelectedToday = selectedDate == today
+                    val isSelectedPast = selectedDate.isBefore(today) && !isSelectedCompleted
+                    val isSelectedFuture = selectedDate.isAfter(today)
+
+                    val statusBgColor = when {
+                        isSelectedCompleted -> EmeraldGreen.copy(alpha = 0.15f)
+                        isSelectedPast -> RubyRed.copy(alpha = 0.15f)
+                        isSelectedToday -> VioletPrimary.copy(alpha = 0.2f)
+                        else -> Color.White.copy(alpha = 0.04f)
+                    }
+
+                    val statusBorderColor = when {
+                        isSelectedCompleted -> EmeraldGreen.copy(alpha = 0.5f)
+                        isSelectedPast -> RubyRed.copy(alpha = 0.5f)
+                        isSelectedToday -> VioletPrimary.copy(alpha = 0.7f)
+                        else -> Color.White.copy(alpha = 0.1f)
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(statusBgColor, RoundedCornerShape(12.dp))
+                            .border(1.dp, statusBorderColor, RoundedCornerShape(12.dp))
+                            .padding(horizontal = 12.dp, vertical = 7.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column {
+                            Text(
+                                text = selectedDate.format(DateTimeFormatter.ofPattern("EEE, dd MMM yyyy", Locale.US)),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White.copy(alpha = 0.7f)
                             )
+                            Text(
+                                text = when {
+                                    isSelectedCompleted -> "🏆 Completed with Streak Strike!"
+                                    isSelectedPast -> "❌ Missed Challenge (Expired)"
+                                    isSelectedToday -> if (isSelectedCompleted) "⭐ Done Today!" else "⚡ Today's Challenge Active"
+                                    else -> "🔒 Unlocks on this date"
+                                },
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Black,
+                                color = when {
+                                    isSelectedCompleted -> EmeraldGreen
+                                    isSelectedPast -> RubyRed
+                                    isSelectedToday -> LavenderAccent
+                                    else -> Color.White.copy(alpha = 0.5f)
+                                }
+                            )
+                        }
+
+                        Text(
+                            text = when {
+                                isSelectedCompleted -> "🔥 WON"
+                                isSelectedPast -> "MISSED"
+                                isSelectedToday -> "READY"
+                                else -> "LOCKED"
+                            },
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black,
+                            color = when {
+                                isSelectedCompleted -> EmeraldGreen
+                                isSelectedPast -> RubyRed
+                                isSelectedToday -> GoldAccent
+                                else -> Color.White.copy(alpha = 0.4f)
+                            },
+                            modifier = Modifier
+                                .background(Color.Black.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
                         )
-                    )
+                    }
 
-                    val monthName = LocalDate.now().month.name.lowercase().replaceFirstChar { it.uppercase() }
-                    val year = LocalDate.now().year
-                    Text(
-                        text = "$monthName $year",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White.copy(alpha = 0.5f),
-                        letterSpacing = 0.5.sp,
-                        modifier = Modifier.padding(top = 2.dp)
-                    )
+                    Spacer(modifier = Modifier.height(14.dp))
 
-                    Spacer(modifier = Modifier.height(18.dp))
-
-                    // Colorful Calendar grid
-                    CalendarGrid(completedDates)
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // Animated Glowing Play Button
-                    val greenColor = EmeraldGreen
+                    // Animated Glowing Play Button for Today
+                    val isTodayDone = completedDates.contains(today.format(DateTimeFormatter.ISO_DATE))
                     val infiniteTransition = rememberInfiniteTransition(label = "pulse_btn")
                     val pulseScale by infiniteTransition.animateFloat(
                         initialValue = 1f,
-                        targetValue = 1.03f,
+                        targetValue = 1.025f,
                         animationSpec = infiniteRepeatable(
                             animation = tween(1000, easing = FastOutSlowInEasing),
                             repeatMode = RepeatMode.Reverse
@@ -226,20 +455,24 @@ fun DailyChallengeDialog(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(56.dp)
+                            .height(52.dp)
                             .scale(pulseScale)
-                            .clip(RoundedCornerShape(18.dp))
+                            .clip(RoundedCornerShape(16.dp))
                             .background(
                                 brush = Brush.verticalGradient(
-                                    colors = listOf(greenColor, Color(0xFF2E7D32))
+                                    colors = if (isTodayDone) {
+                                        listOf(VioletPrimary, Color(0xFF512DA8))
+                                    } else {
+                                        listOf(EmeraldGreen, Color(0xFF2E7D32))
+                                    }
                                 )
                             )
                             .border(
                                 width = 1.5.dp,
                                 brush = Brush.verticalGradient(
-                                    colors = listOf(Color.White.copy(alpha = 0.45f), Color.Transparent)
+                                    colors = listOf(Color.White.copy(alpha = 0.5f), Color.Transparent)
                                 ),
-                                shape = RoundedCornerShape(18.dp)
+                                shape = RoundedCornerShape(16.dp)
                             )
                             .clickable { onPlayToday() },
                         contentAlignment = Alignment.Center
@@ -249,15 +482,15 @@ fun DailyChallengeDialog(
                             horizontalArrangement = Arrangement.Center
                         ) {
                             Icon(
-                                imageVector = Icons.Default.PlayArrow,
+                                imageVector = if (isTodayDone) Icons.Default.Refresh else Icons.Default.PlayArrow,
                                 contentDescription = null,
                                 tint = Color.White,
-                                modifier = Modifier.size(24.dp)
+                                modifier = Modifier.size(22.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "PLAY TODAY'S LEVEL",
-                                fontSize = 14.sp,
+                                text = if (isTodayDone) "PRACTICE TODAY'S LEVEL" else "PLAY TODAY'S LEVEL",
+                                fontSize = 13.sp,
                                 fontWeight = FontWeight.Black,
                                 color = Color.White,
                                 letterSpacing = 1.sp,
@@ -272,50 +505,49 @@ fun DailyChallengeDialog(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    // Premium Share Progress Button
-                    val context = androidx.compose.ui.platform.LocalContext.current
+                    // Share Progress Button
+                    val context = LocalContext.current
                     OutlinedButton(
                         onClick = {
-                            val appUrl = "https://ais-pre-zd2ct6cs36h4qk7rq4htax-95295274561.asia-southeast1.run.app"
+                            val appUrl = "https://cupandcoin.vercel.app/"
                             val completedCount = completedDates.size
                             val shareMsg = """
-                                📅 *Cup Shuffle 3D Daily Focus Completed!* 🏆
+                                📅 *Cup & Coin 3D Daily Challenge!* 🏆
                                 
-                                I am training my focus and tracking the vortex/orbital loops! 🧠
-                                ⭐ Total Daily Levels completed this month: $completedCount Days
+                                🧠 I am training my focus and tracking high-speed orbital shuffles!
+                                🔥 Active Streak: $dailyStreak Days
+                                ⭐ Total Daily Puzzles Solved: $completedCount
                                 
-                                🥤 Watch vertical orbit shuffles, dodge speed-ups, and keep your focus sharp!
-                                📥 Download & Play the direct APK here:
+                                🥤 Track the coin, beat the shuffle, and keep your strike alive!
+                                📥 Play & Download the APK:
                                 $appUrl
                             """.trimIndent()
-                            com.example.util.ShareUtils.shareText(context, shareMsg, "Share Daily Progress")
+                            ShareUtils.shareText(context, shareMsg, "Share Daily Streak")
                         },
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = LavenderAccent),
-                        border = androidx.compose.foundation.BorderStroke(1.5.dp, LavenderAccent.copy(alpha = 0.6f)),
-                        shape = RoundedCornerShape(18.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.2.dp, LavenderAccent.copy(alpha = 0.5f)),
+                        shape = RoundedCornerShape(14.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(50.dp)
+                            .height(44.dp)
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {
-                            Text("📤", fontSize = 16.sp)
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("📤", fontSize = 14.sp)
+                            Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                "SHARE DAILY PROGRESS",
-                                fontSize = 12.sp,
+                                "SHARE STREAK PROGRESS",
+                                fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp,
+                                letterSpacing = 0.8.sp,
                                 color = LavenderLight
                             )
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(6.dp))
                 }
             }
         }
@@ -323,17 +555,45 @@ fun DailyChallengeDialog(
 }
 
 @Composable
-fun CalendarGrid(completedDates: Set<String>) {
-    val today = LocalDate.now()
-    val firstDayOfMonth = today.withDayOfMonth(1)
-    val daysInMonth = today.lengthOfMonth()
+private fun LegendPill(color: Color, icon: String, label: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+        modifier = Modifier
+            .background(Color.White.copy(alpha = 0.04f), RoundedCornerShape(6.dp))
+            .padding(horizontal = 5.dp, vertical = 2.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(7.dp)
+                .background(color, CircleShape)
+        )
+        Text(
+            text = "$icon $label",
+            fontSize = 9.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White.copy(alpha = 0.7f)
+        )
+    }
+}
+
+@Composable
+fun CalendarGrid(
+    yearMonth: YearMonth,
+    completedDates: Set<String>,
+    selectedDate: LocalDate,
+    onDateSelected: (LocalDate) -> Unit
+) {
+    val today = remember { LocalDate.now() }
+    val firstDayOfMonth = yearMonth.atDay(1)
+    val daysInMonth = yearMonth.lengthOfMonth()
     val startDayOfWeek = (firstDayOfMonth.dayOfWeek.value) % 7 // 0 = Sunday
 
     val weekdays = listOf("S", "M", "T", "W", "T", "F", "S")
 
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         // Weekdays Headers
         Row(
@@ -347,7 +607,7 @@ fun CalendarGrid(completedDates: Set<String>) {
                     textAlign = TextAlign.Center,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = if (day == "S") GoldAccent else Color.White.copy(alpha = 0.4f)
+                    color = if (day == "S") GoldAccent else Color.White.copy(alpha = 0.45f)
                 )
             }
         }
@@ -357,7 +617,7 @@ fun CalendarGrid(completedDates: Set<String>) {
             columns = GridCells.Fixed(7),
             modifier = Modifier.height(190.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             // Fill initial blank days
             items(startDayOfWeek) {
@@ -366,129 +626,140 @@ fun CalendarGrid(completedDates: Set<String>) {
 
             items(daysInMonth) { index ->
                 val day = index + 1
-                val date = firstDayOfMonth.plusDays(index.toLong())
+                val date = yearMonth.atDay(day)
                 val dateStr = date.format(DateTimeFormatter.ISO_DATE)
                 val isCompleted = completedDates.contains(dateStr)
                 val isToday = date == today
+                val isPast = date.isBefore(today) && !isCompleted
+                val isFuture = date.isAfter(today)
+                val isSelected = date == selectedDate
 
-                // Sequential entrance animation with spring
-                var animateTile by remember { mutableStateOf(false) }
-                LaunchedEffect(Unit) {
-                    animateTile = true
+                // Status-based dynamic colors
+                val tileBgGradient = when {
+                    isCompleted -> listOf(
+                        EmeraldGreen.copy(alpha = 0.35f),
+                        EmeraldGreen.copy(alpha = 0.15f)
+                    )
+                    isToday -> listOf(
+                        VioletPrimary.copy(alpha = 0.4f),
+                        VioletPrimary.copy(alpha = 0.18f)
+                    )
+                    isPast -> listOf(
+                        RubyRed.copy(alpha = 0.22f),
+                        RubyRed.copy(alpha = 0.08f)
+                    )
+                    else -> listOf(
+                        Color.White.copy(alpha = 0.05f),
+                        Color.White.copy(alpha = 0.02f)
+                    )
                 }
 
-                val tileScale by animateFloatAsState(
-                    targetValue = if (animateTile) 1f else 0.4f,
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessMedium
-                    ),
-                    label = "tile_scale"
-                )
+                val tileBorderColor = when {
+                    isSelected -> GoldAccent
+                    isCompleted -> EmeraldGreen
+                    isToday -> VioletPrimary
+                    isPast -> RubyRed.copy(alpha = 0.5f)
+                    else -> Color.White.copy(alpha = 0.1f)
+                }
+
+                val textColor = when {
+                    isCompleted -> EmeraldGreen
+                    isToday -> Color.White
+                    isPast -> RubyRed.copy(alpha = 0.9f)
+                    isFuture -> Color.White.copy(alpha = 0.35f)
+                    else -> Color.White.copy(alpha = 0.8f)
+                }
 
                 Box(
                     modifier = Modifier
                         .size(36.dp)
-                        .graphicsLayer {
-                            scaleX = tileScale
-                            scaleY = tileScale
-                        },
+                        .clip(RoundedCornerShape(9.dp))
+                        .background(Brush.verticalGradient(tileBgGradient))
+                        .border(
+                            width = if (isSelected) 2.dp else if (isToday || isCompleted) 1.5.dp else 1.dp,
+                            color = tileBorderColor,
+                            shape = RoundedCornerShape(9.dp)
+                        )
+                        .clickable { onDateSelected(date) },
                     contentAlignment = Alignment.Center
                 ) {
-                    val tileColor = if (isCompleted) {
-                        EmeraldGreen.copy(alpha = 0.25f)
-                    } else if (isToday) {
-                        LavenderAccent.copy(alpha = 0.25f)
-                    } else {
-                        Color.White.copy(alpha = 0.05f)
-                    }
-
-                    val borderColor = if (isCompleted) {
-                        EmeraldGreen
-                    } else if (isToday) {
-                        LavenderAccent
-                    } else {
-                        Color.White.copy(alpha = 0.12f)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                brush = Brush.verticalGradient(
-                                    colors = listOf(
-                                        tileColor.copy(alpha = tileColor.alpha + 0.1f),
-                                        tileColor.copy(alpha = Math.max(0f, tileColor.alpha - 0.05f))
-                                    )
-                                )
-                            )
-                            .border(
-                                width = if (isToday) 2.dp else 1.2.dp,
-                                brush = Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.White.copy(alpha = if (isToday) 0.8f else 0.2f),
-                                        borderColor
-                                    )
-                                ),
-                                shape = RoundedCornerShape(10.dp)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (isCompleted) {
-                            // Completed coin sparkle star icon in background
+                    // Background strike indicator / badge
+                    when {
+                        isCompleted -> {
                             Icon(
-                                imageVector = Icons.Default.Star,
+                                imageVector = Icons.Default.Check,
                                 contentDescription = null,
                                 tint = EmeraldGreen.copy(alpha = 0.3f),
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .scale(1.1f)
+                                modifier = Modifier.size(24.dp)
                             )
                         }
-
-                        if (isToday) {
-                            // Today shining aura ring
-                            val todayTransition = rememberInfiniteTransition(label = "today")
-                            val auraScale by todayTransition.animateFloat(
-                                initialValue = 0.8f,
-                                targetValue = 1.3f,
-                                animationSpec = infiniteRepeatable(
-                                    animation = tween(1200, easing = LinearEasing),
-                                    repeatMode = RepeatMode.Reverse
-                                ),
-                                label = "aura"
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .scale(auraScale)
-                                    .border(0.8.dp, LavenderAccent.copy(alpha = 0.4f), RoundedCornerShape(10.dp))
+                        isPast -> {
+                            // Subtle missed indicator
+                            Text(
+                                text = "✕",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = RubyRed.copy(alpha = 0.25f)
                             )
                         }
+                        isFuture -> {
+                            // Locked symbol
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = null,
+                                tint = Color.White.copy(alpha = 0.12f),
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
 
-                        Text(
-                            text = "$day",
-                            fontSize = 11.sp,
-                            fontWeight = if (isToday || isCompleted) FontWeight.Black else FontWeight.Bold,
-                            color = if (isCompleted) {
-                                EmeraldGreen
-                            } else if (isToday) {
-                                LavenderAccent
+                    // Active pulse aura for today
+                    if (isToday) {
+                        val todayTransition = rememberInfiniteTransition(label = "today_aura")
+                        val auraScale by todayTransition.animateFloat(
+                            initialValue = 0.85f,
+                            targetValue = 1.15f,
+                            animationSpec = infiniteRepeatable(
+                                animation = tween(1200, easing = LinearEasing),
+                                repeatMode = RepeatMode.Reverse
+                            ),
+                            label = "aura"
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .scale(auraScale)
+                                .border(0.8.dp, VioletPrimary.copy(alpha = 0.6f), RoundedCornerShape(9.dp))
+                        )
+                    }
+
+                    // Day Number
+                    Text(
+                        text = "$day",
+                        fontSize = 11.sp,
+                        fontWeight = if (isToday || isCompleted || isSelected) FontWeight.Black else FontWeight.Bold,
+                        color = textColor,
+                        style = TextStyle(
+                            shadow = if (isCompleted || isToday) {
+                                Shadow(
+                                    color = (if (isCompleted) EmeraldGreen else VioletPrimary).copy(alpha = 0.6f),
+                                    offset = Offset(0f, 1f),
+                                    blurRadius = 3f
+                                )
                             } else {
-                                Color.White.copy(alpha = 0.75f)
-                            },
-                            style = TextStyle(
-                                shadow = if (isToday || isCompleted) {
-                                    Shadow(
-                                        color = (if (isCompleted) EmeraldGreen else LavenderAccent).copy(alpha = 0.6f),
-                                        offset = Offset(0f, 1f),
-                                        blurRadius = 3f
-                                    )
-                                } else {
-                                    null
-                                }
-                            )
+                                null
+                            }
+                        )
+                    )
+
+                    // Small corner dot indicator for completed strike
+                    if (isCompleted) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(2.5.dp)
+                                .size(4.dp)
+                                .background(GoldAccent, CircleShape)
                         )
                     }
                 }
