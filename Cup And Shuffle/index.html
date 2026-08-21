@@ -973,6 +973,52 @@
             0% { transform: translateY(0px) rotate(0deg); }
             100% { transform: translateY(-10px) rotate(3deg); }
         }
+
+        /* ----------------------------------------------------
+           ADVANCED RESPONSIVE MEDIA QUERIES (MOBILE & TABLET)
+           ---------------------------------------------------- */
+        @media screen and (max-width: 1024px) {
+            .container, main, .download-center, .features-grid, .showcase-container {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+            h1 { font-size: 2.4rem !important; }
+            h2 { font-size: 1.8rem !important; }
+        }
+
+        @media screen and (max-width: 768px) {
+            body {
+                font-size: 15px;
+                padding: 10px;
+            }
+            .container, .download-center, .showcase-container {
+                padding: 24px 16px;
+                border-radius: 20px;
+            }
+            h1 { font-size: 1.9rem !important; line-height: 1.2; }
+            h2 { font-size: 1.5rem !important; }
+            .btn-download-primary, .btn-download-secondary {
+                width: 100% !important;
+                padding: 16px 20px !important;
+                font-size: 1.05rem !important;
+            }
+            .features-grid {
+                grid-template-columns: 1fr !important;
+                gap: 16px;
+            }
+            .showcase-tabs {
+                gap: 8px;
+            }
+            .showcase-tab {
+                padding: 8px 14px;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            h1 { font-size: 1.6rem !important; }
+            .download-title { font-size: 1.4rem !important; }
+        }
     </style>
 </head>
 <body>
