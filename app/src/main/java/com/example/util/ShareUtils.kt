@@ -4,11 +4,20 @@ import android.content.Context
 import android.content.Intent
 
 object ShareUtils {
+    const val APP_WEBSITE_URL = "https://ais-pre-zd2ct6cs36h4qk7rq4htax-95295274561.asia-southeast1.run.app"
+
     fun shareText(context: Context, text: String, chooserTitle: String = "Share Cup Shuffle 3D") {
         try {
+            // Ensure website link is always attached if not already included
+            val fullText = if (!text.contains(APP_WEBSITE_URL)) {
+                "$text\n\n🌐 Play / Download Game:\n$APP_WEBSITE_URL"
+            } else {
+                text
+            }
+
             val sendIntent = Intent().apply {
                 action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_TEXT, text)
+                putExtra(Intent.EXTRA_TEXT, fullText)
                 type = "text/plain"
             }
             val shareIntent = Intent.createChooser(sendIntent, chooserTitle).apply {
@@ -20,3 +29,4 @@ object ShareUtils {
         }
     }
 }
+

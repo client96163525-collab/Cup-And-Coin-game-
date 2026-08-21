@@ -608,88 +608,11 @@ fun HomeTabContent(
             }
         }
 
-        // Primary Play Button: Massive Rounded Purple Capsule with Glow & 3D bevel
-        item {
-            AnimatedEntrance(isVisible = isVisible, delayMillis = 250) {
-                val purpleColor = VioletPrimary
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(64.dp)
-                        .drawBehind {
-                            drawRoundRect(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(purpleColor.copy(alpha = 0.35f), Color.Transparent),
-                                    radius = size.width * 0.6f
-                                )
-                            )
-                        }
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(purpleColor, purpleColor.copy(alpha = 0.8f))
-                            )
-                        )
-                        .border(
-                            width = 1.5.dp,
-                            brush = Brush.verticalGradient(
-                                colors = listOf(Color.White.copy(alpha = 0.4f), Color.Transparent)
-                            ),
-                            shape = RoundedCornerShape(24.dp)
-                        )
-                        .clickable {
-                            if (selectedMode == GameMode.DAILY_CHALLENGE) {
-                                onDailyTrigger()
-                            } else {
-                                onStartGame(selectedMode)
-                            }
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.PlayArrow,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(28.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "PLAY",
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Black,
-                                color = Color.White,
-                                letterSpacing = 1.sp,
-                                style = TextStyle(
-                                    shadow = Shadow(
-                                        color = Color.Black.copy(alpha = 0.5f),
-                                        offset = Offset(0f, 2f),
-                                        blurRadius = 4f
-                                    )
-                                )
-                            )
-                            Text(
-                                text = selectedMode.title.uppercase(),
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White.copy(alpha = 0.7f),
-                                letterSpacing = 0.5.sp
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
         // Quick Modes Selection Row with 3D scale and glow
         item {
-            AnimatedEntrance(isVisible = isVisible, delayMillis = 300) {
+            AnimatedEntrance(isVisible = isVisible, delayMillis = 200) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                     horizontalArrangement = Arrangement.SpaceAround,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -729,6 +652,26 @@ fun HomeTabContent(
                         onClick = { selectedMode = GameMode.DAILY_CHALLENGE }
                     )
                 }
+            }
+        }
+
+        // ═══════════════════════════════════════════
+        // MODE-SPECIFIC SHOWCASE CARD (CUSTOM 3D UI FOR EACH MODE)
+        // ═══════════════════════════════════════════
+        item {
+            AnimatedEntrance(isVisible = isVisible, delayMillis = 240) {
+                ModeShowcaseCard3D(
+                    mode = selectedMode,
+                    stats = stats,
+                    isDailyCompleted = isDailyCompleted,
+                    onPlay = {
+                        if (selectedMode == GameMode.DAILY_CHALLENGE) {
+                            onDailyTrigger()
+                        } else {
+                            onStartGame(selectedMode)
+                        }
+                    }
+                )
             }
         }
 
@@ -1006,7 +949,12 @@ fun ThemesTabContent(
     onSelectCoinTheme: (CoinTheme) -> Unit,
     onSelectShuffleTheme: (ShuffleTheme) -> Unit
 ) {
-    var selectedTab by remember { mutableIntStateOf(0) } // 0 = Cups, 1 = Coins
+    var selectedTab by remember { mutableIntStateOf(0) } // 0 = Cups, 1 = Coins, 2 = Shuffle
+    var previewCupTheme by remember(settings.selectedCupTheme) { mutableStateOf(settings.selectedCupTheme) }
+    var previewCoinTheme by remember(settings.selectedCoinTheme) { mutableStateOf(settings.selectedCoinTheme) }
+    var previewShuffleTheme by remember(settings.selectedShuffleTheme) { mutableStateOf(settings.selectedShuffleTheme) }
+
+    val context = LocalContext.current
 
     LazyColumn(
         modifier = Modifier
@@ -1039,20 +987,20 @@ fun ThemesTabContent(
                 }
                 Column {
                     Text(
-                        text = "CUSTOMIZE THEMES",
+                        text = "3D THEMES VAULT",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Black,
                         color = Color.White,
                         letterSpacing = 1.sp
                     )
                     Text(
-                        text = "Unlock and equip exclusive skins",
+                        text = "Inspect all 3D skins • Unlock by leveling up & scoring",
                         fontSize = 12.sp,
                         color = Color.White.copy(alpha = 0.6f)
                     )
                 }
             }
-            Divider(color = Color.White.copy(alpha = 0.1f), modifier = Modifier.padding(vertical = 12.dp))
+            Divider(color = Color.White.copy(alpha = 0.1f), modifier = Modifier.padding(vertical = 8.dp))
         }
 
         // Tab selection (Double bezel 3D style)
@@ -1117,23 +1065,140 @@ fun ThemesTabContent(
             }
         }
 
+        // ═══════════════════════════════════════════
+        // 3D LIVE PREVIEW SHOWCASE STAGE
+        // ═══════════════════════════════════════════
+        item {
+            when (selectedTab) {
+                0 -> {
+                    val isUnlocked = stats.highestLevel >= previewCupTheme.unlockLevel
+                    val isEquipped = settings.selectedCupTheme == previewCupTheme
+                    ThemeLivePreviewStage(
+                        title = previewCupTheme.displayName,
+                        category = "3D CUP SKIN",
+                        accentColor = previewCupTheme.primaryColor,
+                        isUnlocked = isUnlocked,
+                        isEquipped = isEquipped,
+                        unlockRequirementText = if (isUnlocked) "UNLOCKED (Req. Lvl ${previewCupTheme.unlockLevel})" else "LOCK: Reach Level ${previewCupTheme.unlockLevel} (Current: Lvl ${stats.highestLevel})",
+                        onEquip = {
+                            if (isUnlocked) {
+                                onSelectCupTheme(previewCupTheme)
+                                Toast.makeText(context, "Equipped ${previewCupTheme.displayName}!", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "Locked! Reach Level ${previewCupTheme.unlockLevel} to equip.", Toast.LENGTH_LONG).show()
+                            }
+                        },
+                        previewContent = {
+                            CupVisual(
+                                theme = previewCupTheme,
+                                width = 72.dp,
+                                height = 88.dp,
+                                isLifted = true,
+                                liftAmount = 0.45f
+                            )
+                        }
+                    )
+                }
+                1 -> {
+                    val isUnlocked = stats.bestScore >= previewCoinTheme.unlockScore
+                    val isEquipped = settings.selectedCoinTheme == previewCoinTheme
+                    ThemeLivePreviewStage(
+                        title = "${previewCoinTheme.displayName} (${previewCoinTheme.symbol})",
+                        category = "3D COIN ARTIFACT",
+                        accentColor = previewCoinTheme.baseColor,
+                        isUnlocked = isUnlocked,
+                        isEquipped = isEquipped,
+                        unlockRequirementText = if (isUnlocked) "UNLOCKED (Req. ${previewCoinTheme.unlockScore} Pts)" else "LOCK: Reach ${previewCoinTheme.unlockScore} Pts (Best: ${stats.bestScore})",
+                        onEquip = {
+                            if (isUnlocked) {
+                                onSelectCoinTheme(previewCoinTheme)
+                                Toast.makeText(context, "Equipped ${previewCoinTheme.displayName}!", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "Locked! Reach score ${previewCoinTheme.unlockScore} to equip.", Toast.LENGTH_LONG).show()
+                            }
+                        },
+                        previewContent = {
+                            CoinVisual(theme = previewCoinTheme, size = 68.dp, isSpinning = true)
+                        }
+                    )
+                }
+                2 -> {
+                    val isUnlocked = stats.highestLevel >= previewShuffleTheme.unlockLevel
+                    val isEquipped = settings.selectedShuffleTheme == previewShuffleTheme
+                    val accentColor = when (previewShuffleTheme) {
+                        ShuffleTheme.CLASSIC_SLIDE -> Color(0xFF00E5FF)
+                        ShuffleTheme.DOUBLE_SPIN_WAVE -> Color(0xFFE040FB)
+                        ShuffleTheme.COSMIC_ZIG_ZAG -> Color(0xFFFFD700)
+                        ShuffleTheme.CHAOS_VORTEX -> Color(0xFFFF3D00)
+                    }
+                    ThemeLivePreviewStage(
+                        title = previewShuffleTheme.displayName,
+                        category = "3D SHUFFLE PATTERN",
+                        accentColor = accentColor,
+                        isUnlocked = isUnlocked,
+                        isEquipped = isEquipped,
+                        unlockRequirementText = if (isUnlocked) "UNLOCKED (Req. Lvl ${previewShuffleTheme.unlockLevel})" else "LOCK: Reach Level ${previewShuffleTheme.unlockLevel} (Current: Lvl ${stats.highestLevel})",
+                        onEquip = {
+                            if (isUnlocked) {
+                                onSelectShuffleTheme(previewShuffleTheme)
+                                Toast.makeText(context, "Equipped ${previewShuffleTheme.displayName}!", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "Locked! Reach Level ${previewShuffleTheme.unlockLevel} to equip.", Toast.LENGTH_LONG).show()
+                            }
+                        },
+                        previewContent = {
+                            Box(
+                                modifier = Modifier
+                                    .size(72.dp)
+                                    .background(accentColor.copy(alpha = 0.2f), CircleShape)
+                                    .border(2.dp, accentColor, CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = previewShuffleTheme.effectEmoji,
+                                    fontSize = 36.sp
+                                )
+                            }
+                        }
+                    )
+                }
+            }
+        }
+
+        // Section Title for Vault Catalog
+        item {
+            Text(
+                text = "SKIN VAULT CATALOG (TAP TO PREVIEW)",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Black,
+                color = Color.White.copy(alpha = 0.5f),
+                letterSpacing = 1.sp,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+
         // Theme list
         if (selectedTab == 0) {
             items(CupTheme.entries) { theme ->
                 val isUnlocked = stats.highestLevel >= theme.unlockLevel
                 val isSelected = settings.selectedCupTheme == theme
+                val isInspected = previewCupTheme == theme
 
                 ThemeItemRow3D(
                     title = theme.displayName,
                     subtitle = if (isUnlocked) {
-                        if (isSelected) "Active Equipped Theme ✓" else "Tap to Equip Theme"
+                        if (isSelected) "Active Equipped Theme ✓" else "Unlocked • Tap to Inspect"
                     } else {
-                        "🔒 Unlocks at Level ${theme.unlockLevel}"
+                        "🔒 Requires Level ${theme.unlockLevel}"
                     },
                     isUnlocked = isUnlocked,
                     isSelected = isSelected,
+                    isInspected = isInspected,
                     accentColor = theme.primaryColor,
-                    onSelect = { if (isUnlocked) onSelectCupTheme(theme) },
+                    onSelect = {
+                        previewCupTheme = theme
+                        if (isUnlocked) onSelectCupTheme(theme)
+                    },
                     iconContent = {
                         CupVisual(theme = theme, width = 36.dp, height = 44.dp)
                     }
@@ -1143,18 +1208,23 @@ fun ThemesTabContent(
             items(CoinTheme.entries) { theme ->
                 val isUnlocked = stats.bestScore >= theme.unlockScore
                 val isSelected = settings.selectedCoinTheme == theme
+                val isInspected = previewCoinTheme == theme
 
                 ThemeItemRow3D(
                     title = "${theme.displayName} (${theme.symbol})",
                     subtitle = if (isUnlocked) {
-                        if (isSelected) "Active Equipped Coin ✓" else "Tap to Equip Coin"
+                        if (isSelected) "Active Equipped Coin ✓" else "Unlocked • Tap to Inspect"
                     } else {
-                        "🔒 Unlocks at score ${theme.unlockScore}"
+                        "🔒 Requires ${theme.unlockScore} Points"
                     },
                     isUnlocked = isUnlocked,
                     isSelected = isSelected,
+                    isInspected = isInspected,
                     accentColor = theme.baseColor,
-                    onSelect = { if (isUnlocked) onSelectCoinTheme(theme) },
+                    onSelect = {
+                        previewCoinTheme = theme
+                        if (isUnlocked) onSelectCoinTheme(theme)
+                    },
                     iconContent = {
                         CoinVisual(theme = theme, size = 36.dp, isSpinning = false)
                     }
@@ -1164,6 +1234,7 @@ fun ThemesTabContent(
             items(ShuffleTheme.entries) { theme ->
                 val isUnlocked = stats.highestLevel >= theme.unlockLevel
                 val isSelected = settings.selectedShuffleTheme == theme
+                val isInspected = previewShuffleTheme == theme
                 val accentColor = when (theme) {
                     ShuffleTheme.CLASSIC_SLIDE -> Color(0xFF00E5FF)
                     ShuffleTheme.DOUBLE_SPIN_WAVE -> Color(0xFFE040FB)
@@ -1174,14 +1245,18 @@ fun ThemesTabContent(
                 ThemeItemRow3D(
                     title = theme.displayName,
                     subtitle = if (isUnlocked) {
-                        if (isSelected) "Active Shuffle Animation ✓" else "Tap to Equip Style"
+                        if (isSelected) "Active Shuffle Style ✓" else "Unlocked • Tap to Inspect"
                     } else {
-                        "🔒 Unlocks at Level ${theme.unlockLevel}"
+                        "🔒 Requires Level ${theme.unlockLevel}"
                     },
                     isUnlocked = isUnlocked,
                     isSelected = isSelected,
+                    isInspected = isInspected,
                     accentColor = accentColor,
-                    onSelect = { if (isUnlocked) onSelectShuffleTheme(theme) },
+                    onSelect = {
+                        previewShuffleTheme = theme
+                        if (isUnlocked) onSelectShuffleTheme(theme)
+                    },
                     iconContent = {
                         Box(
                             modifier = Modifier
@@ -1197,6 +1272,179 @@ fun ThemesTabContent(
                         }
                     }
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun ThemeLivePreviewStage(
+    title: String,
+    category: String,
+    accentColor: Color,
+    isUnlocked: Boolean,
+    isEquipped: Boolean,
+    unlockRequirementText: String,
+    onEquip: () -> Unit,
+    previewContent: @Composable () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .drawBehind {
+                drawRoundRect(
+                    brush = Brush.radialGradient(
+                        colors = listOf(accentColor.copy(alpha = 0.35f), Color.Transparent),
+                        center = Offset(size.width * 0.5f, size.height * 0.45f),
+                        radius = size.width * 0.6f
+                    )
+                )
+            }
+            .clip(RoundedCornerShape(24.dp))
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF1E172F),
+                        Color(0xFF0F0B18)
+                    )
+                )
+            )
+            .border(
+                width = 1.5.dp,
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = 0.5f),
+                        accentColor.copy(alpha = 0.6f),
+                        Color.Transparent
+                    )
+                ),
+                shape = RoundedCornerShape(24.dp)
+            )
+            .padding(18.dp)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            // Category Badge
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = category,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Black,
+                    color = accentColor,
+                    letterSpacing = 1.2.sp
+                )
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = if (isEquipped) EmeraldGreen.copy(alpha = 0.2f) else if (isUnlocked) GoldAccent.copy(alpha = 0.2f) else RubyRed.copy(alpha = 0.2f),
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        if (isEquipped) EmeraldGreen.copy(alpha = 0.5f) else if (isUnlocked) GoldAccent.copy(alpha = 0.5f) else RubyRed.copy(alpha = 0.5f)
+                    )
+                ) {
+                    Text(
+                        text = if (isEquipped) "EQUIPPED" else if (isUnlocked) "UNLOCKED" else "LOCKED",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = if (isEquipped) EmeraldGreen else if (isUnlocked) GoldAccent else RubyRed,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // 3D Visual Floating Display Stage
+            Box(
+                modifier = Modifier
+                    .size(110.dp)
+                    .drawBehind {
+                        drawCircle(
+                            brush = Brush.radialGradient(
+                                colors = listOf(accentColor.copy(alpha = 0.45f), Color.Transparent),
+                                radius = size.width * 0.7f
+                            )
+                        )
+                    }
+                    .background(Color.Black.copy(alpha = 0.4f), CircleShape)
+                    .border(1.5.dp, accentColor.copy(alpha = 0.5f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                previewContent()
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Title & Unlock Info
+            Text(
+                text = title,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Black,
+                color = Color.White,
+                letterSpacing = 0.5.sp,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = unlockRequirementText,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (isUnlocked) EmeraldGreen else RubyRed,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // 3D Equip / Locked Action Button
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = if (isEquipped) {
+                                listOf(Color(0xFF2E7D32), Color(0xFF1B5E20))
+                            } else if (isUnlocked) {
+                                listOf(accentColor, accentColor.copy(alpha = 0.75f))
+                            } else {
+                                listOf(Color(0xFF37474F), Color(0xFF212121))
+                            }
+                        )
+                    )
+                    .border(
+                        width = 1.2.dp,
+                        brush = Brush.verticalGradient(
+                            colors = listOf(Color.White.copy(alpha = 0.6f), Color.Transparent)
+                        ),
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .clickable(enabled = isUnlocked && !isEquipped, onClick = onEquip),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    if (isEquipped) {
+                        Icon(imageVector = Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("CURRENTLY EQUIPPED ✓", fontSize = 13.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    } else if (isUnlocked) {
+                        Icon(imageVector = Icons.Default.CheckCircle, contentDescription = null, tint = Color.Black, modifier = Modifier.size(20.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("EQUIP THIS SKIN ➔", fontSize = 13.sp, fontWeight = FontWeight.Black, color = Color.Black)
+                    } else {
+                        Icon(imageVector = Icons.Default.Lock, contentDescription = null, tint = Color.White.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("LEVEL REQUIREMENT LOCKED", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White.copy(alpha = 0.6f))
+                    }
+                }
             }
         }
     }
@@ -1809,6 +2057,7 @@ fun ThemeItemRow3D(
     subtitle: String,
     isUnlocked: Boolean,
     isSelected: Boolean,
+    isInspected: Boolean = false,
     accentColor: Color,
     onSelect: () -> Unit,
     iconContent: @Composable () -> Unit
@@ -1816,9 +2065,9 @@ fun ThemeItemRow3D(
     Glowing3DCard(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(enabled = isUnlocked, onClick = onSelect),
-        glowColor = accentColor,
-        isGlowing = isSelected,
+            .clickable(onClick = onSelect),
+        glowColor = if (isInspected) accentColor else if (isSelected) LavenderAccent else accentColor.copy(alpha = 0.4f),
+        isGlowing = isInspected || isSelected,
         shape = RoundedCornerShape(20.dp)
     ) {
         Row(
@@ -1832,24 +2081,36 @@ fun ThemeItemRow3D(
                 modifier = Modifier
                     .size(56.dp)
                     .clip(RoundedCornerShape(14.dp))
-                    .background(accentColor.copy(alpha = 0.15f))
-                    .border(1.dp, accentColor.copy(alpha = 0.35f), RoundedCornerShape(14.dp)),
+                    .background(accentColor.copy(alpha = if (isInspected) 0.3f else 0.15f))
+                    .border(
+                        width = if (isInspected) 2.dp else 1.dp,
+                        color = if (isInspected) accentColor else accentColor.copy(alpha = 0.35f),
+                        shape = RoundedCornerShape(14.dp)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 iconContent()
             }
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (isUnlocked) Color.White else Color.White.copy(alpha = 0.4f)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = title,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isUnlocked) Color.White else Color.White.copy(alpha = 0.7f)
+                    )
+                    if (!isUnlocked) {
+                        Text("🔒", fontSize = 12.sp)
+                    }
+                }
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = subtitle,
-                    fontSize = 13.sp,
+                    fontSize = 12.sp,
                     color = if (isSelected) LavenderAccent else if (isUnlocked) Color.White.copy(alpha = 0.7f) else RubyRed
                 )
             }
@@ -1858,11 +2119,291 @@ fun ThemeItemRow3D(
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = "Selected",
-                    tint = LavenderAccent,
-                    modifier = Modifier.size(28.dp)
+                    tint = EmeraldGreen,
+                    modifier = Modifier.size(26.dp)
                 )
+            } else if (isInspected) {
+                Box(
+                    modifier = Modifier
+                        .background(accentColor.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+                        .border(1.dp, accentColor, RoundedCornerShape(8.dp))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Text("INSPECTING", fontSize = 9.sp, fontWeight = FontWeight.Black, color = accentColor)
+                }
             }
         }
+    }
+}
+
+@Composable
+fun ModeShowcaseCard3D(
+    mode: GameMode,
+    stats: PlayerStats,
+    isDailyCompleted: Boolean,
+    onPlay: () -> Unit
+) {
+    val modeAccent = when (mode) {
+        GameMode.CLASSIC -> GoldAccent
+        GameMode.TIME_ATTACK -> Color(0xFF00E5FF)
+        GameMode.ENDLESS -> Color(0xFFFF5722)
+        GameMode.PERFECT_RUN -> Color(0xFFFFD54F)
+        GameMode.DAILY_CHALLENGE -> EmeraldGreen
+    }
+
+    val modeGradient = when (mode) {
+        GameMode.CLASSIC -> listOf(Color(0xFF2C2205), Color(0xFF130E01))
+        GameMode.TIME_ATTACK -> listOf(Color(0xFF072138), Color(0xFF020B14))
+        GameMode.ENDLESS -> listOf(Color(0xFF33140A), Color(0xFF140502))
+        GameMode.PERFECT_RUN -> listOf(Color(0xFF2F240A), Color(0xFF120E02))
+        GameMode.DAILY_CHALLENGE -> listOf(Color(0xFF0A2B1D), Color(0xFF02120C))
+    }
+
+    val modeIcon = when (mode) {
+        GameMode.CLASSIC -> Icons.Default.EmojiEvents
+        GameMode.TIME_ATTACK -> Icons.Default.FlashOn
+        GameMode.ENDLESS -> Icons.Default.Whatshot
+        GameMode.PERFECT_RUN -> Icons.Default.Adjust
+        GameMode.DAILY_CHALLENGE -> Icons.Default.DateRange
+    }
+
+    val modeTagline = when (mode) {
+        GameMode.CLASSIC -> "PROGRESSIVE LEVEL CHALLENGE"
+        GameMode.TIME_ATTACK -> "30-SECOND HIGH-SPEED BLITZ"
+        GameMode.ENDLESS -> "ENDLESS SURVIVAL ARENA • 3 LIVES"
+        GameMode.PERFECT_RUN -> "FLAWLESS RUN • ZERO MISTAKES"
+        GameMode.DAILY_CHALLENGE -> "DAILY PUZZLE SEED ARENA"
+    }
+
+    val modeDescription = when (mode) {
+        GameMode.CLASSIC -> "Start from Level 1, track accelerating cup shuffles, and level up with consecutive wins!"
+        GameMode.TIME_ATTACK -> "Race against the clock! Fast correct guesses add +3.0s extra time to your countdown."
+        GameMode.ENDLESS -> "Infinite survival run! Speed multiplies every 3 rounds. Shields absorb incorrect guesses."
+        GameMode.PERFECT_RUN -> "Strict perfection gauntlet! A single incorrect guess ends your run immediately."
+        GameMode.DAILY_CHALLENGE -> "Unique daily seed for all players worldwide. Solve daily to stack continuous streaks!"
+    }
+
+    val buttonText = when (mode) {
+        GameMode.CLASSIC -> "PLAY CLASSIC (LEVEL ${stats.highestLevel}) ➔"
+        GameMode.TIME_ATTACK -> "START TIME ATTACK BLITZ ⚡"
+        GameMode.ENDLESS -> "ENTER ENDLESS SURVIVAL 🔥"
+        GameMode.PERFECT_RUN -> "LAUNCH PERFECT RUN 💎"
+        GameMode.DAILY_CHALLENGE -> if (isDailyCompleted) "REPLAY DAILY CHALLENGE 📅" else "PLAY TODAY'S PUZZLE ➔"
+    }
+
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse_mode_btn")
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.02f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "mode_btn_scale"
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .drawBehind {
+                drawRoundRect(
+                    brush = Brush.radialGradient(
+                        colors = listOf(modeAccent.copy(alpha = 0.3f), Color.Transparent),
+                        center = Offset(size.width * 0.5f, size.height * 0.35f),
+                        radius = size.width * 0.75f
+                    )
+                )
+            }
+            .clip(RoundedCornerShape(26.dp))
+            .background(Brush.verticalGradient(modeGradient))
+            .border(
+                width = 1.8.dp,
+                brush = Brush.verticalGradient(
+                    colors = listOf(Color.White.copy(alpha = 0.55f), modeAccent.copy(alpha = 0.7f), Color.Transparent)
+                ),
+                shape = RoundedCornerShape(26.dp)
+            )
+            .padding(18.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Mode Header Row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .background(modeAccent.copy(alpha = 0.2f), CircleShape)
+                            .border(1.5.dp, modeAccent, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = modeIcon,
+                            contentDescription = null,
+                            tint = modeAccent,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    Column {
+                        Text(
+                            text = mode.title.uppercase(),
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color.White,
+                            letterSpacing = 0.8.sp
+                        )
+                        Text(
+                            text = modeTagline,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = modeAccent,
+                            letterSpacing = 0.6.sp
+                        )
+                    }
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color.Black.copy(alpha = 0.4f),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, modeAccent.copy(alpha = 0.5f))
+                ) {
+                    Text(
+                        text = when (mode) {
+                            GameMode.CLASSIC -> "LVL ${stats.highestLevel}"
+                            GameMode.TIME_ATTACK -> "${stats.timeAttackStats.bestScore} PTS"
+                            GameMode.ENDLESS -> "🛡️ ${stats.shieldCount} SHIELDS"
+                            GameMode.PERFECT_RUN -> "BEST ${stats.bestStreak}"
+                            GameMode.DAILY_CHALLENGE -> "${stats.dailyStreak}D STREAK"
+                        },
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black,
+                        color = modeAccent,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            Text(
+                text = modeDescription,
+                fontSize = 12.sp,
+                color = Color.White.copy(alpha = 0.78f),
+                lineHeight = 16.sp
+            )
+
+            // Dynamic Mode Highlights Bar
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Black.copy(alpha = 0.35f), RoundedCornerShape(12.dp))
+                    .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(12.dp))
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                when (mode) {
+                    GameMode.CLASSIC -> {
+                        ModeStatBadge("CLEAR RECORD", "Lvl ${stats.highestLevel}", GoldAccent)
+                        ModeStatBadge("WIN RATE", "${stats.winRatePercent}%", EmeraldGreen)
+                        ModeStatBadge("COMBO MULTI", "x${stats.bestCombo}", VegasGold)
+                    }
+                    GameMode.TIME_ATTACK -> {
+                        ModeStatBadge("TIME BEST", "${stats.timeAttackStats.bestScore} Pts", Color(0xFF00E5FF))
+                        ModeStatBadge("GAMES WON", "${stats.timeAttackStats.totalWins}", EmeraldGreen)
+                        ModeStatBadge("TIME BONUS", "+3.0s / Win", GoldAccent)
+                    }
+                    GameMode.ENDLESS -> {
+                        ModeStatBadge("LIVES", "3 Hearts", RubyRed)
+                        ModeStatBadge("ACTIVE SHIELDS", "${stats.shieldCount} 🛡️", Color(0xFF00E5FF))
+                        ModeStatBadge("ENDLESS RECORD", "${stats.endlessStats.bestScore} Pts", Color(0xFFFF5722))
+                    }
+                    GameMode.PERFECT_RUN -> {
+                        ModeStatBadge("TOLERANCE", "0 Errors", RubyRed)
+                        ModeStatBadge("STRIKE RECORD", "${stats.bestStreak} Wins", GoldAccent)
+                        ModeStatBadge("DIFFICULTY", "INSANE", RubyRed)
+                    }
+                    GameMode.DAILY_CHALLENGE -> {
+                        ModeStatBadge("ACTIVE STREAK", "${stats.dailyStreak} Days", GoldAccent)
+                        ModeStatBadge("TODAY'S PUZZLE", if (isDailyCompleted) "SOLVED ✓" else "READY ⚡", if (isDailyCompleted) EmeraldGreen else Color(0xFF00E5FF))
+                        ModeStatBadge("REWARDS", "Badge + Streak", EmeraldGreen)
+                    }
+                }
+            }
+
+            // ═══════════════════════════════════════════
+            // MASSIVE 3D EMBOSSED MODE-SPECIFIC PLAY BUTTON
+            // ═══════════════════════════════════════════
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .graphicsLayer {
+                        scaleX = pulseScale
+                        scaleY = pulseScale
+                    }
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                modeAccent,
+                                modeAccent.copy(alpha = 0.75f)
+                            )
+                        )
+                    )
+                    .border(
+                        width = 1.5.dp,
+                        brush = Brush.verticalGradient(
+                            colors = listOf(Color.White.copy(alpha = 0.8f), Color.Transparent)
+                        ),
+                        shape = RoundedCornerShape(18.dp)
+                    )
+                    .clickable(onClick = onPlay),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = null,
+                        tint = Color.Black,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = buttonText,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.Black,
+                        letterSpacing = 1.sp,
+                        style = TextStyle(
+                            shadow = Shadow(
+                                color = Color.White.copy(alpha = 0.4f),
+                                offset = Offset(0f, 1f),
+                                blurRadius = 2f
+                            )
+                        )
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ModeStatBadge(label: String, value: String, valueColor: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = label, fontSize = 8.sp, fontWeight = FontWeight.Bold, color = TextMuted)
+        Text(text = value, fontSize = 11.sp, fontWeight = FontWeight.Black, color = valueColor)
     }
 }
 
