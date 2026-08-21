@@ -1616,7 +1616,6 @@ fun SettingsTabContent(
 
         // Information & Legal Card
         item {
-            var showAboutModal by remember { mutableStateOf(false) }
             var showSupportModal by remember { mutableStateOf(false) }
             var showPrivacyModal by remember { mutableStateOf(false) }
             var showTermsModal by remember { mutableStateOf(false) }
@@ -1643,23 +1642,6 @@ fun SettingsTabContent(
                         letterSpacing = 1.sp
                     )
                     Divider(color = Color.White.copy(alpha = 0.1f))
-
-                    // Row 1: About Us
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { showAboutModal = true }
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text("About Us", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                            Text("App version & details", fontSize = 12.sp, color = Color.White.copy(alpha = 0.5f))
-                        }
-                        Icon(imageVector = Icons.Default.ChevronRight, contentDescription = null, tint = Color.White.copy(alpha = 0.4f))
-                    }
-                    Divider(color = Color.White.copy(alpha = 0.05f))
 
                     // Row 2: Help & Support
                     Row(
@@ -1711,46 +1693,6 @@ fun SettingsTabContent(
                         Icon(imageVector = Icons.Default.ChevronRight, contentDescription = null, tint = Color.White.copy(alpha = 0.4f))
                     }
                 }
-            }
-
-            // About Us Dialog Modal
-            if (showAboutModal) {
-                AlertDialog(
-                    onDismissRequest = { showAboutModal = false },
-                    title = {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Text("ℹ️", fontSize = 24.sp)
-                            Text("About Cup and Coin", fontWeight = FontWeight.Black, color = Color.White, fontSize = 20.sp)
-                        }
-                    },
-                    text = {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Text(
-                                "Cup and Coin is a premium concentration and memory building shell game designed to test your focus limits.",
-                                color = Color.White.copy(alpha = 0.85f),
-                                fontSize = 14.sp
-                            )
-                            Divider(color = Color.White.copy(alpha = 0.1f))
-                            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                                Text("Version:", fontWeight = FontWeight.Bold, color = NeonCyan, fontSize = 13.sp)
-                                Text("v1.0.0", color = Color.White, fontSize = 13.sp)
-                            }
-                        }
-                    },
-                    confirmButton = {
-                        Button(
-                            onClick = { showAboutModal = false },
-                            colors = ButtonDefaults.buttonColors(containerColor = NeonCyan)
-                        ) {
-                            Text("Got it!", color = MidnightNavy, fontWeight = FontWeight.Bold)
-                        }
-                    },
-                    containerColor = MidnightNavy,
-                    shape = RoundedCornerShape(22.dp)
-                )
             }
 
             // Help & Support Modal with Intent & Copy Clipboard Actions
@@ -2069,6 +2011,39 @@ fun SettingsTabContent(
                         )
                     }
                 }
+            }
+        }
+
+        // Legal Information Footer Link
+        item {
+            val context = androidx.compose.ui.platform.LocalContext.current
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Legal Information",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = NeonCyan,
+                    modifier = Modifier
+                        .clickable {
+                            try {
+                                val intent = android.content.Intent(
+                                    android.content.Intent.ACTION_VIEW,
+                                    android.net.Uri.parse("https://cupandcoin.vercel.app")
+                                )
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                android.widget.Toast.makeText(context, "Cannot open webpage", android.widget.Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        .padding(8.dp),
+                    style = androidx.compose.ui.text.TextStyle(
+                        textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline
+                    )
+                )
             }
         }
     }
