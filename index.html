@@ -961,65 +961,24 @@
         </div>
 
         <!-- ----------------------------------------------------
-           3D GAMEPLAY DEMO (MINI-GAME SHUFFLE SHOWCASE)
+           Download Center Panel
            ---------------------------------------------------- -->
-        <div class="game-wrapper">
-            <div class="game-header">
-                <h3>🎮 TEST YOUR FOCUS DIRECTLY IN 3D!</h3>
-                <p>The golden coin is placed inside the middle cup. Press Shuffle, watch the fast orbits, and tap the correct cup!</p>
-            </div>
-
-            <!-- Play stage for 3D cylinders -->
-            <div class="stage-3d">
-                <!-- Golden coin -->
-                <div class="coin-3d" id="target-coin"></div>
-
-                <!-- Three 3D Cups -->
-                <div class="cup-3d" id="cup-0" onclick="selectCup(0)">
-                    <div class="cup-rim"></div>
-                    <div class="cup-body">
-                        <div class="cup-ring"></div>
-                        <div class="cup-ring-bottom"></div>
-                    </div>
-                </div>
-
-                <div class="cup-3d" id="cup-1" onclick="selectCup(1)">
-                    <div class="cup-rim"></div>
-                    <div class="cup-body">
-                        <div class="cup-ring"></div>
-                        <div class="cup-ring-bottom"></div>
-                    </div>
-                </div>
-
-                <div class="cup-3d" id="cup-2" onclick="selectCup(2)">
-                    <div class="cup-rim"></div>
-                    <div class="cup-body">
-                        <div class="cup-ring"></div>
-                        <div class="cup-ring-bottom"></div>
-                    </div>
-                </div>
-            </div>
-
-            <button class="btn-action" id="shuffle-btn" onclick="startDemoShuffle()">⚡ Start Shuffle</button>
-            <div class="game-status" id="game-status-text">Click Start to watch the 3D spiral path!</div>
-        </div>
-
-        <!-- Features Showcase Grid -->
-        <div class="features">
-            <div class="feature-card">
-                <span class="feature-icon">🌀</span>
-                <h4 class="feature-title">Orbital Loop Shuffling</h4>
-                <p class="feature-desc">Go beyond flat 2D slides! Cups loop, helix, and spiral around each other in fully simulated 3D vertical tracks.</p>
-            </div>
-            <div class="feature-card">
-                <span class="feature-icon">🛡️</span>
-                <h4 class="feature-title">Shield Saves & Multipliers</h4>
-                <p class="feature-desc">Claim Daily Lucky Spin rewards to secure protective shields that automatically save you from streaks break!</p>
-            </div>
-            <div class="feature-card">
-                <span class="feature-icon">📅</span>
-                <h4 class="feature-title">Daily Challenge Streaks</h4>
-                <p class="feature-desc">Play unique daily cup arrangements, build your daily streak, and directly share stats with friends.</p>
+        <div class="download-center" style="margin-bottom: 45px;">
+            <h3 class="download-title">📥 DOWNLOAD CENTER</h3>
+            <p style="color: #94a3b8; font-size: 1rem; margin-bottom: 25px;">Install Cup Shuffle 3D directly on your phone and start training your focus offline!</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 14px; align-items: center; justify-content: center;">
+                <!-- Direct APK Download Link -->
+                <a href="https://ais-pre-zd2ct6cs36h4qk7rq4htax-95295274561.asia-southeast1.run.app/app-debug.apk" id="direct-apk-download" class="btn-download-primary">
+                    🚀 Direct Download APK
+                </a>
+                
+                <p style="color: #64748b; font-size: 0.8rem; margin: 4px 0;">Filename: <b>cup-shuffle-3d.apk</b> (100% Secure, Verified Child-Safe)</p>
+                
+                <!-- Google Play Store Placeholder -->
+                <a href="#" class="btn-download-secondary" onclick="alert('Coming soon on Google Play Store!')">
+                    🤖 Get it on Play Store
+                </a>
             </div>
         </div>
 
@@ -1161,23 +1120,66 @@
             </div>
         </div>
 
-        <!-- Download Center Panel -->
-        <div class="download-center">
-            <h3 class="download-title">📥 DOWNLOAD CENTER</h3>
-            <p style="color: #94a3b8; font-size: 1rem; margin-bottom: 25px;">Install Cup Shuffle 3D directly on your phone and start training your focus offline!</p>
-            
-            <div style="display: flex; flex-direction: column; gap: 14px; align-items: center; justify-content: center;">
-                <!-- Direct APK Download Link -->
-                <a href="https://ais-pre-zd2ct6cs36h4qk7rq4htax-95295274561.asia-southeast1.run.app/app-debug.apk" id="direct-apk-download" class="btn-download-primary">
-                    🚀 Direct Download APK
-                </a>
-                
-                <p style="color: #64748b; font-size: 0.8rem; margin: 4px 0;">Filename: <b>cup-shuffle-3d.apk</b> (100% Secure, Verified Child-Safe)</p>
-                
-                <!-- Google Play Store Placeholder -->
-                <a href="#" class="btn-download-secondary" onclick="alert('Coming soon on Google Play Store!')">
-                    🤖 Get it on Play Store
-                </a>
+        <!-- ----------------------------------------------------
+           3D GAMEPLAY DEMO (MINI-GAME SHUFFLE SHOWCASE)
+           ---------------------------------------------------- -->
+        <div class="game-wrapper">
+            <div class="game-header">
+                <h3>🎮 TEST YOUR FOCUS DIRECTLY IN 3D!</h3>
+                <p>The golden coin is placed inside the middle cup. Press Shuffle, watch the fast orbits, and tap the correct cup!</p>
+            </div>
+
+            <!-- Play stage for 3D cylinders -->
+            <div class="stage-3d">
+                <!-- Golden coin -->
+                <div class="coin-3d" id="target-coin"></div>
+
+                <!-- Three 3D Cups -->
+                <div class="cup-3d" id="cup-0" onclick="selectCup(0)">
+                    <div class="cup-rim"></div>
+                    <div class="cup-body">
+                        <div class="cup-ring"></div>
+                        <div class="cup-ring-bottom"></div>
+                    </div>
+                </div>
+
+                <div class="cup-3d" id="cup-1" onclick="selectCup(1)">
+                    <div class="cup-rim"></div>
+                    <div class="cup-body">
+                        <div class="cup-ring"></div>
+                        <div class="cup-ring-bottom"></div>
+                    </div>
+                </div>
+
+                <div class="cup-3d" id="cup-2" onclick="selectCup(2)">
+                    <div class="cup-rim"></div>
+                    <div class="cup-body">
+                        <div class="cup-ring"></div>
+                        <div class="cup-ring-bottom"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-action" id="shuffle-btn" onclick="startDemoShuffle()">⚡ Start Shuffle</button>
+            <div class="game-status" id="game-status-text">Click Start to watch the 3D spiral path!</div>
+        </div>
+
+        <!-- Features Showcase Grid -->
+        <div class="features" style="margin-top: 40px;">
+            <div class="feature-card">
+                <span class="feature-icon">🌀</span>
+                <h4 class="feature-title">Orbital Loop Shuffling</h4>
+                <p class="feature-desc">Go beyond flat 2D slides! Cups loop, helix, and spiral around each other in fully simulated 3D vertical tracks.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🛡️</span>
+                <h4 class="feature-title">Shield Saves & Multipliers</h4>
+                <p class="feature-desc">Claim Daily Lucky Spin rewards to secure protective shields that automatically save you from streaks break!</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">📅</span>
+                <h4 class="feature-title">Daily Challenge Streaks</h4>
+                <p class="feature-desc">Play unique daily cup arrangements, build your daily streak, and directly share stats with friends.</p>
             </div>
         </div>
     </div>
