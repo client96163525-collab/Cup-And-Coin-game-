@@ -1,5 +1,6 @@
 package com.example
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -42,6 +43,22 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Global Crash Reporting & Logging Handler
+        val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            val crashInfo = "FATAL CRASH in thread [${thread.name}]: ${throwable.javaClass.name} - ${throwable.message}\n" +
+                    throwable.stackTrace.take(10).joinToString("\n") { "  at $it" }
+            com.example.util.DebugLogger.e("CRASH_HANDLER", crashInfo)
+            try {
+                getSharedPreferences("game_prefs", Context.MODE_PRIVATE)
+                    .edit()
+                    .putString("last_crash_log", crashInfo)
+                    .commit()
+            } catch (_: Throwable) {}
+            defaultHandler?.uncaughtException(thread, throwable)
+        }
+
         setContent {
             val viewModel: GameViewModel = viewModel()
             val settings by viewModel.settings.collectAsStateWithLifecycle()
@@ -68,139 +85,201 @@ class MainActivity : ComponentActivity() {
                     if (showSplash) {
                         SplashScreen()
                     } else {
-                        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-                        val stats by viewModel.stats.collectAsStateWithLifecycle()
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                            val stats by viewModel.stats.collectAsStateWithLifecycle()
 
-                        var showHowToPlay by remember { mutableStateOf(false) }
-                        var showAppExitConfirm by remember { mutableStateOf(false) }
+                            var showHowToPlay by remember { mutableStateOf(false) }
+                            var showAppExitConfirm by remember { mutableStateOf(false) }
 
-                        // System Back Button Handling
-                        BackHandler(enabled = true) {
-                            when {
-                                showAppExitConfirm -> showAppExitConfirm = false
-                                showHowToPlay -> showHowToPlay = false
-                                uiState.gameState != GameState.HOME -> {
-                                    viewModel.returnToHome()
-                                }
-                                else -> {
-                                    showAppExitConfirm = true
+                            val context = androidx.compose.ui.platform.LocalContext.current
+                            var previousCrashLog by remember { mutableStateOf<String?>(null) }
+
+                            LaunchedEffect(Unit) {
+                                try {
+                                    val prefs = context.getSharedPreferences("game_prefs", android.content.Context.MODE_PRIVATE)
+                                    val crash = prefs.getString("last_crash_log", null)
+                                    if (!crash.isNullOrBlank()) {
+                                        previousCrashLog = crash
+                                        com.example.util.DebugLogger.e("PREVIOUS_CRASH", crash)
+                                        prefs.edit().remove("last_crash_log").apply()
+                                    }
+                                } catch (_: Throwable) {}
+                            }
+
+                            if (previousCrashLog != null) {
+                                AlertDialog(
+                                    onDismissRequest = { previousCrashLog = null },
+                                    title = { Text("Previous Session Crash Report", color = RubyRed, fontWeight = FontWeight.Bold, fontSize = 16.sp) },
+                                    text = {
+                                        Column {
+                                            Text(
+                                                text = "The app recovered from a previous crash. Details logged to console:",
+                                                fontSize = 12.sp,
+                                                color = Color.White.copy(alpha = 0.8f),
+                                                modifier = Modifier.padding(bottom = 8.dp)
+                                            )
+                                            Surface(
+                                                color = Color.Black.copy(alpha = 0.5f),
+                                                shape = RoundedCornerShape(8.dp),
+                                                modifier = Modifier.fillMaxWidth()
+                                            ) {
+                                                Text(
+                                                    text = previousCrashLog ?: "",
+                                                    fontSize = 10.sp,
+                                                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                                                    color = NeonCyan,
+                                                    modifier = Modifier.padding(8.dp)
+                                                )
+                                            }
+                                        }
+                                    },
+                                    confirmButton = {
+                                        Button(
+                                            onClick = { previousCrashLog = null },
+                                            colors = ButtonDefaults.buttonColors(containerColor = RubyDark)
+                                        ) {
+                                            Text("Dismiss & Play")
+                                        }
+                                    },
+                                    containerColor = MinimalSurfaceElevated,
+                                    shape = RoundedCornerShape(20.dp)
+                                )
+                            }
+
+                            // System Back Button Handling
+                            BackHandler(enabled = true) {
+                                when {
+                                    showAppExitConfirm -> showAppExitConfirm = false
+                                    showHowToPlay -> showHowToPlay = false
+                                    uiState.gameState != GameState.HOME -> {
+                                        viewModel.returnToHome()
+                                    }
+                                    else -> {
+                                        showAppExitConfirm = true
+                                    }
                                 }
                             }
-                        }
 
-                        if (uiState.gameState == GameState.HOME) {
-                            HomeScreen(
-                                stats = stats,
-                                settings = settings,
-                                isDailyCompleted = uiState.isDailyCompletedToday,
-                                isLuckySpinCompleted = uiState.isLuckySpinCompletedToday,
-                                onSpinClaimed = { rewardType -> viewModel.spinLuckyWheel(rewardType) },
-                                onStartGame = { mode -> viewModel.startGame(mode) },
-                                onOpenHowToPlay = { showHowToPlay = true },
-                                onSelectCupTheme = { theme -> viewModel.selectCupTheme(theme) },
-                                onSelectCoinTheme = { theme -> viewModel.selectCoinTheme(theme) },
-                                onSelectShuffleTheme = { theme -> viewModel.selectShuffleTheme(theme) },
-                                onToggleSound = { viewModel.toggleSound() },
-                                onToggleVibration = { viewModel.toggleVibration() },
-                                onToggleReducedMotion = { viewModel.toggleReducedMotion() },
-                                onAppThemeChange = { theme -> viewModel.selectAppTheme(theme) },
-                                onResetProgress = { viewModel.resetProgress() },
-                                onPlaySound = { sound ->
-                                    when (sound) {
-                                        "tab" -> viewModel.audioEngine.playTabSwitch()
-                                        "unlock" -> viewModel.audioEngine.playThemeUnlock()
-                                        "tap" -> viewModel.audioEngine.playTap()
-                                        "lose" -> viewModel.audioEngine.playLose()
-                                        "jackpot" -> viewModel.audioEngine.playJackpot()
-                                    }
-                                }
-                            )
-                        } else {
-                            GameScreen(
-                                uiState = uiState,
-                                settings = settings,
-                                stats = stats,
-                                onCupSelected = { slotIndex -> viewModel.onCupSelected(slotIndex) },
-                                onNextRound = { viewModel.nextRound() },
-                                onRetryRound = { viewModel.retryRound() },
-                                onRestartGame = { viewModel.restartCurrentGame() },
-                                onReturnToHome = { viewModel.returnToHome() },
-                                onToggleSound = { viewModel.toggleSound() }
-                            )
-                        }
-
-                        // Full Screen Modals
-                        if (showHowToPlay) {
-                            HowToPlayFullScreen(onDismiss = { showHowToPlay = false })
-                        }
-
-                        // App Exit Confirmation Dialog (3D Frosted Theme)
-                        if (showAppExitConfirm) {
-                            AlertDialog(
-                                onDismissRequest = { showAppExitConfirm = false },
-                                icon = {
-                                    Surface(
-                                        shape = CircleShape,
-                                        color = RubyRed.copy(alpha = 0.2f),
-                                        modifier = Modifier.size(52.dp)
-                                    ) {
-                                        Box(contentAlignment = Alignment.Center) {
-                                            Icon(
-                                                imageVector = Icons.Default.ExitToApp,
-                                                contentDescription = null,
-                                                tint = RubyRed,
-                                                modifier = Modifier.size(28.dp)
-                                            )
+                            if (uiState.gameState == GameState.HOME) {
+                                HomeScreen(
+                                    stats = stats,
+                                    settings = settings,
+                                    isDailyCompleted = uiState.isDailyCompletedToday,
+                                    isLuckySpinCompleted = uiState.isLuckySpinCompletedToday,
+                                    onSpinClaimed = { rewardType -> viewModel.spinLuckyWheel(rewardType) },
+                                    onStartGame = { mode -> viewModel.startGame(mode) },
+                                    onOpenHowToPlay = { showHowToPlay = true },
+                                    onSelectCupTheme = { theme -> viewModel.selectCupTheme(theme) },
+                                    onSelectCoinTheme = { theme -> viewModel.selectCoinTheme(theme) },
+                                    onSelectShuffleTheme = { theme -> viewModel.selectShuffleTheme(theme) },
+                                    onToggleSound = { viewModel.toggleSound() },
+                                    onToggleVibration = { viewModel.toggleVibration() },
+                                    onToggleReducedMotion = { viewModel.toggleReducedMotion() },
+                                    onAppThemeChange = { theme -> viewModel.selectAppTheme(theme) },
+                                    onResetProgress = { viewModel.resetProgress() },
+                                    onPlaySound = { sound ->
+                                        when (sound) {
+                                            "tab" -> viewModel.audioEngine.playTabSwitch()
+                                            "unlock" -> viewModel.audioEngine.playThemeUnlock()
+                                            "tap" -> viewModel.audioEngine.playTap()
+                                            "lose" -> viewModel.audioEngine.playLose()
+                                            "win" -> viewModel.audioEngine.playWin()
+                                            "reward", "bonus" -> viewModel.audioEngine.playRewardClaim()
+                                            "jackpot" -> viewModel.audioEngine.playJackpot()
+                                            "wheel_tick" -> viewModel.audioEngine.playWheelTick()
+                                            "coin" -> viewModel.audioEngine.playCoinCollect()
+                                            "shuffle" -> viewModel.audioEngine.playShuffle()
                                         }
                                     }
-                                },
-                                title = {
-                                    Text(
-                                        text = "Exit Cup & Coin?",
-                                        fontWeight = FontWeight.Black,
-                                        fontSize = 20.sp,
-                                        color = Color.White,
-                                        textAlign = TextAlign.Center
-                                    )
-                                },
-                                text = {
-                                    Text(
-                                        text = "Are you sure you want to exit the application? Your career stats and unlocked themes are safely saved.",
-                                        fontSize = 14.sp,
-                                        color = Color.White.copy(alpha = 0.75f),
-                                        textAlign = TextAlign.Center,
-                                        lineHeight = 20.sp
-                                    )
-                                },
-                                confirmButton = {
-                                    Button(
-                                        onClick = {
-                                            showAppExitConfirm = false
-                                            finish()
-                                        },
-                                        colors = ButtonDefaults.buttonColors(containerColor = RubyDark),
-                                        shape = RoundedCornerShape(14.dp),
-                                        modifier = Modifier.height(48.dp)
-                                    ) {
-                                        Text("Yes, Exit", fontWeight = FontWeight.Bold, color = Color.White)
-                                    }
-                                },
-                                dismissButton = {
-                                    OutlinedButton(
-                                        onClick = { showAppExitConfirm = false },
-                                        shape = RoundedCornerShape(14.dp),
-                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = LavenderAccent),
-                                        border = ButtonDefaults.outlinedButtonBorder().copy(
-                                            brush = Brush.linearGradient(listOf(LavenderAccent, LavenderAccent))
-                                        ),
-                                        modifier = Modifier.height(48.dp)
-                                    ) {
-                                        Text("Stay & Play", fontWeight = FontWeight.Bold)
-                                    }
-                                },
-                                containerColor = MinimalSurfaceElevated,
-                                shape = RoundedCornerShape(24.dp)
-                            )
+                                )
+                            } else {
+                                GameScreen(
+                                    uiState = uiState,
+                                    settings = settings,
+                                    stats = stats,
+                                    onCupSelected = { slotIndex -> viewModel.onCupSelected(slotIndex) },
+                                    onNextRound = { viewModel.nextRound() },
+                                    onRetryRound = { viewModel.retryRound() },
+                                    onRestartGame = { viewModel.restartCurrentGame() },
+                                    onReturnToHome = { viewModel.returnToHome() },
+                                    onToggleSound = { viewModel.toggleSound() }
+                                )
+                            }
+
+                            // Full Screen Modals
+                            if (showHowToPlay) {
+                                HowToPlayFullScreen(onDismiss = { showHowToPlay = false })
+                            }
+
+                            // App Exit Confirmation Dialog (3D Frosted Theme)
+                            if (showAppExitConfirm) {
+                                AlertDialog(
+                                    onDismissRequest = { showAppExitConfirm = false },
+                                    icon = {
+                                        Surface(
+                                            shape = CircleShape,
+                                            color = RubyRed.copy(alpha = 0.2f),
+                                            modifier = Modifier.size(52.dp)
+                                        ) {
+                                            Box(contentAlignment = Alignment.Center) {
+                                                Icon(
+                                                    imageVector = Icons.Default.ExitToApp,
+                                                    contentDescription = null,
+                                                    tint = RubyRed,
+                                                    modifier = Modifier.size(28.dp)
+                                                )
+                                            }
+                                        }
+                                    },
+                                    title = {
+                                        Text(
+                                            text = "Exit Cup & Coin?",
+                                            fontWeight = FontWeight.Black,
+                                            fontSize = 20.sp,
+                                            color = Color.White,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    },
+                                    text = {
+                                        Text(
+                                            text = "Are you sure you want to exit the application? Your career stats and unlocked themes are safely saved.",
+                                            fontSize = 14.sp,
+                                            color = Color.White.copy(alpha = 0.75f),
+                                            textAlign = TextAlign.Center,
+                                            lineHeight = 20.sp
+                                        )
+                                    },
+                                    confirmButton = {
+                                        Button(
+                                            onClick = {
+                                                showAppExitConfirm = false
+                                                finish()
+                                            },
+                                            colors = ButtonDefaults.buttonColors(containerColor = RubyDark),
+                                            shape = RoundedCornerShape(14.dp),
+                                            modifier = Modifier.height(48.dp)
+                                        ) {
+                                            Text("Yes, Exit", fontWeight = FontWeight.Bold, color = Color.White)
+                                        }
+                                    },
+                                    dismissButton = {
+                                        OutlinedButton(
+                                            onClick = { showAppExitConfirm = false },
+                                            shape = RoundedCornerShape(14.dp),
+                                            colors = ButtonDefaults.outlinedButtonColors(contentColor = LavenderAccent),
+                                            border = ButtonDefaults.outlinedButtonBorder().copy(
+                                                brush = Brush.linearGradient(listOf(LavenderAccent, LavenderAccent))
+                                            ),
+                                            modifier = Modifier.height(48.dp)
+                                        ) {
+                                            Text("Stay & Play", fontWeight = FontWeight.Bold)
+                                        }
+                                    },
+                                    containerColor = MinimalSurfaceElevated,
+                                    shape = RoundedCornerShape(24.dp)
+                                )
+                            }
                         }
                     }
                 }

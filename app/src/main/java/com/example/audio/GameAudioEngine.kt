@@ -8,11 +8,14 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.speech.tts.TextToSpeech
 import com.example.model.GameMode
+import com.example.util.DebugLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Locale
 import kotlin.math.PI
 import kotlin.math.exp
 import kotlin.math.sin
@@ -22,6 +25,9 @@ class GameAudioEngine(private val context: Context) {
 
     var isSoundEnabled: Boolean = true
     var isVibrationEnabled: Boolean = true
+
+    private var tts: TextToSpeech? = null
+    private var isTtsReady = false
 
     private val vibrator: Vibrator? by lazy {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -33,16 +39,89 @@ class GameAudioEngine(private val context: Context) {
         }
     }
 
-    private val sampleRate = 44100
+    private val sampleRate = 22050
+    private var sharedTrack: AudioTrack? = null
+    private val audioLock = Any()
+
+    init {
+        initSharedTrack()
+        initTextToSpeech()
+    }
+
+    private fun initTextToSpeech() {
+        try {
+            tts = TextToSpeech(context.applicationContext) { status ->
+                if (status == TextToSpeech.SUCCESS) {
+                    val result = tts?.setLanguage(Locale.US)
+                    if (result != TextToSpeech.LANG_MISSING_DATA && result != TextToSpeech.LANG_NOT_SUPPORTED) {
+                        isTtsReady = true
+                    }
+                }
+            }
+        } catch (_: Throwable) {
+            tts = null
+        }
+    }
+
+    fun speakVoice(text: String, pitch: Float = 1.0f, speechRate: Float = 1.0f) {
+        if (!isSoundEnabled) return
+        try {
+            if (isTtsReady && tts != null) {
+                tts?.setPitch(pitch)
+                tts?.setSpeechRate(speechRate)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "GameVoice_${System.currentTimeMillis()}")
+                } else {
+                    @Suppress("DEPRECATION")
+                    tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null)
+                }
+            }
+        } catch (_: Throwable) {}
+    }
+
+    private fun initSharedTrack() {
+        try {
+            val minBuf = AudioTrack.getMinBufferSize(
+                sampleRate,
+                AudioFormat.CHANNEL_OUT_MONO,
+                AudioFormat.ENCODING_PCM_16BIT
+            ).coerceAtLeast(sampleRate * 2)
+
+            sharedTrack = AudioTrack.Builder()
+                .setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_GAME)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                )
+                .setAudioFormat(
+                    AudioFormat.Builder()
+                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                        .setSampleRate(sampleRate)
+                        .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                        .build()
+                )
+                .setBufferSizeInBytes(minBuf)
+                .setTransferMode(AudioTrack.MODE_STREAM)
+                .build()
+
+            if (sharedTrack?.state == AudioTrack.STATE_INITIALIZED) {
+                sharedTrack?.play()
+            }
+        } catch (_: Throwable) {
+            sharedTrack = null
+        }
+    }
 
     /**
-     * Synthesizes audio samples in real-time and streams via AudioTrack
+     * Synthesizes audio samples in real-time and streams via reusable AudioTrack
      */
     private fun playTone(
         durationSec: Double,
         generator: (timeSec: Double) -> Double
     ) {
         if (!isSoundEnabled) return
+
         scope.launch {
             try {
                 val numSamples = (durationSec * sampleRate).toInt().coerceAtLeast(1)
@@ -53,43 +132,21 @@ class GameAudioEngine(private val context: Context) {
                     samples[i] = (sampleValue * Short.MAX_VALUE).toInt().toShort()
                 }
 
-                val bufferSize = AudioTrack.getMinBufferSize(
-                    sampleRate,
-                    AudioFormat.CHANNEL_OUT_MONO,
-                    AudioFormat.ENCODING_PCM_16BIT
-                ).coerceAtLeast(samples.size * 2)
-
-                val audioTrack = AudioTrack.Builder()
-                    .setAudioAttributes(
-                        AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_GAME)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                            .build()
-                    )
-                    .setAudioFormat(
-                        AudioFormat.Builder()
-                            .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                            .setSampleRate(sampleRate)
-                            .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
-                            .build()
-                    )
-                    .setBufferSizeInBytes(bufferSize)
-                    .setTransferMode(AudioTrack.MODE_STATIC)
-                    .build()
-
-                audioTrack.write(samples, 0, samples.size)
-                audioTrack.play()
-
-                // Release track safely after playback completes
-                launch {
-                    delay((durationSec * 1000).toLong() + 120)
-                    try {
-                        audioTrack.stop()
-                        audioTrack.release()
-                    } catch (_: Exception) {}
+                synchronized(audioLock) {
+                    var track = sharedTrack
+                    if (track == null || track.state != AudioTrack.STATE_INITIALIZED) {
+                        initSharedTrack()
+                        track = sharedTrack
+                    }
+                    if (track != null && track.state == AudioTrack.STATE_INITIALIZED) {
+                        if (track.playState != AudioTrack.PLAYSTATE_PLAYING) {
+                            try { track.play() } catch (_: Throwable) {}
+                        }
+                        track.write(samples, 0, samples.size)
+                    }
                 }
-            } catch (_: Exception) {
-                // Safe audio generation fallback
+            } catch (_: Throwable) {
+                // Ignore any audio error safely
             }
         }
     }
@@ -169,6 +226,8 @@ class GameAudioEngine(private val context: Context) {
     // ==========================================
 
     fun playWin(mode: GameMode = GameMode.CLASSIC) {
+        DebugLogger.i("AUDIO", "playWin called for mode=$mode")
+        speakVoice("You Win!", pitch = 1.15f, speechRate = 1.05f)
         when (mode) {
             GameMode.CLASSIC -> {
                 // Triumphant Warm Brass Fanfare Progression (C5 -> E5 -> G5 -> C6)
@@ -252,6 +311,8 @@ class GameAudioEngine(private val context: Context) {
     // ==========================================
 
     fun playLose(mode: GameMode = GameMode.CLASSIC) {
+        DebugLogger.i("AUDIO", "playLose called for mode=$mode")
+        speakVoice("You Lose!", pitch = 0.85f, speechRate = 0.95f)
         when (mode) {
             GameMode.CLASSIC -> {
                 // Smooth Acoustic Descending Minor Glissando
@@ -414,6 +475,43 @@ class GameAudioEngine(private val context: Context) {
             sin(2.0 * PI * 1200.0 * t) * env * 0.3
         }
         triggerVibrate(8, 30)
+    }
+
+    fun playRewardClaim() {
+        speakVoice("Claim Your Bonus!", pitch = 1.1f, speechRate = 1.0f)
+        // Triumphant bonus reward claim fanfare ("Claim Your Bonus!")
+        playTone(0.75) { t ->
+            val env = exp(-t * 3.0)
+            val step = (t * 6.0).toInt()
+            val freqs = doubleArrayOf(587.33, 739.99, 880.0, 1174.66, 1479.98, 1760.0) // D5, F#5, A5, D6, F#6, A6
+            val f = if (step < freqs.size) freqs[step] else freqs.last()
+            val chime = sin(2.0 * PI * f * t) + sin(2.0 * PI * (f * 1.5) * t) * 0.3
+            chime * env * 0.4
+        }
+        triggerPatternVibrate(longArrayOf(0, 40, 40, 40, 40, 120))
+    }
+
+    fun playWheelTick() {
+        // Authentic wooden peg ticking sound matching lucky wheel spin speed
+        playTone(0.025) { t ->
+            val env = exp(-t * 180.0)
+            val click = sin(2.0 * PI * 1400.0 * t) * 0.5 + sin(2.0 * PI * 420.0 * t) * 0.3
+            click * env * 0.45
+        }
+        triggerVibrate(6, 40)
+    }
+
+    fun playCoinCollect() {
+        // Crisp coin collection chime
+        playTone(0.3) { t ->
+            val env = exp(-t * 10.0)
+            val f1 = 987.77 // B5
+            val f2 = 1318.5 // E6
+            val s1 = sin(2.0 * PI * f1 * t)
+            val s2 = if (t >= 0.08) sin(2.0 * PI * f2 * (t - 0.08)) * exp(-(t - 0.08) * 10.0) else 0.0
+            (s1 + s2) * env * 0.4
+        }
+        triggerVibrate(20, 80)
     }
 
     private fun triggerVibrate(durationMs: Long, amplitude: Int = 100) {

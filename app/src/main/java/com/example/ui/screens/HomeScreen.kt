@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.model.*
@@ -432,7 +433,7 @@ fun HomeScreen(
                 completedDates = stats.completedDailyDates,
                 dailyStreak = stats.dailyStreak,
                 onPlayToday = {
-                    onPlaySound("jackpot")
+                    onPlaySound("reward")
                     showDailyChallengeDialog = false
                     onStartGame(GameMode.DAILY_CHALLENGE)
                 },
@@ -531,7 +532,7 @@ fun HomeTabContent(
                     ) {
                         Text("🏆", fontSize = 11.sp)
                         Text(
-                            text = String.format("%,d", stats.bestScore),
+                            text = String.format(java.util.Locale.US, "%,d", stats.bestScore),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Black,
                             color = GoldAccent
@@ -590,7 +591,7 @@ fun HomeTabContent(
                 ) {
                     BestStatCard(
                         label = "BEST SCORE",
-                        value = String.format("%,d", stats.bestScore),
+                        value = String.format(java.util.Locale.US, "%,d", stats.bestScore),
                         icon = Icons.Default.EmojiEvents,
                         iconColor = GoldAccent,
                         modifier = Modifier.weight(1f)
@@ -2793,7 +2794,9 @@ fun TodayChallengeCard(
                     Text(
                         text = if (isCompleted) "Challenge completed! ✓" else "One puzzle. One chance.",
                         fontSize = 12.sp,
-                        color = Color.White.copy(alpha = 0.75f)
+                        color = Color.White.copy(alpha = 0.75f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
@@ -3193,11 +3196,11 @@ fun LuckySpinWheelCard(
                         if (isCompleted) {
                             Box(
                                 modifier = Modifier
-                                    .background(Color.White.copy(alpha = 0.12f), RoundedCornerShape(6.dp))
-                                    .border(0.5.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(6.dp))
+                                    .background(EmeraldGreen.copy(alpha = 0.15f), RoundedCornerShape(6.dp))
+                                    .border(0.5.dp, EmeraldGreen.copy(alpha = 0.5f), RoundedCornerShape(6.dp))
                                     .padding(horizontal = 6.dp, vertical = 2.dp)
                             ) {
-                                Text("COMPLETED", color = Color.White.copy(alpha = 0.7f), fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                Text("DONE ✓", color = EmeraldGreen, fontSize = 8.sp, fontWeight = FontWeight.Bold, maxLines = 1)
                             }
                         } else {
                             Box(
@@ -3206,19 +3209,21 @@ fun LuckySpinWheelCard(
                                     .border(1.dp, cyanAccent.copy(alpha = 0.6f), RoundedCornerShape(6.dp))
                                     .padding(horizontal = 6.dp, vertical = 2.dp)
                             ) {
-                                Text("READY", color = cyanAccent, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                Text("READY", color = cyanAccent, fontSize = 8.sp, fontWeight = FontWeight.Bold, maxLines = 1)
                             }
                         }
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = if (isCompleted) 
-                            "Spun! Active Shields: ${stats.shieldCount} 🛡️ | 2X Multi: ${if (stats.doubleScoreActive) "Active 🔥" else "Inactive"}"
-                            else "Win free Endless Mode Shields & 2X Score Multipliers!",
+                            "Spun! Shields: ${stats.shieldCount} 🛡️ • Multiplier Active 🔥"
+                            else "Win free Endless Mode Shields & 2X Multipliers!",
                         fontSize = 11.sp,
-                        color = Color.White.copy(alpha = 0.8f), // Clearer color
+                        color = Color.White.copy(alpha = 0.8f),
                         lineHeight = 14.sp,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }

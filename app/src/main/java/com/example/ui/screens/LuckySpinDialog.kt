@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -105,10 +106,11 @@ fun LuckySpinDialog(
             val degreesPerSegment = 360f / segments.size
             val normalizedAngle = (finalValue % 360f + 360f) % 360f
             val pointerOffsetAngle = (270f - normalizedAngle + 360f) % 360f
-            val hitIndex = (pointerOffsetAngle / degreesPerSegment).toInt() % segments.size
-            selectedSegmentIndex = hitIndex
+            val rawHit = (pointerOffsetAngle / degreesPerSegment).toInt()
+            val hitIndex = ((rawHit % segments.size) + segments.size) % segments.size
+            selectedSegmentIndex = hitIndex.coerceIn(0, segments.lastIndex)
             showRewardDialog = true
-            onPlaySound("unlock")
+            onPlaySound("reward")
         }
     }
 
@@ -476,24 +478,27 @@ fun LuckySpinDialog(
                     // ═══════════════════════════════════════════
                     if (isCompletedToday && !showRewardDialog) {
                         Surface(
-                            shape = RoundedCornerShape(18.dp),
-                            color = Color.White.copy(alpha = 0.06f),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.12f)),
+                            shape = RoundedCornerShape(16.dp),
+                            color = EmeraldGreen.copy(alpha = 0.12f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, EmeraldGreen.copy(alpha = 0.4f)),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(52.dp)
+                                .height(46.dp)
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
+                            Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 12.dp)) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
-                                    Text("✓", color = EmeraldGreen, fontWeight = FontWeight.Black)
+                                    Text("✓", color = EmeraldGreen, fontWeight = FontWeight.Black, fontSize = 14.sp)
                                     Text(
-                                        "SPIN COMPLETED TODAY (COME BACK TOMORROW)",
-                                        color = Color.White.copy(alpha = 0.6f),
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Bold
+                                        text = "SPIN COMPLETED TODAY",
+                                        color = Color.White,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        letterSpacing = 0.5.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
                             }
@@ -555,7 +560,7 @@ fun LuckySpinDialog(
                                                 val delayTime = (tick * tick * 4L).coerceIn(40L, 340L)
                                                 delay(delayTime)
                                                 pegNeedleVibration = if (tick % 2 == 0) 12f else -12f
-                                                onPlaySound("tap")
+                                                onPlaySound("wheel_tick")
                                             }
                                             pegNeedleVibration = 0f
                                         }
@@ -589,7 +594,7 @@ fun LuckySpinDialog(
             // REWARD NOTIFICATION OVERLAY DIALOG
             // ═══════════════════════════════════════════
             if (showRewardDialog) {
-                val winningSegment = segments[selectedSegmentIndex]
+                val winningSegment = segments.getOrElse(selectedSegmentIndex.coerceIn(0, segments.lastIndex)) { segments.first() }
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -692,6 +697,7 @@ fun LuckySpinDialog(
 
                             Button(
                                 onClick = {
+                                    onPlaySound("coin")
                                     showRewardDialog = false
                                     onSpinClaimed(winningSegment.rewardType)
                                     onDismiss()

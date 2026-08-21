@@ -83,8 +83,10 @@ fun ParticleBurst(
                     // Left bottom corner shooting up-right towards center
                     startX = 0.02f
                     startY = 0.95f
-                    // Angle between -15 and -65 degrees (in radians: -0.08 to -0.36 * PI)
-                    val angle = Random.nextDouble(-0.08 * Math.PI, -0.36 * Math.PI)
+                    // Angle between -15 and -65 degrees (in radians: -0.36 * PI to -0.08 * PI)
+                    val angle = try {
+                        Random.nextDouble(-0.36 * Math.PI, -0.08 * Math.PI)
+                    } catch (_: Throwable) { -0.2 * Math.PI }
                     val speed = Random.nextFloat() * 1200f + 800f
                     vx = (cos(angle) * speed).toFloat()
                     vy = (sin(angle) * speed).toFloat()
@@ -93,8 +95,10 @@ fun ParticleBurst(
                     // Right bottom corner shooting up-left towards center
                     startX = 0.98f
                     startY = 0.95f
-                    // Angle between -115 and -165 degrees (in radians: -0.64 to -0.92 * PI)
-                    val angle = Random.nextDouble(-0.64 * Math.PI, -0.92 * Math.PI)
+                    // Angle between -115 and -165 degrees (in radians: -0.92 * PI to -0.64 * PI)
+                    val angle = try {
+                        Random.nextDouble(-0.92 * Math.PI, -0.64 * Math.PI)
+                    } catch (_: Throwable) { -0.8 * Math.PI }
                     val speed = Random.nextFloat() * 1200f + 800f
                     vx = (cos(angle) * speed).toFloat()
                     vy = (sin(angle) * speed).toFloat()

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.audio.GameAudioEngine
 import com.example.data.GameRepository
 import com.example.model.*
+import com.example.util.DebugLogger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -76,6 +77,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private var timerJob: Job? = null
     private var dailyChallengeTimerJob: Job? = null
     private var gameLoopJob: Job? = null
+    private var selectCupJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -93,7 +95,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun startGame(mode: GameMode) {
+        DebugLogger.i("GAME_VM", "startGame requested for mode=$mode")
         audioEngine.playTap()
+        selectCupJob?.cancel()
         gameLoopJob?.cancel()
         timerJob?.cancel()
 
@@ -130,6 +134,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 cupOffsetYs = List(cupCount) { 0f },
                 cupTilts = List(cupCount) { 0f },
                 activeSwapPair = null,
+                currentSwap = null,
+                isShuffling = false,
                 roundScoreEarned = 0,
                 roundMultiplierEarned = 1.0f
             )
@@ -140,6 +146,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     fun nextRound() {
         audioEngine.playTap()
+        selectCupJob?.cancel()
         val currentMode = _uiState.value.gameMode
         val currentLevel = _uiState.value.currentLevel
 
@@ -169,6 +176,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 cupOffsetYs = List(cupCount) { 0f },
                 cupTilts = List(cupCount) { 0f },
                 activeSwapPair = null,
+                currentSwap = null,
+                isShuffling = false,
                 roundScoreEarned = 0
             )
         }
@@ -180,15 +189,20 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     fun retryRound() {
         audioEngine.playTap()
+        selectCupJob?.cancel()
+        val cupCount = _uiState.value.cupCount
         _uiState.update {
             it.copy(
                 gameState = GameState.SHOW_COIN,
                 selectedSlotIndex = null,
                 isRevealingWinningSlot = false,
-                cupOffsetXs = listOf(0f, 0f, 0f),
-                cupOffsetYs = listOf(0f, 0f, 0f),
-                cupTilts = listOf(0f, 0f, 0f),
+                cupLiftAmounts = List(cupCount) { 0f },
+                cupOffsetXs = List(cupCount) { 0f },
+                cupOffsetYs = List(cupCount) { 0f },
+                cupTilts = List(cupCount) { 0f },
                 activeSwapPair = null,
+                currentSwap = null,
+                isShuffling = false,
                 roundScoreEarned = 0
             )
         }
@@ -201,11 +215,16 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     fun returnToHome() {
         audioEngine.playTap()
+        selectCupJob?.cancel()
         gameLoopJob?.cancel()
         timerJob?.cancel()
         _uiState.update {
             it.copy(
                 gameState = GameState.HOME,
+                selectedSlotIndex = null,
+                isShuffling = false,
+                activeSwapPair = null,
+                currentSwap = null,
                 isDailyCompletedToday = repository.isDailyChallengeCompletedToday()
             )
         }
@@ -234,9 +253,16 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             val mode = currentState.gameMode
             val cupCount = currentState.cupCount
 
-            // If retry, keep exact same winning coin slot so the coin stays in the same box!
+            // If retry, randomize a fresh coin slot different from previous slot
             val initialCoinSlot = when {
-                isRetry -> currentState.coinSlotIndex
+                isRetry -> {
+                    val prevSlot = currentState.coinSlotIndex
+                    var newSlot = kotlin.random.Random.nextInt(cupCount)
+                    if (cupCount > 1 && newSlot == prevSlot) {
+                        newSlot = (prevSlot + 1) % cupCount
+                    }
+                    newSlot
+                }
                 mode == GameMode.TUTORIAL -> when (level) {
                     1 -> 1 // Middle cup for first tutorial step
                     2 -> 0 // Left cup for second tutorial step
@@ -304,7 +330,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             // Step: Drop cup to cover coin
             _uiState.update {
                 it.copy(
-                    cupLiftAmounts = listOf(0f, 0f, 0f),
+                    cupLiftAmounts = List(cupCount) { 0f },
                     roundStatusText = if (mode == GameMode.TUTORIAL) "PREPARE TO TRACK..." else "GET READY..."
                 )
             }
@@ -540,11 +566,18 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         var lastPair: Pair<Int, Int>? = null
+        var currentCoinTracking = initialCoin
 
         for (i in 0 until swapCount) {
             // Pick a pair that isn't identical to the immediately preceding one
             val availablePairs = pairs.filter { it != lastPair }
-            val chosenPair = availablePairs[rnd.nextInt(availablePairs.size)]
+            val chosenPair = if (availablePairs.isNotEmpty()) {
+                availablePairs[rnd.nextInt(availablePairs.size)]
+            } else if (pairs.isNotEmpty()) {
+                pairs[rnd.nextInt(pairs.size)]
+            } else {
+                0 to 1
+            }
             lastPair = chosenPair
 
             // Add occasional fake shake on higher levels (>10)
@@ -570,6 +603,26 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                     durationMs = varDuration,
                     isFakeShake = false,
                     arcHeightRatio = arcDir
+                )
+            )
+
+            currentCoinTracking = when (currentCoinTracking) {
+                chosenPair.first -> chosenPair.second
+                chosenPair.second -> chosenPair.first
+                else -> currentCoinTracking
+            }
+        }
+
+        // Guarantee coin finishes in a shuffled position different from starting position
+        if (currentCoinTracking == initialCoin && cupCount > 1) {
+            val altCup = (initialCoin + 1) % cupCount
+            moves.add(
+                SwapMove(
+                    cup1 = initialCoin,
+                    cup2 = altCup,
+                    durationMs = baseDurationMs,
+                    isFakeShake = false,
+                    arcHeightRatio = 0.35f
                 )
             )
         }
@@ -601,15 +654,39 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     fun onCupSelected(slotIndex: Int, isTimeout: Boolean = false) {
         val currentState = _uiState.value
-        if (!currentState.isInputAllowed && !isTimeout) return
-        if (currentState.gameState != GameState.WAITING_FOR_GUESS) return
+        DebugLogger.d("GAME_VM", "onCupSelected: slotIndex=$slotIndex, isTimeout=$isTimeout, isInputAllowed=${currentState.isInputAllowed}, gameState=${currentState.gameState}")
+        if (!currentState.isInputAllowed && !isTimeout) {
+            DebugLogger.w("GAME_VM", "onCupSelected IGNORED: input not allowed")
+            return
+        }
+        if (currentState.gameState != GameState.WAITING_FOR_GUESS) {
+            DebugLogger.w("GAME_VM", "onCupSelected IGNORED: wrong gameState (${currentState.gameState})")
+            return
+        }
+        if (selectCupJob?.isActive == true) {
+            DebugLogger.w("GAME_VM", "onCupSelected IGNORED: selectCupJob already active")
+            return
+        }
 
         timerJob?.cancel()
+        selectCupJob?.cancel()
         audioEngine.playTap()
 
-        val isWin = slotIndex == currentState.coinSlotIndex && !isTimeout
+        val cupCount = currentState.cupCount
+        val safeSlotIndex = if (slotIndex in 0 until cupCount) slotIndex else -1
+        val winningSlot = (currentState.coinSlotIndex % cupCount).coerceAtLeast(0)
+        val isWin = safeSlotIndex == winningSlot && !isTimeout
         val mode = currentState.gameMode
         val level = currentState.currentLevel
+
+        DebugLogger.i("GAME_RESULT", "Tapped Slot: $safeSlotIndex | Winning Slot: $winningSlot | Mode: $mode | Level: $level | Result: ${if (isWin) "WIN 🏆" else "LOSE ❌"}")
+
+        // Synchronously update UI state immediately to REVEALING and set selectedSlotIndex.
+        // This IMMEDIATELY sets isInputAllowed = false so no rapid duplicate taps can execute.
+        val initialLifts = MutableList(cupCount) { 0f }
+        if (safeSlotIndex in 0 until cupCount) {
+            initialLifts[safeSlotIndex] = 1f
+        }
 
         // Mode specific scoring and streak logic
         var newCombo = currentState.combo
@@ -650,7 +727,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             }
             // Time Attack penalty
             if (mode == GameMode.TIME_ATTACK) {
-                // Deduct 3 seconds
                 _uiState.update { it.copy(timeAttackRemainingSec = (it.timeAttackRemainingSec - 3f).coerceAtLeast(0f)) }
             }
             
@@ -662,21 +738,24 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
-        viewModelScope.launch {
-            // Lift the selected cup (or timeout auto-reveal)
-            val lifts = MutableList(currentState.cupCount) { 0f }
-            if (slotIndex in 0 until currentState.cupCount) {
-                lifts[slotIndex] = 1f
-            }
+        _uiState.update {
+            it.copy(
+                gameState = GameState.REVEALING,
+                selectedSlotIndex = if (safeSlotIndex in 0 until cupCount) safeSlotIndex else null,
+                cupLiftAmounts = initialLifts,
+                roundStatusText = if (isWin) "YOU FOUND IT! 🎉" else if (isTimeout) "TIME EXPIRED! ⏱️" else "REVEALING... 🪙"
+            )
+        }
 
+        selectCupJob = viewModelScope.launch {
             if (isWin) {
                 audioEngine.playWin(mode)
+                delay(120)
+                audioEngine.playCoinCollect()
                 if (newWinStreak >= 2) {
                     delay(150)
                     audioEngine.playComboMultiplier()
                 }
-            } else {
-                audioEngine.playLose(mode)
             }
 
             val resultTitle = when {
@@ -708,14 +787,14 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 isWin -> "+$roundScore PTS Earned • Great guess!"
                 isShieldUsed -> "Shield protected your streak! Safe to continue."
                 isGameOver -> "Final Score: $score • Reached Level $level"
-                else -> "The coin was under Cup ${currentState.coinSlotIndex + 1}"
+                else -> "The coin was under Cup ${winningSlot + 1}"
             }
 
             _uiState.update {
                 it.copy(
                     gameState = if (isGameOver) GameState.GAME_OVER else (if (isWin) GameState.WIN else GameState.LOSE),
-                    selectedSlotIndex = if (slotIndex in 0 until currentState.cupCount) slotIndex else null,
-                    cupLiftAmounts = lifts,
+                    selectedSlotIndex = if (safeSlotIndex in 0 until cupCount) safeSlotIndex else null,
+                    cupLiftAmounts = initialLifts,
                     combo = newCombo,
                     perfectStreak = newPerfectStreak,
                     winStreak = newWinStreak,
@@ -732,9 +811,21 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                         isWin && newWinStreak >= 2 -> "🔥 ${newWinStreak}X STREAK! +$roundScore PTS"
                         isWin -> "YOU FOUND IT! 🎉" 
                         isTimeout -> "TIME EXPIRED! ⏱️" 
-                        else -> "MISS! ❌"
+                        else -> "THE COIN WAS HERE! 🪙"
                     }
                 )
+            }
+
+            // If user lost, reveal the actual winning cup after a brief suspense pause!
+            if (!isWin) {
+                delay(350)
+                audioEngine.playLose(mode)
+                val revealLifts = initialLifts.toMutableList()
+                if (winningSlot in 0 until cupCount) {
+                    revealLifts[winningSlot] = 1f
+                }
+                _uiState.update { it.copy(cupLiftAmounts = revealLifts) }
+                audioEngine.playCoinReveal()
             }
             
             if (isWin && mode == GameMode.TIME_ATTACK) {
@@ -808,7 +899,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     fun spinLuckyWheel(rewardType: String) {
         repository.recordLuckySpin(rewardType)
         _uiState.update { it.copy(isLuckySpinCompletedToday = true) }
-        audioEngine.playCoinReveal()
+        audioEngine.playRewardClaim()
     }
 
     fun resetProgress() {

@@ -870,7 +870,7 @@ private fun ClassicHeroWidget(
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
-                text = "${String.format("%.1f", uiState.streakMultiplier)}x",
+                text = "${String.format(Locale.US, "%.1f", uiState.streakMultiplier)}x",
                 fontSize = 38.sp,
                 fontWeight = FontWeight.Black,
                 color = if (uiState.winStreak >= 2) visualTheme.secondaryAccent else Color.White,
@@ -949,7 +949,7 @@ private fun TimeAttackHeroWidget(
             }
 
             Text(
-                text = String.format("%.2fs", remainingSec),
+                text = String.format(Locale.US, "%.2fs", remainingSec),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Black,
                 color = timerColor,
@@ -1110,7 +1110,7 @@ private fun PerfectRunHeroWidget(
                 border = BorderStroke(1.dp, visualTheme.primaryAccent.copy(alpha = 0.4f))
             ) {
                 Text(
-                    text = "${String.format("%.1f", multiplier)}x BOOST",
+                    text = "${String.format(Locale.US, "%.1f", multiplier)}x BOOST",
                     fontSize = 9.sp,
                     fontWeight = FontWeight.Black,
                     color = visualTheme.primaryAccent,
@@ -1680,7 +1680,7 @@ private fun ModeCupSlotContainer(
     )
 
     val isSelected = uiState.selectedSlotIndex == slotIndex
-    val isWinning = isCoinAtThisSlot && (uiState.gameState == GameState.WIN || uiState.isRevealingWinningSlot)
+    val isWinning = isCoinAtThisSlot && (uiState.gameState == GameState.WIN || uiState.gameState == GameState.LOSE || uiState.gameState == GameState.GAME_OVER || uiState.isRevealingWinningSlot)
     val isSelectable = uiState.isInputAllowed
 
     val infiniteTransition = rememberInfiniteTransition(label = "pulse_guess_$slotIndex")
@@ -1763,7 +1763,7 @@ private fun ModeCupSlotContainer(
                     CoinVisual(
                         theme = settings.selectedCoinTheme,
                         size = 46.dp,
-                        isSpinning = uiState.gameState == GameState.WIN || uiState.gameState == GameState.SHOW_COIN,
+                        isSpinning = uiState.gameState == GameState.WIN || uiState.gameState == GameState.LOSE || uiState.gameState == GameState.GAME_OVER || uiState.gameState == GameState.SHOW_COIN,
                         isGlowing = true
                     )
                 }
@@ -2032,7 +2032,7 @@ private fun ModeFooterMetadataRow(
                 ) {
                     Text("🔥", fontSize = 11.sp)
                     Text(
-                        text = "${String.format("%.1f", multiplier)}x BOOST",
+                        text = "${String.format(Locale.US, "%.1f", multiplier)}x BOOST",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
                         color = visualTheme.secondaryAccent
@@ -2120,7 +2120,7 @@ private fun ModeRoundResultCard(
                     ) {
                         Text("🔥", fontSize = 12.sp)
                         Text(
-                            text = "${String.format("%.1fx", multiplier)} WIN-STREAK MULTIPLIER APPLIED",
+                            text = "${String.format(Locale.US, "%.1f", multiplier)}x WIN-STREAK MULTIPLIER APPLIED",
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             color = visualTheme.secondaryAccent
