@@ -859,6 +859,85 @@
             text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
         }
 
+        /* Enterprise FAQ Accordion Styling */
+        .faq-accordion {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 20px;
+        }
+        .faq-item {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .faq-item:hover {
+            border-color: rgba(0, 229, 255, 0.4);
+            box-shadow: 0 4px 20px rgba(0, 229, 255, 0.1);
+        }
+        .faq-question {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            padding: 18px 20px;
+            color: #ffffff;
+            font-size: 1.02rem;
+            font-weight: 700;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            gap: 15px;
+        }
+        .faq-question .faq-chevron {
+            font-size: 0.85rem;
+            color: var(--neon-cyan);
+            transition: transform 0.3s ease;
+        }
+        .faq-question.active .faq-chevron {
+            transform: rotate(180deg);
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0 20px;
+            background: rgba(10, 15, 30, 0.5);
+        }
+        .faq-answer p {
+            padding: 0 0 18px 0;
+            margin: 0;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .phone-status-bar {
+            background: #090d1f;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .phone-notch-pill {
+            width: 90px;
+            height: 16px;
+            background: #1e293b;
+            border-radius: 8px;
+        }
+        .phone-screen-viewport {
+            overflow: hidden;
+            background: #000;
+        }
+
         /* ----------------------------------------------------
            FROSTED GLASS MODALS (BACK-BUTTON COMPLIANT)
            ---------------------------------------------------- */
@@ -1109,11 +1188,11 @@
         </section>
 
         <!-- ----------------------------------------------------
-           🔥 GAME SCREENSHOTS & GAMEPLAY SHOWCASE
+           🔥 GAME SCREENSHOTS & GAMEPLAY SHOWCASE (PRO PHONE FRAMES)
            ---------------------------------------------------- -->
         <section class="showcase-section">
-            <h2 class="showcase-title">📱 CAP AND COIN 3D MODES & FEATURES</h2>
-            <p class="showcase-desc">Explore the interactive modes of Cap and Coin (Cup and Coin 3D): 3D Shuffle Board, Daily Lucky Wheel, and Career Achievements.</p>
+            <h2 class="showcase-title">📱 CAP AND COIN 3D APP SHOWCASE</h2>
+            <p class="showcase-desc">Explore the immersive gameplay modes of Cap and Coin (Cup and Coin 3D) presented in pro mobile device frames.</p>
             
             <div class="showcase-tabs">
                 <button class="showcase-tab active" id="tab-btn-board" onclick="switchShowcaseTab('board')">
@@ -1130,7 +1209,14 @@
             <!-- Tab Content 1: Shuffle Board -->
             <div class="showcase-content active" id="showcase-board">
                 <div class="phone-mockup-real">
-                    <img class="screenshot-img" src="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303823/cup_and_coin_v2_screenshot_1_uo3gnn.jpg" alt="Cap and Coin 3D Game Stage Screenshot - Track the Hidden Golden Coin" loading="lazy">
+                    <div class="phone-status-bar">
+                        <span>9:41</span>
+                        <div class="phone-notch-pill"></div>
+                        <span style="font-size: 0.75rem;">5G 📶 🔋</span>
+                    </div>
+                    <div class="phone-screen-viewport">
+                        <img class="screenshot-img" src="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303823/cup_and_coin_v2_screenshot_1_uo3gnn.jpg" alt="Cap and Coin 3D Game Stage Screenshot - Track the Hidden Golden Coin" loading="lazy">
+                    </div>
                     <div class="screenshot-caption">
                         <h4>🎮 3D Cap Shuffling Arena</h4>
                         <p>Real in-game capture showing orbital 3D tracks, neon cups, and live streak counters.</p>
@@ -1141,7 +1227,14 @@
             <!-- Tab Content 2: Lucky Spin -->
             <div class="showcase-content" id="showcase-spin">
                 <div class="phone-mockup-real">
-                    <img class="screenshot-img" src="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303823/cup_and_coin_v2_screenshot_3_cvtw2f.jpg" alt="Cap and Coin Daily Lucky Spin Wheel Screenshot" loading="lazy">
+                    <div class="phone-status-bar">
+                        <span>9:41</span>
+                        <div class="phone-notch-pill"></div>
+                        <span style="font-size: 0.75rem;">5G 📶 🔋</span>
+                    </div>
+                    <div class="phone-screen-viewport">
+                        <img class="screenshot-img" src="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303823/cup_and_coin_v2_screenshot_3_cvtw2f.jpg" alt="Cap and Coin Daily Lucky Spin Wheel Screenshot" loading="lazy">
+                    </div>
                     <div class="screenshot-caption">
                         <h4>🎡 Daily Lucky Spin Wheel</h4>
                         <p>Spin every 24 hours to win free protective shields, coin boosts, and bonus multipliers.</p>
@@ -1152,7 +1245,14 @@
             <!-- Tab Content 3: Career Stats -->
             <div class="showcase-content" id="showcase-career">
                 <div class="phone-mockup-real">
-                    <img class="screenshot-img" src="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303822/cup_and_coin_v2_screenshot_4_nhxsxs.jpg" alt="Cap and Coin Victory and High Score Career Stats Screenshot" loading="lazy">
+                    <div class="phone-status-bar">
+                        <span>9:41</span>
+                        <div class="phone-notch-pill"></div>
+                        <span style="font-size: 0.75rem;">5G 📶 🔋</span>
+                    </div>
+                    <div class="phone-screen-viewport">
+                        <img class="screenshot-img" src="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303822/cup_and_coin_v2_screenshot_4_nhxsxs.jpg" alt="Cap and Coin Victory and High Score Career Stats Screenshot" loading="lazy">
+                    </div>
                     <div class="screenshot-caption">
                         <h4>📊 Victory & Career Progress</h4>
                         <p>Level completion screen with dynamic focus scores, badges, and consecutive win streaks.</p>
@@ -1163,6 +1263,11 @@
             <!-- Full Screenshots Gallery Grid -->
             <div class="screenshots-grid">
                 <div class="screenshot-card">
+                    <div style="background: #0f172a; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 0.75rem; color: #94a3b8;">
+                        <span>9:41</span>
+                        <span style="font-weight: 700; color: var(--neon-cyan);">Cap & Coin 3D</span>
+                        <span>📶 🔋</span>
+                    </div>
                     <img src="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303823/cup_and_coin_v2_screenshot_1_uo3gnn.jpg" alt="3D Cap Shuffle Stage" loading="lazy">
                     <div class="screenshot-card-body">
                         <h4 class="screenshot-card-title"><span>🎮</span> 3D Cap Shuffle Stage</h4>
@@ -1171,6 +1276,11 @@
                 </div>
 
                 <div class="screenshot-card">
+                    <div style="background: #0f172a; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 0.75rem; color: #94a3b8;">
+                        <span>9:41</span>
+                        <span style="font-weight: 700; color: #f59e0b;">Lucky Spin</span>
+                        <span>📶 🔋</span>
+                    </div>
                     <img src="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303823/cup_and_coin_v2_screenshot_3_cvtw2f.jpg" alt="Daily Lucky Spin Wheel" loading="lazy">
                     <div class="screenshot-card-body">
                         <h4 class="screenshot-card-title"><span>🎡</span> Daily Lucky Spin</h4>
@@ -1179,6 +1289,11 @@
                 </div>
 
                 <div class="screenshot-card">
+                    <div style="background: #0f172a; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 0.75rem; color: #94a3b8;">
+                        <span>9:41</span>
+                        <span style="font-weight: 700; color: #10b981;">Career Stats</span>
+                        <span>📶 🔋</span>
+                    </div>
                     <img src="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303822/cup_and_coin_v2_screenshot_4_nhxsxs.jpg" alt="Victory & High Score Stats" loading="lazy">
                     <div class="screenshot-card-body">
                         <h4 class="screenshot-card-title"><span>🏆</span> Victory & Stats</h4>
@@ -1221,36 +1336,66 @@
             <h2 style="color: var(--neon-cyan); margin-top: 0; font-size: 1.4rem; text-align: center;">❓ FREQUENTLY ASKED QUESTIONS (FAQ)</h2>
             <p style="color: #94a3b8; font-size: 0.9rem; text-align: center; margin-bottom: 20px;">Everything you need to know about Cap and Coin (Cup and Coin 3D) game rules, online play, and focus training.</p>
             
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-                <article style="background: rgba(15, 23, 42, 0.6); border-left: 3px solid var(--neon-cyan); padding: 14px 18px; border-radius: 8px;">
-                    <h3 style="color: white; font-size: 1rem; margin: 0 0 6px 0;">What is Cap and Coin (Cup and Coin 3D)?</h3>
-                    <p style="color: #cbd5e1; font-size: 0.85rem; margin: 0;">Cap and Coin (also known as Cup and Coin 3D or Cap and Coin Game) is an interactive 3D brain training and concentration game inspired by the traditional shell game. A golden coin is hidden under one of three caps, which shuffle rapidly across 3D paths. Your goal is to track the coin and pick the correct cap.</p>
-                </article>
+            <div class="faq-accordion">
+                <div class="faq-item">
+                    <button class="faq-question active" onclick="toggleFaq(this)">
+                        <span>What is Cap and Coin (Cup and Coin 3D)?</span>
+                        <span class="faq-chevron">▼</span>
+                    </button>
+                    <div class="faq-answer" style="max-height: 200px;">
+                        <p>Cap and Coin (also known as Cup and Coin 3D or Cap and Coin Game) is an interactive 3D brain training and concentration game inspired by the traditional shell game. A golden coin is hidden under one of three caps, which shuffle rapidly across 3D paths. Your goal is to track the coin and pick the correct cap.</p>
+                    </div>
+                </div>
 
-                <article style="background: rgba(15, 23, 42, 0.6); border-left: 3px solid var(--neon-purple); padding: 14px 18px; border-radius: 8px;">
-                    <h3 style="color: white; font-size: 1rem; margin: 0 0 6px 0;">How do you play the Cap and Coin game?</h3>
-                    <p style="color: #cbd5e1; font-size: 0.85rem; margin: 0;">1. Watch the golden coin get placed inside one of the 3D caps. 2. Keep your focus as the caps swap positions in spiral and orbital patterns. 3. Tap the cap containing the coin to win points, unlock daily streaks, and achieve new high scores.</p>
-                </article>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>How do you play the Cap and Coin game?</span>
+                        <span class="faq-chevron">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>1. Watch the golden coin get placed inside one of the 3D caps. 2. Keep your focus as the caps swap positions in spiral and orbital patterns. 3. Tap the cap containing the coin to win points, unlock daily streaks, and achieve new high scores.</p>
+                    </div>
+                </div>
 
-                <article style="background: rgba(15, 23, 42, 0.6); border-left: 3px solid var(--neon-green); padding: 14px 18px; border-radius: 8px;">
-                    <h3 style="color: white; font-size: 1rem; margin: 0 0 6px 0;">Can I play Cap and Coin online for free in my browser?</h3>
-                    <p style="color: #cbd5e1; font-size: 0.85rem; margin: 0;">Yes! Cap and Coin is 100% free to play directly in your web browser on mobile phones, tablets, and desktop computers with zero setup required.</p>
-                </article>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>Can I play Cap and Coin online for free in my browser?</span>
+                        <span class="faq-chevron">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Yes! Cap and Coin is 100% free to play directly in your web browser on mobile phones, tablets, and desktop computers with zero setup required.</p>
+                    </div>
+                </div>
 
-                <article style="background: rgba(15, 23, 42, 0.6); border-left: 3px solid var(--neon-pink); padding: 14px 18px; border-radius: 8px;">
-                    <h3 style="color: white; font-size: 1rem; margin: 0 0 6px 0;">Is Cap and Coin safe and privacy-friendly?</h3>
-                    <p style="color: #cbd5e1; font-size: 0.85rem; margin: 0;">Yes! Cap and Coin respects user privacy. It collects no personal data, uses zero tracking cookies, and saves all game progress locally on your device.</p>
-                </article>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>Is Cap and Coin safe and privacy-friendly?</span>
+                        <span class="faq-chevron">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Yes! Cap and Coin respects user privacy. It collects no personal data, uses zero tracking cookies, and saves all game progress locally on your device.</p>
+                    </div>
+                </div>
 
-                <article style="background: rgba(15, 23, 42, 0.6); border-left: 3px solid var(--neon-cyan); padding: 14px 18px; border-radius: 8px;">
-                    <h3 style="color: white; font-size: 1rem; margin: 0 0 6px 0;">Why is Cap and Coin effective for brain training and focus?</h3>
-                    <p style="color: #cbd5e1; font-size: 0.85rem; margin: 0;">Tracking high-speed 3D orbital swaps trains spatial attention, eye-tracking precision, mental stamina, and short-term visual memory in a fun and engaging way.</p>
-                </article>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>Why is Cap and Coin effective for brain training and focus?</span>
+                        <span class="faq-chevron">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Tracking high-speed 3D orbital swaps trains spatial attention, eye-tracking precision, mental stamina, and short-term visual memory in a fun and engaging way.</p>
+                    </div>
+                </div>
 
-                <article style="background: rgba(15, 23, 42, 0.6); border-left: 3px solid var(--neon-purple); padding: 14px 18px; border-radius: 8px;">
-                    <h3 style="color: white; font-size: 1rem; margin: 0 0 6px 0;">What features and modes are included in Cap and Coin 3D?</h3>
-                    <p style="color: #cbd5e1; font-size: 0.85rem; margin: 0;">Cap and Coin features dynamic 3D physics-based cap shuffles, a Daily Lucky Spin reward wheel, career achievement badges, daily challenges, and progressive difficulty tiers.</p>
-                </article>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>What features and modes are included in Cap and Coin 3D?</span>
+                        <span class="faq-chevron">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Cap and Coin features dynamic 3D physics-based cap shuffles, a Daily Lucky Spin reward wheel, career achievement badges, daily challenges, and progressive difficulty tiers.</p>
+                    </div>
+                </div>
             </div>
         </section>
     </div>
@@ -1515,6 +1660,22 @@
             } else if (tabId === 'career') {
                 document.getElementById('tab-btn-career').classList.add('active');
                 document.getElementById('showcase-career').classList.add('active');
+            }
+        }
+
+        // ----------------------------------------------------
+        // FAQ ACCORDION TOGGLE
+        // ----------------------------------------------------
+        function toggleFaq(button) {
+            const answer = button.nextElementSibling;
+            const isOpen = button.classList.contains('active');
+            
+            if (isOpen) {
+                button.classList.remove('active');
+                answer.style.maxHeight = null;
+            } else {
+                button.classList.add('active');
+                answer.style.maxHeight = answer.scrollHeight + "px";
             }
         }
 
