@@ -1743,12 +1743,15 @@
             }
         });
 
-        // If page is loaded with hash directly
-        if (window.location.hash) {
-            const initialHash = window.location.hash.replace('#', '');
-            if (initialHash === 'privacy' || initialHash === 'terms') {
-                openModal(initialHash);
-            }
+        // Service Worker registration for Monetag
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('SW registered: ', registration.scope);
+                }).catch(function(err) {
+                    console.log('SW registration failed: ', err);
+                });
+            });
         }
     </script>
 </body>
