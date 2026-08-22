@@ -1137,9 +1137,156 @@
         @media screen and (max-width: 480px) {
             h1 { font-size: 1.6rem !important; }
         }
+
+        /* Enterprise Big-Tech Header / Navbar Styling */
+        .enterprise-navbar-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10000;
+            background: rgba(3, 7, 18, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(0, 242, 254, 0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .enterprise-navbar {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+        .nav-brand-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(0,229,255,0.4);
+        }
+        .nav-brand-logo img {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+            border-radius: 50%;
+        }
+        .nav-brand-title {
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: -0.3px;
+        }
+        .nav-links-desktop {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+        }
+        .nav-link {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 0.92rem;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+        .nav-link:hover {
+            color: var(--neon-cyan);
+        }
+        .nav-cta-btn {
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            color: #030712;
+            font-weight: 800;
+            font-size: 0.88rem;
+            padding: 9px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.35);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .nav-cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 242, 254, 0.5);
+        }
+        .mobile-menu-toggle {
+            display: none;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #ffffff;
+            font-size: 1.2rem;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .mobile-nav-drawer {
+            display: none;
+            flex-direction: column;
+            gap: 14px;
+            background: rgba(3, 7, 18, 0.96);
+            border-bottom: 1px solid rgba(0, 242, 254, 0.2);
+            padding: 20px 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+        }
+        .mobile-nav-drawer.open {
+            display: flex;
+        }
+        @media screen and (max-width: 900px) {
+            .nav-links-desktop, .nav-cta-btn {
+                display: none;
+            }
+            .mobile-menu-toggle {
+                display: block;
+            }
+        }
+        body {
+            padding-top: 75px;
+        }
     </style>
 </head>
 <body>
+
+    <!-- Enterprise Big-Tech Navbar -->
+    <header class="enterprise-navbar-wrapper">
+        <div class="enterprise-navbar">
+            <a href="https://cupandcoin.vercel.app/" class="nav-brand">
+                <div class="nav-brand-logo">
+                    <img src="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303827/App_icon_ldn6l9.png" alt="Cap and Coin Logo">
+                </div>
+                <span class="nav-brand-title">Cap & Coin 3D</span>
+            </a>
+            <nav class="nav-links-desktop">
+                <a href="#play-online" class="nav-link">Play 3D Online</a>
+                <a href="#showcase-section" class="nav-link">App Showcase</a>
+                <a href="#faq-section" class="nav-link">FAQ</a>
+                <a onclick="openModal('privacy')" class="nav-link" style="cursor: pointer;">Privacy</a>
+            </nav>
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <a href="#play-online" class="nav-cta-btn">🎮 Play Now</a>
+                <button class="mobile-menu-toggle" onclick="toggleMobileNav()" aria-label="Toggle navigation menu">
+                    ☰
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Navigation Drawer -->
+        <div class="mobile-nav-drawer" id="mobileNavDrawer">
+            <a href="#play-online" class="nav-link" onclick="toggleMobileNav()">🎮 Play 3D Online</a>
+            <a href="#showcase-section" class="nav-link" onclick="toggleMobileNav()">📱 App Showcase & Screenshots</a>
+            <a href="#faq-section" class="nav-link" onclick="toggleMobileNav()">❓ FAQ & Game Rules</a>
+            <a onclick="openModal('privacy'); toggleMobileNav();" class="nav-link">🛡️ Privacy Policy</a>
+            <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.4/Cup.And.Coin.apk" class="nav-cta-btn" style="text-align: center; margin-top: 6px;" target="_blank" rel="noopener noreferrer">
+                🚀 Download v1.0.4 APK
+            </a>
+        </div>
+    </header>
 
     <div class="container">
         <!-- Breadcrumb Navigation for SEO & Bot Hierarchy -->
@@ -1797,6 +1944,12 @@
                     console.log('SW registration failed: ', err);
                 });
             });
+        }
+
+        // Mobile Nav Drawer Toggle
+        function toggleMobileNav() {
+            const drawer = document.getElementById('mobileNavDrawer');
+            drawer.classList.toggle('open');
         }
     </script>
     <!-- Mobile Sticky Bottom Quick Action Bar for High Mobile Conversion & Ad Visibility -->
