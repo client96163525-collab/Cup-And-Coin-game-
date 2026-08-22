@@ -103,7 +103,7 @@
           "gamePlatform": ["Web Browser", "Mobile Browser", "Desktop"],
           "genre": ["Brain Training", "Casual Game", "Puzzle", "Arcade", "Focus Game"],
           "playMode": "SinglePlayer",
-          "softwareVersion": "1.0.3",
+          "softwareVersion": "1.0.4",
           "url": "https://cupandcoin.vercel.app/",
           "description": "Cap and Coin (Cup and Coin 3D) is an interactive 3D focus, concentration, and brain training game based on the classic shell game. Track the golden coin under 3D caps as they perform high-speed orbital, helix, and vortex shuffles.",
           "author": {
@@ -342,25 +342,50 @@
             background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
             color: #020617;
             font-weight: 900;
-            padding: 16px 42px;
+            padding: 16px 36px;
             border-radius: 35px;
-            font-size: 1.15rem;
+            font-size: 1.05rem;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 12px;
+            justify-content: center;
+            gap: 10px;
             box-shadow: 0 8px 25px rgba(0, 242, 254, 0.4);
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-top: 15px;
             cursor: pointer;
             border: none;
         }
 
         .btn-play-hero:hover {
-            transform: scale(1.05) translateY(-2px);
+            transform: scale(1.04) translateY(-2px);
             box-shadow: 0 15px 35px rgba(0, 242, 254, 0.6);
+        }
+
+        .btn-download-apk {
+            background: linear-gradient(135deg, #00e676 0%, #00b0ff 100%);
+            color: #020617;
+            font-weight: 900;
+            padding: 16px 36px;
+            border-radius: 35px;
+            font-size: 1.05rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 8px 25px rgba(0, 230, 118, 0.35);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-download-apk:hover {
+            transform: scale(1.04) translateY(-2px);
+            box-shadow: 0 15px 35px rgba(0, 230, 118, 0.55);
         }
 
         /* ----------------------------------------------------
@@ -1008,10 +1033,16 @@
 
         <section class="hero-action-bar">
             <h2>⚡ READY TO TEST YOUR FOCUS IN CAP AND COIN?</h2>
-            <p style="color: #94a3b8; font-size: 1rem; margin: 0 0 15px 0;">Play the classic 3-cup shell game reimagined with dynamic 3D spiral shuffles, instant visual tracking, and daily focus boosts right in your browser!</p>
-            <a href="#play-online" class="btn-play-hero">
-                🎮 Play Cap and Coin 3D Online Now
-            </a>
+            <p style="color: #94a3b8; font-size: 1rem; margin: 0 0 20px 0;">Play the classic 3-cup shell game with dynamic 3D spiral shuffles in your browser, or download the official Android APK directly!</p>
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; align-items: center;">
+                <a href="#play-online" class="btn-play-hero">
+                    🎮 Play 3D Online Now
+                </a>
+                <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.4/Cup.And.Coin.apk" class="btn-download-apk" target="_blank" rel="noopener noreferrer">
+                    🚀 Download APK (v1.0.4)
+                </a>
+            </div>
+            <p style="margin: 12px 0 0 0; font-size: 0.8rem; color: #64748b;">Filename: <strong>Cup.And.Coin.apk</strong> • Version: <strong>v1.0.4 (Latest Release)</strong> • 18.5 MB • 100% Virus-Free & SHA-256 Verified</p>
         </section>
 
         <!-- ----------------------------------------------------
