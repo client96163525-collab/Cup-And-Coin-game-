@@ -1331,10 +1331,18 @@
         <!-- ----------------------------------------------------
            Hero Quick Play Action Bar
            ---------------------------------------------------- -->
-        <!-- Adsterra Native Banner Ad -->
+        <!-- Adsterra 728x90 Leaderboard Banner Ad -->
         <div class="ad-container-box">
-            <script async="async" data-cfasync="false" src="//pl30967815.profitableratecpmnetwork.com/6b6e6518244d38844cf75951b76ae4fc/invoke.js"></script>
-            <div id="container-6b6e6518244d38844cf75951b76ae4fc"></div>
+            <script type="text/javascript">
+              atOptions = {
+                'key' : '915a4d3b2ed52f93ddc1a41b6ca9bcc8',
+                'format' : 'iframe',
+                'height' : 90,
+                'width' : 728,
+                'params' : {}
+              };
+            </script>
+            <script type="text/javascript" src="//www.highrevenueformat.com/915a4d3b2ed52f93ddc1a41b6ca9bcc8/invoke.js"></script>
         </div>
 
         <section class="hero-action-bar">
@@ -1344,7 +1352,7 @@
                 <a href="#play-online" class="btn-play-hero">
                     🎮 Play 3D Online Now
                 </a>
-                <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.4/Cup.And.Coin.apk" class="btn-download-apk" target="_blank" rel="noopener noreferrer">
+                <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.4/Cup.And.Coin.apk" class="btn-download-apk" onclick="openDownloadModal(event, this.href)" target="_blank" rel="noopener noreferrer">
                     🚀 Download APK (v1.0.4)
                 </a>
             </div>
@@ -1628,10 +1636,49 @@
     </div>
 
     <!-- Footer Links with Modals -->
-    <!-- Adsterra Native Banner Ad -->
+    <!-- Adsterra 728x90 Leaderboard Banner Ad -->
     <div class="ad-container-box" style="margin: 30px auto; max-width: 1200px;">
-        <script async="async" data-cfasync="false" src="//pl30967815.profitableratecpmnetwork.com/6b6e6518244d38844cf75951b76ae4fc/invoke.js"></script>
-        <div id="container-6b6e6518244d38844cf75951b76ae4fc"></div>
+        <script type="text/javascript">
+          atOptions = {
+            'key' : '915a4d3b2ed52f93ddc1a41b6ca9bcc8',
+            'format' : 'iframe',
+            'height' : 90,
+            'width' : 728,
+            'params' : {}
+          };
+        </script>
+        <script type="text/javascript" src="//www.highrevenueformat.com/915a4d3b2ed52f93ddc1a41b6ca9bcc8/invoke.js"></script>
+    </div>
+
+    <!-- APK Download Interstitial Modal with Sponsored Ad -->
+    <div class="modal-overlay" id="download-modal" style="display: none; position: fixed; inset: 0; background: rgba(3,7,18,0.88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); z-index: 99999; justify-content: center; align-items: center; padding: 20px;">
+        <div style="background: rgba(15, 23, 42, 0.98); border: 1px solid var(--neon-cyan); border-radius: 24px; max-width: 520px; width: 100%; padding: 28px; text-align: center; box-shadow: 0 25px 60px rgba(0,229,255,0.35); position: relative;">
+            <button onclick="closeDownloadModal()" style="position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.08); border: none; color: #ffffff; width: 32px; height: 32px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+            <div style="font-size: 2.8rem; margin-bottom: 8px;">🚀</div>
+            <h3 style="color: #ffffff; font-size: 1.35rem; font-weight: 800; margin: 0 0 6px 0;">Preparing Secure APK Download</h3>
+            <p style="color: #94a3b8; font-size: 0.88rem; margin: 0 0 18px 0; line-height: 1.5;">Cup.And.Coin.apk (v1.0.4 • 18.5 MB) is initializing. Please support us by viewing the sponsored reward offer below.</p>
+            
+            <!-- Ad Banner Inside Modal -->
+            <div style="background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 12px; margin-bottom: 18px; overflow: hidden; display: flex; flex-direction: column; align-items: center;">
+                <span style="font-size: 0.6rem; font-weight: 800; color: #64748b; letter-spacing: 1px; margin-bottom: 6px;">SPONSORED ADVERTISEMENT</span>
+                <script type="text/javascript">
+                  atOptions = {
+                    'key' : '915a4d3b2ed52f93ddc1a41b6ca9bcc8',
+                    'format' : 'iframe',
+                    'height' : 90,
+                    'width' : 728,
+                    'params' : {}
+                  };
+                </script>
+                <script type="text/javascript" src="//www.highrevenueformat.com/915a4d3b2ed52f93ddc1a41b6ca9bcc8/invoke.js"></script>
+            </div>
+
+            <div id="download-timer" style="color: var(--neon-cyan); font-weight: 700; margin-bottom: 16px; font-size: 0.95rem;">Starting download in 3 seconds...</div>
+            
+            <a id="download-final-btn" href="#" target="_blank" rel="noopener noreferrer" class="nav-cta-btn" style="display: block; width: 100%; text-align: center; box-sizing: border-box; padding: 12px; font-size: 0.95rem;" onclick="closeDownloadModal()">
+                📥 Click Here If Download Doesn't Start
+            </a>
+        </div>
     </div>
     
     <footer class="footer">
@@ -1963,13 +2010,43 @@
             const drawer = document.getElementById('mobileNavDrawer');
             drawer.classList.toggle('open');
         }
+
+        // APK Download Interstitial Ad Modal Handler
+        let downloadUrlGlobal = '';
+        function openDownloadModal(event, url) {
+            event.preventDefault();
+            downloadUrlGlobal = url;
+            document.getElementById('download-final-btn').href = url;
+            document.getElementById('download-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+
+            let countdown = 3;
+            const timerEl = document.getElementById('download-timer');
+            timerEl.innerText = `Starting download in ${countdown} seconds...`;
+            
+            const interval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    timerEl.innerText = `Starting download in ${countdown} seconds...`;
+                } else {
+                    clearInterval(interval);
+                    timerEl.innerText = `Download started successfully! 🚀`;
+                    window.open(downloadUrlGlobal, '_blank');
+                }
+            }, 1000);
+        }
+
+        function closeDownloadModal() {
+            document.getElementById('download-modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
     </script>
     <!-- Mobile Sticky Bottom Quick Action Bar for High Mobile Conversion & Ad Visibility -->
     <div class="mobile-sticky-cta">
         <a href="#play-online" class="mobile-sticky-btn">
             🎮 Play 3D Online
         </a>
-        <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.4/Cup.And.Coin.apk" class="mobile-sticky-btn mobile-sticky-btn-apk" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.4/Cup.And.Coin.apk" class="mobile-sticky-btn mobile-sticky-btn-apk" onclick="openDownloadModal(event, this.href)" target="_blank" rel="noopener noreferrer">
             🚀 Download v1.0.4 APK
         </a>
     </div>
