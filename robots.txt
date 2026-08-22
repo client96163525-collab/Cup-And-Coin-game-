@@ -3,7 +3,6 @@ Allow: /
 Allow: /sitemap.xml
 Allow: /privacy.html
 Allow: /terms.html
-Allow: /cup-and-coin.apk
 
 User-agent: Googlebot
 Allow: /
