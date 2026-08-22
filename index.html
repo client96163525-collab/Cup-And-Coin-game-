@@ -716,12 +716,12 @@
 
         /* Phone mockup with Real Screenshots */
         .phone-mockup-real {
-            width: 320px;
-            max-width: 100%;
-            height: auto;
+            width: 100%;
+            max-width: 320px;
+            margin: 0 auto;
             background: #090d1f;
-            border: 8px solid #1e293b;
-            border-radius: 36px;
+            border: 6px solid #1e293b;
+            border-radius: 30px;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 35px rgba(0, 229, 255, 0.2);
             position: relative;
             overflow: hidden;
@@ -733,8 +733,10 @@
         .phone-mockup-real .screenshot-img {
             width: 100%;
             height: auto;
+            max-height: 520px;
+            object-fit: contain;
             display: block;
-            border-radius: 26px;
+            border-radius: 20px;
             transition: transform 0.3s ease;
         }
 
@@ -1148,6 +1150,24 @@
 
         @media screen and (max-width: 480px) {
             h1 { font-size: 1.6rem !important; }
+            .enterprise-navbar {
+                padding: 10px 14px !important;
+            }
+            .nav-brand-logo {
+                width: 36px;
+                height: 36px;
+                border-radius: 10px;
+            }
+            .nav-brand-logo img {
+                width: 24px;
+                height: 24px;
+            }
+            .nav-brand-title {
+                font-size: 1.02rem !important;
+            }
+            body {
+                padding-top: 65px !important;
+            }
         }
 
         /* Enterprise Big-Tech Header / Navbar Styling */
