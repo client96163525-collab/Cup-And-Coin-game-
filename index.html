@@ -24,7 +24,7 @@
     <!-- Social Share Preview Meta Tags (Open Graph / Telegram / WhatsApp / FB) -->
     <meta property="og:title" content="Cap and Coin (Cup and Coin 3D) - Official Brain Trainer Game">
     <meta property="og:description" content="Master your focus in Cap and Coin! Track the hidden coin under 3D shuffling caps, beat rapid vertical orbit and spiral shuffles, and play online free.">
-    <meta property="og:image" content="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=1200&h=630&q=80">
+    <meta property="og:image" content="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303823/cup_and_coin_v2_screenshot_1_uo3gnn.jpg">
     <meta property="og:url" content="https://cupandcoin.vercel.app/">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Cap and Coin 3D">
@@ -34,12 +34,12 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Cap and Coin - Official 3D Brain Trainer Game">
     <meta name="twitter:description" content="Play the official Cap and Coin game online! Track the hidden coin under 3D caps, beat orbital shuffles, and train your focus.">
-    <meta name="twitter:image" content="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=1200&h=630&q=80">
+    <meta name="twitter:image" content="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303823/cup_and_coin_v2_screenshot_1_uo3gnn.jpg">
 
-    <!-- Preload High-Quality Showcase Background Images for Instant Tab Switching -->
-    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80">
-    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80">
-    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=800&q=80">
+    <!-- Preload Official High-Resolution In-Game Screenshots -->
+    <link rel="preload" as="image" href="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303823/cup_and_coin_v2_screenshot_1_uo3gnn.jpg">
+    <link rel="preload" as="image" href="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303823/cup_and_coin_v2_screenshot_3_cvtw2f.jpg">
+    <link rel="preload" as="image" href="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303822/cup_and_coin_v2_screenshot_4_nhxsxs.jpg">
 
     <!-- Schema.org Comprehensive Structured Data (JSON-LD) with FAQ Schema for Top Google Ranking -->
     <script type="application/ld+json">
@@ -689,281 +689,113 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        /* Phone mockup simulation for Screenshots */
-        .phone-mockup {
+        /* Phone mockup with Real Screenshots */
+        .phone-mockup-real {
             width: 320px;
-            height: 560px;
+            max-width: 100%;
+            height: auto;
             background: #090d1f;
             border: 8px solid #1e293b;
-            border-radius: 40px;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(213, 0, 249, 0.15);
+            border-radius: 36px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 35px rgba(0, 229, 255, 0.2);
             position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            text-align: left;
+            text-align: center;
         }
 
-        /* Phone camera notch */
-        .phone-mockup::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 140px;
-            height: 20px;
-            background: #1e293b;
-            border-bottom-left-radius: 15px;
-            border-bottom-right-radius: 15px;
-            z-index: 100;
+        .phone-mockup-real .screenshot-img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 26px;
+            transition: transform 0.3s ease;
         }
 
-        /* Mock status bar */
-        .mock-status-bar {
-            height: 25px;
-            padding: 8px 24px 0 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.65rem;
-            color: #64748b;
-            font-weight: bold;
-            z-index: 10;
+        .phone-mockup-real .screenshot-caption {
+            padding: 14px 16px;
+            background: rgba(15, 23, 42, 0.95);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center;
         }
 
-        .mock-app-header {
-            padding: 10px 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .mock-app-title {
-            font-size: 1rem;
-            font-weight: 900;
+        .screenshot-caption h4 {
+            margin: 0 0 4px 0;
             color: #ffffff;
+            font-size: 0.95rem;
+            font-weight: 800;
+        }
+
+        .screenshot-caption p {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 0.78rem;
+        }
+
+        /* 3-Column Screenshots Gallery Grid */
+        .screenshots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 22px;
+            margin-top: 35px;
+        }
+
+        .screenshot-card {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .screenshot-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 15px 35px rgba(0, 229, 255, 0.25);
+        }
+
+        .screenshot-card img {
+            width: 100%;
+            height: 380px;
+            object-fit: cover;
+            object-position: top center;
+            display: block;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            transition: transform 0.4s ease;
+        }
+
+        .screenshot-card:hover img {
+            transform: scale(1.03);
+        }
+
+        .screenshot-card-body {
+            padding: 16px 18px;
+            text-align: left;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .screenshot-card-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 0 0 6px 0;
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
-        /* Phone Content: Tab 1 Shuffle Board */
-        .mock-game-body {
-            flex: 1;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .mock-level-badge {
-            background: rgba(0, 229, 255, 0.1);
-            border: 1px solid var(--neon-cyan);
-            color: var(--neon-cyan);
-            padding: 4px 10px;
-            border-radius: 15px;
-            font-size: 0.75rem;
-            font-weight: 800;
-            display: inline-block;
-            align-self: flex-start;
-        }
-
-        .mock-coin-count {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            color: #ffe082;
-            font-weight: bold;
-            font-size: 0.85rem;
-        }
-
-        .mock-3d-track {
-            height: 160px;
-            border: 1px dashed rgba(0, 229, 255, 0.2);
-            border-radius: 16px;
-            position: relative;
-            display: flex;
-            justify-content: space-around;
-            align-items: flex-end;
-            padding-bottom: 15px;
-            background: radial-gradient(circle at 50% 50%, rgba(0, 229, 255, 0.03) 0%, transparent 80%);
-            margin: 15px 0;
-        }
-
-        .mock-cup {
-            width: 50px;
-            height: 70px;
-            background: linear-gradient(to right, #7c3aed, #d500f9, #7c3aed);
-            border-radius: 8px 8px 4px 4px;
-            border: 1.5px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-        }
-
-        .mock-cup::after {
-            content: "";
-            position: absolute;
-            top: 25%;
-            width: 100%;
-            height: 4px;
-            background: var(--neon-cyan);
-            box-shadow: 0 0 8px var(--neon-cyan);
-        }
-
-        .mock-cup.lifted {
-            transform: translateY(-25px);
-        }
-
-        .mock-btn-action {
-            background: linear-gradient(135deg, var(--neon-cyan), #00bcd4);
-            color: #000;
-            border: none;
-            padding: 10px;
-            border-radius: 10px;
-            font-weight: 800;
-            font-size: 0.8rem;
-            text-align: center;
-            box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
-            text-transform: uppercase;
-            cursor: pointer;
-        }
-
-        /* Phone Content: Tab 2 Lucky Spin */
-        .spin-wheel-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            flex: 1;
-            padding: 15px;
-            position: relative;
-        }
-
-        .spin-pin {
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-top: 18px solid var(--neon-pink);
-            position: absolute;
-            top: 25px;
-            z-index: 15;
-            filter: drop-shadow(0 0 4px var(--neon-pink));
-        }
-
-        .spin-wheel-mock {
-            width: 170px;
-            height: 170px;
-            border-radius: 50%;
-            border: 6px solid #1e293b;
-            box-shadow: 0 0 25px rgba(213, 0, 249, 0.2), inset 0 0 10px rgba(0,0,0,0.5);
-            background: conic-gradient(
-                #d500f9 0deg 45deg,
-                #311b92 45deg 90deg,
-                #00e5ff 90deg 135deg,
-                #1b5e20 135deg 180deg,
-                #ff1744 180deg 225deg,
-                #ff6f00 225deg 270deg,
-                #ffd600 270deg 315deg,
-                #4a148c 315deg 360deg
-            );
-            position: relative;
-            margin-bottom: 20px;
-            animation: slowRotate 15s linear infinite;
-        }
-
-        @keyframes slowRotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .spin-inner-core {
-            width: 40px;
-            height: 40px;
-            background: #ffffff;
-            border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 0 10px rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-        }
-
-        .mock-spin-btn {
-            background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
-            color: #ffffff;
-            font-weight: 800;
-            border: none;
-            border-radius: 20px;
-            padding: 8px 24px;
-            font-size: 0.8rem;
-            box-shadow: 0 0 15px rgba(213, 0, 249, 0.4);
-            cursor: pointer;
-            text-transform: uppercase;
-        }
-
-        /* Phone Content: Tab 3 Career Achievements */
-        .mock-stats-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 16px;
-            padding: 14px;
-            margin-bottom: 12px;
-        }
-
-        .mock-stats-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-            font-size: 0.8rem;
-        }
-
-        .mock-stats-row:last-child {
-            border-bottom: none;
-        }
-
-        .mock-stats-label {
+        .screenshot-card-desc {
+            font-size: 0.82rem;
             color: #94a3b8;
-            font-weight: 500;
-        }
-
-        .mock-stats-value {
-            color: #ffffff;
-            font-weight: bold;
-        }
-
-        .mock-badge-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .mock-badge-item {
-            background: rgba(213, 0, 249, 0.05);
-            border: 1px solid rgba(213, 0, 249, 0.15);
-            border-radius: 10px;
-            padding: 8px 4px;
-            text-align: center;
-        }
-
-        .mock-badge-icon {
-            font-size: 1.2rem;
-            margin-bottom: 4px;
-        }
-
-        .mock-badge-name {
-            font-size: 0.55rem;
-            color: #cbd5e1;
-            font-weight: bold;
+            margin: 0;
+            line-height: 1.4;
         }
 
         /* ----------------------------------------------------
@@ -1266,118 +1098,60 @@
 
             <!-- Tab Content 1: Shuffle Board -->
             <div class="showcase-content active" id="showcase-board">
-                <div class="phone-mockup" style="background: linear-gradient(135deg, rgba(9, 13, 31, 0.9), rgba(15, 23, 42, 0.94)), url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80'); background-size: cover; background-position: center;">
-                    <div class="mock-status-bar">
-                        <span>09:41 AM</span>
-                        <span>📶 🔋 100%</span>
-                    </div>
-                    <div class="mock-app-header">
-                        <span class="mock-app-title">🥤 Cap & Coin 3D</span>
-                        <span class="mock-coin-count">🪙 1,250</span>
-                    </div>
-                    <div class="mock-game-body">
-                        <div>
-                            <span class="mock-level-badge">LEVEL 24 (HARD)</span>
-                            <h4 style="margin: 8px 0 0 0; color: white; font-size: 1rem; font-weight: 800;">Double Spiral Cap Shuffle</h4>
-                            <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 0.7rem;">Track the coin closely! Speed is increasing...</p>
-                        </div>
-                        
-                        <div class="mock-3d-track">
-                            <div class="mock-cup" style="transform: rotate(10deg);"></div>
-                            <div class="mock-cup lifted" style="border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);">
-                                <div style="width: 14px; height: 14px; background: #ffe082; border-radius: 50%; position: absolute; bottom: -20px; left: 18px; box-shadow: 0 0 10px #ffe082;"></div>
-                            </div>
-                            <div class="mock-cup" style="transform: rotate(-10deg);"></div>
-                        </div>
-
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                            <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: #cbd5e1;">
-                                <span>Streak: 🔥 14 Days</span>
-                                <span>Active Shield: 🛡️ Active</span>
-                            </div>
-                            <button class="mock-btn-action" onclick="document.getElementById('play-online').scrollIntoView({behavior: 'smooth'})">⚡ Play Level in Browser</button>
-                        </div>
+                <div class="phone-mockup-real">
+                    <img class="screenshot-img" src="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303823/cup_and_coin_v2_screenshot_1_uo3gnn.jpg" alt="Cap and Coin 3D Game Stage Screenshot - Track the Hidden Golden Coin" loading="lazy">
+                    <div class="screenshot-caption">
+                        <h4>🎮 3D Cap Shuffling Arena</h4>
+                        <p>Real in-game capture showing orbital 3D tracks, neon cups, and live streak counters.</p>
                     </div>
                 </div>
             </div>
 
             <!-- Tab Content 2: Lucky Spin -->
             <div class="showcase-content" id="showcase-spin">
-                <div class="phone-mockup" style="background: linear-gradient(135deg, rgba(9, 13, 31, 0.9), rgba(15, 23, 42, 0.94)), url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80'); background-size: cover; background-position: center;">
-                    <div class="mock-status-bar">
-                        <span>09:41 AM</span>
-                        <span>📶 🔋 100%</span>
-                    </div>
-                    <div class="mock-app-header">
-                        <span class="mock-app-title">🎡 Daily Lucky Spin</span>
-                        <span class="mock-coin-count">🪙 1,250</span>
-                    </div>
-                    <div class="spin-wheel-container">
-                        <div class="spin-pin"></div>
-                        <div class="spin-wheel-mock">
-                            <div class="spin-inner-core">🎁</div>
-                        </div>
-                        <p style="color: #cbd5e1; font-size: 0.8rem; font-weight: bold; margin-bottom: 12px; text-align: center;">Spin the daily wheel in Cap and Coin to win FREE Protective Shields & Coin Multipliers!</p>
-                        <button class="mock-spin-btn" onclick="alert('🎁 Lucky Spin Reward: +250 Coins & 1 Protective Shield Claimed!')">🎰 Spin Now</button>
+                <div class="phone-mockup-real">
+                    <img class="screenshot-img" src="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303823/cup_and_coin_v2_screenshot_3_cvtw2f.jpg" alt="Cap and Coin Daily Lucky Spin Wheel Screenshot" loading="lazy">
+                    <div class="screenshot-caption">
+                        <h4>🎡 Daily Lucky Spin Wheel</h4>
+                        <p>Spin every 24 hours to win free protective shields, coin boosts, and bonus multipliers.</p>
                     </div>
                 </div>
             </div>
 
             <!-- Tab Content 3: Career Stats -->
             <div class="showcase-content" id="showcase-career">
-                <div class="phone-mockup" style="background: linear-gradient(135deg, rgba(9, 13, 31, 0.9), rgba(15, 23, 42, 0.94)), url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=800&q=80'); background-size: cover; background-position: center;">
-                    <div class="mock-status-bar">
-                        <span>09:41 AM</span>
-                        <span>📶 🔋 100%</span>
+                <div class="phone-mockup-real">
+                    <img class="screenshot-img" src="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303822/cup_and_coin_v2_screenshot_4_nhxsxs.jpg" alt="Cap and Coin Victory and High Score Career Stats Screenshot" loading="lazy">
+                    <div class="screenshot-caption">
+                        <h4>📊 Victory & Career Progress</h4>
+                        <p>Level completion screen with dynamic focus scores, badges, and consecutive win streaks.</p>
                     </div>
-                    <div class="mock-app-header">
-                        <span class="mock-app-title">📊 Career Statistics</span>
-                        <span class="mock-coin-count">🪙 1,250</span>
+                </div>
+            </div>
+
+            <!-- Full Screenshots Gallery Grid -->
+            <div class="screenshots-grid">
+                <div class="screenshot-card">
+                    <img src="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303823/cup_and_coin_v2_screenshot_1_uo3gnn.jpg" alt="3D Cap Shuffle Stage" loading="lazy">
+                    <div class="screenshot-card-body">
+                        <h4 class="screenshot-card-title"><span>🎮</span> 3D Cap Shuffle Stage</h4>
+                        <p class="screenshot-card-desc">High-speed cup trajectory tracking with smooth 60 FPS physics and golden coin reveal effects.</p>
                     </div>
-                    <div class="mock-game-body" style="justify-content: flex-start; gap: 15px;">
-                        <div>
-                            <h4 style="margin: 0; color: white; font-size: 1rem; font-weight: 800;">Cap & Coin Career Summary</h4>
-                            <p style="margin: 2px 0 0 0; color: #cbd5e1; font-size: 0.7rem;">Track your high scores, streak records, and focus badges.</p>
-                        </div>
+                </div>
 
-                        <div class="mock-stats-card">
-                            <div class="mock-stats-row">
-                                <span class="mock-stats-label">🏆 Best High Score</span>
-                                <span class="mock-stats-value" style="color: var(--neon-cyan);">4,820 Pts</span>
-                            </div>
-                            <div class="mock-stats-row">
-                                <span class="mock-stats-label">🚀 Highest Level Reached</span>
-                                <span class="mock-stats-value">Level 42</span>
-                            </div>
-                            <div class="mock-stats-row">
-                                <span class="mock-stats-label">📅 Current Daily Streak</span>
-                                <span class="mock-stats-value" style="color: var(--neon-pink);">🔥 14 Days</span>
-                            </div>
-                            <div class="mock-stats-row">
-                                <span class="mock-stats-label">🎮 Total Cap Shuffles</span>
-                                <span class="mock-stats-value">312 Games</span>
-                            </div>
-                        </div>
+                <div class="screenshot-card">
+                    <img src="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303823/cup_and_coin_v2_screenshot_3_cvtw2f.jpg" alt="Daily Lucky Spin Wheel" loading="lazy">
+                    <div class="screenshot-card-body">
+                        <h4 class="screenshot-card-title"><span>🎡</span> Daily Lucky Spin</h4>
+                        <p class="screenshot-card-desc">Exciting daily prize wheel to earn streak insurance shields, golden coin rewards, and bonus spins.</p>
+                    </div>
+                </div>
 
-                        <div>
-                            <h5 style="margin: 0 0 6px 0; color: #94a3b8; font-size: 0.75rem; text-transform: uppercase;">Unlocked Focus Badges</h5>
-                            <div class="mock-badge-grid">
-                                <div class="mock-badge-item">
-                                    <div class="mock-badge-icon">👁️</div>
-                                    <div class="mock-badge-name">Eagle Eye</div>
-                                </div>
-                                <div class="mock-badge-item">
-                                    <div class="mock-badge-icon">⚡</div>
-                                    <div class="mock-badge-name">Speed Tracker</div>
-                                </div>
-                                <div class="mock-badge-item" style="opacity: 0.5;">
-                                    <div class="mock-badge-icon">👑</div>
-                                    <div class="mock-badge-name">Zen Master</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button class="mock-btn-action" style="margin-top: auto; background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink)); color: white; box-shadow: 0 0 15px rgba(213, 0, 249, 0.3);" onclick="alert('🏆 High score saved locally!')">🌟 Career Saved</button>
+                <div class="screenshot-card">
+                    <img src="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303822/cup_and_coin_v2_screenshot_4_nhxsxs.jpg" alt="Victory & High Score Stats" loading="lazy">
+                    <div class="screenshot-card-body">
+                        <h4 class="screenshot-card-title"><span>🏆</span> Victory & Stats</h4>
+                        <p class="screenshot-card-desc">Milestone progression system displaying your longest daily streaks, highest levels, and unlocked focus badges.</p>
                     </div>
                 </div>
             </div>
