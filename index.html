@@ -916,6 +916,74 @@
             line-height: 1.6;
         }
 
+        /* Adsterra Professional Ad Container Styling */
+        .ad-container-box {
+            margin: 25px auto;
+            text-align: center;
+            max-width: 100%;
+            overflow: hidden;
+            border-radius: 16px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            padding: 16px;
+            position: relative;
+        }
+        .ad-container-box::before {
+            content: "ADVERTISEMENT";
+            display: block;
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: #64748b;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        /* Mobile Sticky Bottom CTA Bar */
+        .mobile-sticky-cta {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 15, 30, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(0, 229, 255, 0.3);
+            padding: 12px 16px;
+            z-index: 9999;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.6);
+        }
+        .mobile-sticky-btn {
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            color: #04060f;
+            font-weight: 800;
+            font-size: 0.9rem;
+            padding: 10px 18px;
+            border-radius: 30px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4);
+        }
+        .mobile-sticky-btn-apk {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+        }
+
+        @media screen and (max-width: 768px) {
+            .mobile-sticky-cta {
+                display: flex;
+            }
+            body {
+                padding-bottom: 70px;
+            }
+        }
+
         .phone-status-bar {
             background: #090d1f;
             padding: 8px 16px;
@@ -1105,7 +1173,7 @@
            Hero Quick Play Action Bar
            ---------------------------------------------------- -->
         <!-- Adsterra Native Banner Ad -->
-        <div style="margin: 20px auto; text-align: center; max-width: 100%; overflow: hidden; border-radius: 12px; background: rgba(255,255,255,0.02); padding: 10px;">
+        <div class="ad-container-box">
             <script async="async" data-cfasync="false" src="//pl30967815.profitableratecpmnetwork.com/6b6e6518244d38844cf75951b76ae4fc/invoke.js"></script>
             <div id="container-6b6e6518244d38844cf75951b76ae4fc"></div>
         </div>
@@ -1402,7 +1470,7 @@
 
     <!-- Footer Links with Modals -->
     <!-- Adsterra Native Banner Ad -->
-    <div style="text-align: center; margin: 30px auto; max-width: 1200px;">
+    <div class="ad-container-box" style="margin: 30px auto; max-width: 1200px;">
         <script async="async" data-cfasync="false" src="//pl30967815.profitableratecpmnetwork.com/6b6e6518244d38844cf75951b76ae4fc/invoke.js"></script>
         <div id="container-6b6e6518244d38844cf75951b76ae4fc"></div>
     </div>
@@ -1731,6 +1799,16 @@
             });
         }
     </script>
+    <!-- Mobile Sticky Bottom Quick Action Bar for High Mobile Conversion & Ad Visibility -->
+    <div class="mobile-sticky-cta">
+        <a href="#play-online" class="mobile-sticky-btn">
+            🎮 Play 3D Online
+        </a>
+        <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.4/Cup.And.Coin.apk" class="mobile-sticky-btn mobile-sticky-btn-apk" target="_blank" rel="noopener noreferrer">
+            🚀 Download v1.0.4 APK
+        </a>
+    </div>
+
     <!-- Adsterra Social Bar Ad -->
     <script type='text/javascript' src='//pl30967814.profitableratecpmnetwork.com/6d/f5/92/6df5927f50798739ac03c869340b074b.js'></script>
 </body>
