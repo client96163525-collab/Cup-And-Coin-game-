@@ -47,6 +47,9 @@ class MainActivity : ComponentActivity() {
         // Initialize Google AdMob
         com.example.util.AdManager.initialize(this)
 
+        // Report app install to official website backend
+        com.example.util.AppInstallReporter.reportInstallIfNeeded(this)
+
         // Global Crash Reporting & Logging Handler
         val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
