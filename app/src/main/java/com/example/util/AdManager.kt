@@ -22,6 +22,7 @@ import com.unity3d.ads.IUnityAdsInitializationListener
 import com.unity3d.ads.IUnityAdsLoadListener
 import com.unity3d.ads.IUnityAdsShowListener
 import com.unity3d.ads.UnityAdsShowOptions
+import com.unity3d.ads.UnityAdsLoadOptions
 import com.unity3d.services.banners.BannerView
 import com.unity3d.services.banners.UnityBannerSize
 import com.unity3d.services.banners.BannerErrorInfo
@@ -124,7 +125,8 @@ object AdManager {
     // Unity Ads Load Methods
     // ----------------------------------------------------
     fun loadUnityInterstitial(context: Context) {
-        UnityAds.load(UNITY_INTERSTITIAL_PLACEMENT_ID, object : IUnityAdsLoadListener {
+        val loadOptions = UnityAdsLoadOptions()
+        UnityAds.load(UNITY_INTERSTITIAL_PLACEMENT_ID, loadOptions, object : IUnityAdsLoadListener {
             override fun onUnityAdsAdLoaded(placementId: String?) {
                 isUnityInterstitialLoaded = true
                 DebugLogger.d("UnityAds", "Unity Interstitial Ad Loaded Successfully")
@@ -138,7 +140,8 @@ object AdManager {
     }
 
     fun loadUnityRewarded(context: Context) {
-        UnityAds.load(UNITY_REWARDED_PLACEMENT_ID, object : IUnityAdsLoadListener {
+        val loadOptions = UnityAdsLoadOptions()
+        UnityAds.load(UNITY_REWARDED_PLACEMENT_ID, loadOptions, object : IUnityAdsLoadListener {
             override fun onUnityAdsAdLoaded(placementId: String?) {
                 isUnityRewardedLoaded = true
                 DebugLogger.d("UnityAds", "Unity Rewarded Ad Loaded Successfully")
