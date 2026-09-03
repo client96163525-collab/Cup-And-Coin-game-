@@ -67,6 +67,7 @@ object AdManager {
     // Unity Ads Load Methods
     // ----------------------------------------------------
     fun loadUnityInterstitial(context: Context) {
+        if (!UnityAds.isInitialized) return
         try {
             UnityAds.load(UNITY_INTERSTITIAL_PLACEMENT_ID, object : IUnityAdsLoadListener {
                 override fun onUnityAdsAdLoaded(placementId: String?) {
@@ -85,6 +86,7 @@ object AdManager {
     }
 
     fun loadUnityRewarded(context: Context) {
+        if (!UnityAds.isInitialized) return
         try {
             UnityAds.load(UNITY_REWARDED_PLACEMENT_ID, object : IUnityAdsLoadListener {
                 override fun onUnityAdsAdLoaded(placementId: String?) {
