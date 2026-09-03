@@ -48,6 +48,7 @@ import androidx.compose.ui.text.AnnotatedString
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import com.example.util.PostHogAnalyticsManager
 
 enum class HomeTab {
     HOME, STATS, THEMES, SETTINGS
@@ -332,14 +333,18 @@ fun HomeScreen(
                         onOpenSettings = { 
                             onPlaySound("tab")
                             currentTab = HomeTab.SETTINGS 
+                            PostHogAnalyticsManager.trackScreen("HomeTab_SETTINGS")
                         },
                         onDailyTrigger = { 
                             onPlaySound("tap")
                             showDailyChallengeDialog = true 
+                            PostHogAnalyticsManager.trackScreen("DailyChallengeDialog")
                         },
                         onLuckySpinTrigger = {
                             onPlaySound("tap")
                             showLuckySpinDialog = true
+                            PostHogAnalyticsManager.trackScreen("LuckySpinDialog")
+                            PostHogAnalyticsManager.trackLuckySpinTriggered("daily_free_spin", "dialog_open")
                         },
                         onSpinClaimed = onSpinClaimed,
                         onPlaySound = onPlaySound
@@ -451,7 +456,8 @@ fun HomeScreen(
                     onClick = { 
                         if (currentTab != HomeTab.HOME) {
                             onPlaySound("tab")
-                            currentTab = HomeTab.HOME 
+                            currentTab = HomeTab.HOME
+                            PostHogAnalyticsManager.trackScreen("HomeTab_HOME")
                         }
                     }
                 )
@@ -462,7 +468,8 @@ fun HomeScreen(
                     onClick = { 
                         if (currentTab != HomeTab.STATS) {
                             onPlaySound("tab")
-                            currentTab = HomeTab.STATS 
+                            currentTab = HomeTab.STATS
+                            PostHogAnalyticsManager.trackScreen("HomeTab_STATS")
                         }
                     }
                 )
@@ -473,7 +480,8 @@ fun HomeScreen(
                     onClick = { 
                         if (currentTab != HomeTab.THEMES) {
                             onPlaySound("tab")
-                            currentTab = HomeTab.THEMES 
+                            currentTab = HomeTab.THEMES
+                            PostHogAnalyticsManager.trackScreen("HomeTab_THEMES")
                         }
                     }
                 )
@@ -484,7 +492,8 @@ fun HomeScreen(
                     onClick = { 
                         if (currentTab != HomeTab.SETTINGS) {
                             onPlaySound("tab")
-                            currentTab = HomeTab.SETTINGS 
+                            currentTab = HomeTab.SETTINGS
+                            PostHogAnalyticsManager.trackScreen("HomeTab_SETTINGS")
                         }
                     }
                 )

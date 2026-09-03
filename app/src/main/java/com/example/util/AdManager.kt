@@ -69,14 +69,17 @@ object AdManager {
     fun loadUnityInterstitial(context: Context) {
         if (!UnityAds.isInitialized) return
         try {
+            PostHogAnalyticsManager.trackAdRequested("INTERSTITIAL", UNITY_INTERSTITIAL_PLACEMENT_ID, "background_preload")
             UnityAds.load(UNITY_INTERSTITIAL_PLACEMENT_ID, object : IUnityAdsLoadListener {
                 override fun onUnityAdsAdLoaded(placementId: String?) {
                     isUnityInterstitialLoaded = true
+                    PostHogAnalyticsManager.trackAdLoaded("INTERSTITIAL", placementId ?: UNITY_INTERSTITIAL_PLACEMENT_ID)
                     DebugLogger.d("UnityAds", "Unity Interstitial Ad Loaded Successfully ($placementId)")
                 }
 
                 override fun onUnityAdsFailedToLoad(placementId: String?, error: UnityAds.UnityAdsLoadError?, message: String?) {
                     isUnityInterstitialLoaded = false
+                    PostHogAnalyticsManager.trackAdFailed("INTERSTITIAL", placementId ?: UNITY_INTERSTITIAL_PLACEMENT_ID, message ?: "Unknown error")
                     DebugLogger.w("UnityAds", "Unity Interstitial failed to load: $message (Error: $error)")
                 }
             })
@@ -88,14 +91,17 @@ object AdManager {
     fun loadUnityRewarded(context: Context) {
         if (!UnityAds.isInitialized) return
         try {
+            PostHogAnalyticsManager.trackAdRequested("REWARDED", UNITY_REWARDED_PLACEMENT_ID, "background_preload")
             UnityAds.load(UNITY_REWARDED_PLACEMENT_ID, object : IUnityAdsLoadListener {
                 override fun onUnityAdsAdLoaded(placementId: String?) {
                     isUnityRewardedLoaded = true
+                    PostHogAnalyticsManager.trackAdLoaded("REWARDED", placementId ?: UNITY_REWARDED_PLACEMENT_ID)
                     DebugLogger.d("UnityAds", "Unity Rewarded Ad Loaded Successfully ($placementId)")
                 }
 
                 override fun onUnityAdsFailedToLoad(placementId: String?, error: UnityAds.UnityAdsLoadError?, message: String?) {
                     isUnityRewardedLoaded = false
+                    PostHogAnalyticsManager.trackAdFailed("REWARDED", placementId ?: UNITY_REWARDED_PLACEMENT_ID, message ?: "Unknown error")
                     DebugLogger.w("UnityAds", "Unity Rewarded failed to load: $message (Error: $error)")
                 }
             })
@@ -113,9 +119,11 @@ object AdManager {
         }
 
         if (UnityAds.isInitialized && isUnityInterstitialLoaded) {
+            PostHogAnalyticsManager.trackAdDisplayed("INTERSTITIAL", UNITY_INTERSTITIAL_PLACEMENT_ID)
             UnityAds.show(activity, UNITY_INTERSTITIAL_PLACEMENT_ID, object : IUnityAdsShowListener {
                 override fun onUnityAdsShowFailure(placementId: String?, error: UnityAds.UnityAdsShowError?, message: String?) {
                     DebugLogger.e("UnityAds", "Unity Interstitial show failed: $message")
+                    PostHogAnalyticsManager.trackAdFailed("INTERSTITIAL", placementId ?: UNITY_INTERSTITIAL_PLACEMENT_ID, message ?: "Show failure")
                     isUnityInterstitialLoaded = false
                     loadUnityInterstitial(activity)
                     onAdDismissed()
@@ -126,6 +134,7 @@ object AdManager {
                 }
 
                 override fun onUnityAdsShowClick(placementId: String?) {
+                    PostHogAnalyticsManager.trackButtonClick("ad_clicked", "InterstitialAd", mapOf("placement_id" to (placementId ?: "")))
                     DebugLogger.d("UnityAds", "Unity Interstitial Clicked")
                 }
 
@@ -157,9 +166,11 @@ object AdManager {
         }
 
         if (UnityAds.isInitialized && isUnityRewardedLoaded) {
+            PostHogAnalyticsManager.trackAdDisplayed("REWARDED", UNITY_REWARDED_PLACEMENT_ID)
             UnityAds.show(activity, UNITY_REWARDED_PLACEMENT_ID, object : IUnityAdsShowListener {
                 override fun onUnityAdsShowFailure(placementId: String?, error: UnityAds.UnityAdsShowError?, message: String?) {
                     DebugLogger.e("UnityAds", "Unity Rewarded show failed: $message (Error: $error)")
+                    PostHogAnalyticsManager.trackAdFailed("REWARDED", placementId ?: UNITY_REWARDED_PLACEMENT_ID, message ?: "Show failure")
                     isUnityRewardedLoaded = false
                     loadUnityRewarded(activity)
                     Toast.makeText(
@@ -175,6 +186,7 @@ object AdManager {
                 }
 
                 override fun onUnityAdsShowClick(placementId: String?) {
+                    PostHogAnalyticsManager.trackButtonClick("ad_clicked", "RewardedAd", mapOf("placement_id" to (placementId ?: "")))
                     DebugLogger.d("UnityAds", "Unity Rewarded Clicked")
                 }
 
@@ -183,6 +195,7 @@ object AdManager {
                     loadUnityRewarded(activity)
                     if (state == UnityAds.UnityAdsShowCompletionState.COMPLETED) {
                         DebugLogger.d("UnityAds", "Unity Rewarded Completed! Granting reward...")
+                        PostHogAnalyticsManager.trackRewardedAdCompleted(500, "user_watch_button")
                         onRewardEarned()
                     } else {
                         DebugLogger.d("UnityAds", "Unity Rewarded Skipped ($state)")

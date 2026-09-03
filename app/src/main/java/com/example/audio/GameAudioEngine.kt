@@ -164,7 +164,7 @@ class GameAudioEngine(private val context: Context) {
     }
 
     // ==========================================
-    // 🔀 SUBTLE CUP SHUFFLING & SLIDE SOUNDS
+    // 🔀 SUBTLE CUP SHUFFLING, MOVEMENT & SLIDE SOUNDS
     // ==========================================
 
     fun playShuffle(mode: GameMode = GameMode.CLASSIC, swapIndex: Int = 0) {
@@ -236,6 +236,70 @@ class GameAudioEngine(private val context: Context) {
                 triggerVibrate(8, 30)
             }
         }
+    }
+
+    /**
+     * Subtle air suction release & upward motion when a cup is lifted
+     */
+    fun playCupLift() {
+        playTone(0.12) { t ->
+            val env = sin((t / 0.12) * PI)
+            val airSuction = sin(2.0 * PI * (160.0 + (t / 0.12) * 240.0) * t)
+            val woodResonance = sin(2.0 * PI * 520.0 * t) * 0.15
+            (airSuction + woodResonance) * env * 0.26
+        }
+        triggerVibrate(7, 35)
+    }
+
+    /**
+     * Soft, natural acoustic thud when a cup lands on the felt table
+     */
+    fun playCupLand() {
+        playTone(0.08) { t ->
+            val env = exp(-t * 55.0)
+            val baseThud = sin(2.0 * PI * 145.0 * t) * 0.75
+            val tableClick = sin(2.0 * PI * 640.0 * t) * 0.25
+            (baseThud + tableClick) * env * 0.30
+        }
+        triggerVibrate(8, 45)
+    }
+
+    /**
+     * Crisp, hollow wooden/ceramic tap when player taps to select a cup
+     */
+    fun playCupSelect() {
+        playTone(0.06) { t ->
+            val env = exp(-t * 70.0)
+            val knock = sin(2.0 * PI * 440.0 * t) * 0.6 + sin(2.0 * PI * 880.0 * t) * 0.3
+            knock * env * 0.35
+        }
+        triggerVibrate(12, 55)
+    }
+
+    /**
+     * Subtle wooden/ceramic wobble rattle during fake shuffles
+     */
+    fun playCupWobble() {
+        playTone(0.18) { t ->
+            val env = sin((t / 0.18) * PI)
+            val wobbleFreq = 320.0 + sin(2.0 * PI * 24.0 * t) * 60.0
+            val rattle = sin(2.0 * PI * wobbleFreq * t) + sin(2.0 * PI * 720.0 * t) * 0.2
+            rattle * env * 0.25
+        }
+        triggerPatternVibrate(longArrayOf(0, 15, 15, 15, 15, 20))
+    }
+
+    /**
+     * Atmospheric subtle suspense heartbeat when guessing begins
+     */
+    fun playSuspensePulse() {
+        playTone(0.22) { t ->
+            val env = exp(-t * 12.0)
+            val subBass = sin(2.0 * PI * 95.0 * t) * 0.8
+            val heartClick = if (t < 0.04) sin(2.0 * PI * 320.0 * t) * 0.3 else 0.0
+            (subBass + heartClick) * env * 0.25
+        }
+        triggerVibrate(10, 30)
     }
 
     // ==========================================
@@ -416,17 +480,6 @@ class GameAudioEngine(private val context: Context) {
 
     fun playCupMove() {
         playShuffle(GameMode.CLASSIC)
-    }
-
-    fun playCupLand() {
-        // Soft, organic wooden cup landing tap on cushioned table surface
-        playTone(0.07) { t ->
-            val env = exp(-t * 60.0)
-            val baseThud = sin(2.0 * PI * 160.0 * t) * 0.7
-            val woodClick = sin(2.0 * PI * 680.0 * t) * 0.25
-            (baseThud + woodClick) * env * 0.28
-        }
-        triggerVibrate(8, 40)
     }
 
     fun playCoinReveal() {

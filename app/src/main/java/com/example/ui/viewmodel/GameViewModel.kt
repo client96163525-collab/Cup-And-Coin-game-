@@ -7,6 +7,7 @@ import com.example.audio.GameAudioEngine
 import com.example.data.GameRepository
 import com.example.model.*
 import com.example.util.DebugLogger
+import com.example.util.PostHogAnalyticsManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -113,6 +114,16 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             mode == GameMode.ENDLESS && resumeLevel > 20 -> 4
             else -> 3
         }
+
+        PostHogAnalyticsManager.trackGameStarted(
+            mode = mode,
+            level = resumeLevel,
+            cupCount = cupCount,
+            shuffleSpeed = 1.0f,
+            currentScore = 0,
+            currentCoins = repository.stats.value.bestScore
+        )
+        PostHogAnalyticsManager.trackScreen("GameScreen_${mode.name}")
 
         _uiState.update {
             it.copy(
@@ -373,6 +384,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                     timeAttackRemainingSec = 5.0f
                 )
             }
+            audioEngine.playSuspensePulse()
 
             // If Time Attack mode, start countdown
             if (mode == GameMode.TIME_ATTACK) {
@@ -432,7 +444,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private suspend fun performFakeShake(slot: Int) {
-        audioEngine.playCupMove()
+        audioEngine.playCupWobble()
         val swap = ActiveSwap(
             id = System.nanoTime(),
             slotA = slot,
@@ -670,7 +682,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
         timerJob?.cancel()
         selectCupJob?.cancel()
-        audioEngine.playTap()
+        audioEngine.playCupSelect()
+        audioEngine.playCupLift()
 
         val cupCount = currentState.cupCount
         val safeSlotIndex = if (slotIndex in 0 until cupCount) slotIndex else -1
@@ -680,6 +693,16 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         val level = currentState.currentLevel
 
         DebugLogger.i("GAME_RESULT", "Tapped Slot: $safeSlotIndex | Winning Slot: $winningSlot | Mode: $mode | Level: $level | Result: ${if (isWin) "WIN 🏆" else "LOSE ❌"}")
+
+        PostHogAnalyticsManager.trackCupSelected(
+            selectedSlot = safeSlotIndex,
+            correctSlot = winningSlot,
+            isWin = isWin,
+            mode = mode,
+            level = level,
+            streak = currentState.winStreak,
+            reactionTimeMs = 0L
+        )
 
         // Synchronously update UI state immediately to REVEALING and set selectedSlotIndex.
         // This IMMEDIATELY sets isInputAllowed = false so no rapid duplicate taps can execute.
@@ -825,6 +848,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                     revealLifts[winningSlot] = 1f
                 }
                 _uiState.update { it.copy(cupLiftAmounts = revealLifts) }
+                audioEngine.playCupLift()
                 audioEngine.playCoinReveal()
             }
             
@@ -851,59 +875,87 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 mode = mode,
                 streak = if (mode == GameMode.PERFECT_RUN) newPerfectStreak else (if (isWin) repository.stats.value.currentStreak + 1 else 0)
             )
+
+            // Telemetry: Game round outcome & updated person properties
+            PostHogAnalyticsManager.trackGameFinished(
+                mode = mode,
+                level = level,
+                isWin = isWin,
+                scoreEarned = roundScore,
+                coinsEarned = if (isWin) (roundScore / 10).coerceAtLeast(10) else 0,
+                streak = newWinStreak,
+                multiplier = newMultiplier
+            )
+            PostHogAnalyticsManager.updateUserProgressProperties(
+                totalScore = repository.stats.value.bestScore,
+                totalCoins = repository.stats.value.bestScore,
+                highestStreak = repository.stats.value.bestStreak,
+                gamesPlayed = repository.stats.value.gamesPlayed + 1,
+                selectedCup = settings.value.selectedCupTheme,
+                selectedCoin = settings.value.selectedCoinTheme
+            )
         }
     }
 
     fun toggleSound() {
         val updated = settings.value.copy(soundEnabled = !settings.value.soundEnabled)
         repository.updateSettings(updated)
+        PostHogAnalyticsManager.trackSettingToggled("sound_enabled", updated.soundEnabled)
         audioEngine.playTap()
     }
 
     fun toggleVibration() {
         val updated = settings.value.copy(vibrationEnabled = !settings.value.vibrationEnabled)
         repository.updateSettings(updated)
+        PostHogAnalyticsManager.trackSettingToggled("vibration_enabled", updated.vibrationEnabled)
         audioEngine.playTap()
     }
 
     fun toggleReducedMotion() {
         val updated = settings.value.copy(reducedMotion = !settings.value.reducedMotion)
         repository.updateSettings(updated)
+        PostHogAnalyticsManager.trackSettingToggled("reduced_motion", updated.reducedMotion)
         audioEngine.playTap()
     }
 
     fun selectCupTheme(theme: CupTheme) {
         val updated = settings.value.copy(selectedCupTheme = theme)
         repository.updateSettings(updated)
+        PostHogAnalyticsManager.trackThemeChanged("cup_theme", theme.name)
         audioEngine.playTap()
     }
 
     fun selectCoinTheme(theme: CoinTheme) {
         val updated = settings.value.copy(selectedCoinTheme = theme)
         repository.updateSettings(updated)
+        PostHogAnalyticsManager.trackThemeChanged("coin_theme", theme.name)
         audioEngine.playTap()
     }
 
     fun selectShuffleTheme(theme: ShuffleTheme) {
         val updated = settings.value.copy(selectedShuffleTheme = theme)
         repository.updateSettings(updated)
+        PostHogAnalyticsManager.trackThemeChanged("shuffle_theme", theme.name)
         audioEngine.playTap()
     }
 
     fun selectAppTheme(theme: com.example.model.AppTheme) {
         val updated = settings.value.copy(appTheme = theme)
         repository.updateSettings(updated)
+        PostHogAnalyticsManager.trackThemeChanged("app_theme", theme.name)
         audioEngine.playTap()
     }
 
     fun spinLuckyWheel(rewardType: String) {
         repository.recordLuckySpin(rewardType)
         _uiState.update { it.copy(isLuckySpinCompletedToday = true) }
+        PostHogAnalyticsManager.trackLuckySpinRewardClaimed(rewardType, 0, "daily_free_spin")
         audioEngine.playRewardClaim()
     }
 
     fun resetProgress() {
         repository.resetProgress()
+        PostHogAnalyticsManager.trackButtonClick("reset_progress_confirmed", "SettingsTab")
         audioEngine.playTap()
         _uiState.update {
             it.copy(

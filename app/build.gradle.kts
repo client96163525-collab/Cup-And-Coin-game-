@@ -129,6 +129,7 @@ dependencies {
   // implementation(libs.play.services.location)
   // implementation(libs.play.services.ads)
   implementation(libs.unity.ads)
+  implementation(libs.posthog.android)
   implementation(libs.retrofit)
   testImplementation(libs.androidx.compose.ui.test.junit4)
   testImplementation(libs.androidx.core)

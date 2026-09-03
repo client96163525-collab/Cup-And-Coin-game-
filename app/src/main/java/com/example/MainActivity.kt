@@ -47,6 +47,9 @@ class MainActivity : ComponentActivity() {
         // Initialize Unity Ads SDK
         com.example.util.AdManager.initialize(this)
 
+        // Initialize PostHog Analytics Engine
+        com.example.util.PostHogAnalyticsManager.initialize(this)
+
         // Report app install to official website backend
         com.example.util.AppInstallReporter.reportInstallIfNeeded(this)
 
@@ -56,6 +59,7 @@ class MainActivity : ComponentActivity() {
             val crashInfo = "FATAL CRASH in thread [${thread.name}]: ${throwable.javaClass.name} - ${throwable.message}\n" +
                     throwable.stackTrace.take(10).joinToString("\n") { "  at $it" }
             com.example.util.DebugLogger.e("CRASH_HANDLER", crashInfo)
+            com.example.util.PostHogAnalyticsManager.trackError("FATAL_CRASH", throwable.message ?: "Unknown", crashInfo)
             try {
                 getSharedPreferences("game_prefs", Context.MODE_PRIVATE)
                     .edit()
