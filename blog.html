@@ -9,6 +9,36 @@
     <link rel="canonical" href="https://cupandcoin.vercel.app/blog.html">
     <link rel="icon" type="image/png" href="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303827/App_icon_ldn6l9.png">
     
+    <!-- Schema.org JSON-LD with Sitelinks SearchAction -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://cupandcoin.vercel.app/#website",
+          "url": "https://cupandcoin.vercel.app/",
+          "name": "Cap and Coin",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://cupandcoin.vercel.app/?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "Blog",
+          "@id": "https://cupandcoin.vercel.app/blog.html#blog",
+          "name": "Cap and Coin 3D Official Blog",
+          "description": "Expert guides, concentration tips, and news for Cap and Coin 3D shell game.",
+          "url": "https://cupandcoin.vercel.app/blog.html"
+        }
+      ]
+    }
+    </script>
+    
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -355,7 +385,7 @@
                 <a href="privacy.html" class="nav-link">Privacy</a>
             </nav>
             <div style="display: flex; align-items: center; gap: 14px;">
-                <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.6/Cup.And.Coin.apk" class="nav-cta-btn" target="_blank" rel="noopener noreferrer">🚀 Download APK</a>
+                <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.6/Cup.And.Coin.apk" class="nav-cta-btn" data-apk-download-btn="true" target="_blank" rel="noopener noreferrer">🚀 Download APK</a>
                 <button class="mobile-menu-toggle" onclick="toggleMobileNav()" aria-label="Toggle navigation menu">
                     ☰
                 </button>
@@ -363,11 +393,11 @@
         </div>
         <!-- Mobile Navigation Drawer -->
         <div class="mobile-nav-drawer" id="mobileNavDrawer">
-            <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.6/Cup.And.Coin.apk" class="nav-link" onclick="toggleMobileNav()" target="_blank" rel="noopener noreferrer">🚀 Download v1.0.6 APK</a>
+            <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.6/Cup.And.Coin.apk" class="nav-link" data-apk-download-btn="true" data-apk-nav-text="true" onclick="toggleMobileNav()" target="_blank" rel="noopener noreferrer">🚀 Download v1.0.6 APK</a>
             <a href="blog.html" class="nav-link active" onclick="toggleMobileNav()">📖 Official Blog & SEO Guides</a>
             <a href="https://cupandcoin.vercel.app/#faq-section" class="nav-link" onclick="toggleMobileNav()">❓ FAQ & Rules</a>
             <a href="privacy.html" class="nav-link" onclick="toggleMobileNav()">🛡️ Privacy Policy</a>
-            <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.6/Cup.And.Coin.apk" class="nav-cta-btn" style="text-align: center; margin-top: 6px;" target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.6/Cup.And.Coin.apk" class="nav-cta-btn" data-apk-download-btn="true" data-apk-nav-text="true" style="text-align: center; margin-top: 6px;" target="_blank" rel="noopener noreferrer">
                 🚀 Download v1.0.6 APK
             </a>
         </div>
@@ -492,6 +522,36 @@
             const drawer = document.getElementById('mobileNavDrawer');
             drawer.classList.toggle('open');
         }
+
+        // Real-time live version updater
+        (function() {
+            async function syncLiveVersion() {
+                try {
+                    const response = await fetch('/version.json?_nocache=' + Date.now(), {
+                        cache: 'no-store',
+                        headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+                    });
+                    if (!response.ok) return;
+                    const data = await response.json();
+                    if (!data || !data.apkUrl) return;
+
+                    document.querySelectorAll('[data-apk-download-btn]').forEach(el => {
+                        el.href = data.apkUrl;
+                        if (el.getAttribute('data-apk-nav-text') === 'true') {
+                            el.innerHTML = `🚀 Download ${data.releaseTag} APK`;
+                        }
+                    });
+                } catch (e) {
+                    console.log('Live sync fallback:', e);
+                }
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', syncLiveVersion);
+            } else {
+                syncLiveVersion();
+            }
+            window.addEventListener('load', syncLiveVersion);
+        })();
     </script>
     <!-- Adsterra Social Bar Ad -->
     <script src="https://pl30967814.profitableratecpmnetwork.com/6d/f5/92/6df5927f50798739ac03c869340b074b.js"></script>

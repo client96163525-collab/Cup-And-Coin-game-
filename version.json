@@ -1,0 +1,15 @@
+{
+  "version": "1.0.6",
+  "versionCode": 6,
+  "releaseTag": "v1.0.6",
+  "apkUrl": "https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.6/Cup.And.Coin.apk",
+  "filename": "Cup.And.Coin.apk",
+  "size": "18.5 MB",
+  "lastUpdated": "2026-09-03T10:38:00Z",
+  "changelog": [
+    "Fixed orbital 3D physics rendering",
+    "Optimized AdManager and fast loading",
+    "Package updated to com.abhix.cupandcoin",
+    "Target SDK 36 (Android 16 ready)"
+  ]
+}

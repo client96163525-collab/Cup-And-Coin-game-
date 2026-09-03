@@ -69,6 +69,14 @@
           "inLanguage": "en-US",
           "publisher": {
             "@id": "https://cupandcoin.vercel.app/#organization"
+          },
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://cupandcoin.vercel.app/?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
           }
         },
         {
@@ -1134,7 +1142,7 @@
                 <a onclick="openModal('privacy')" class="nav-link" style="cursor: pointer;">Privacy</a>
             </nav>
             <div style="display: flex; align-items: center; gap: 14px;">
-                <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.6/Cup.And.Coin.apk" class="nav-cta-btn" onclick="openDownloadModal(event, this.href)" target="_blank" rel="noopener noreferrer">🚀 Download APK</a>
+                <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.6/Cup.And.Coin.apk" class="nav-cta-btn" data-apk-download-btn="true" onclick="openDownloadModal(event, this.href)" target="_blank" rel="noopener noreferrer">🚀 Download APK</a>
                 <button class="mobile-menu-toggle" onclick="toggleMobileNav()" aria-label="Toggle navigation menu">
                     ☰
                 </button>
@@ -1142,12 +1150,12 @@
         </div>
         <!-- Mobile Navigation Drawer -->
         <div class="mobile-nav-drawer" id="mobileNavDrawer">
-            <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.6/Cup.And.Coin.apk" class="nav-link" onclick="openDownloadModal(event, this.href); toggleMobileNav();" target="_blank" rel="noopener noreferrer">🚀 Download v1.0.6 APK</a>
+            <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.6/Cup.And.Coin.apk" class="nav-link" data-apk-download-btn="true" data-apk-nav-text="true" onclick="openDownloadModal(event, this.href); toggleMobileNav();" target="_blank" rel="noopener noreferrer">🚀 Download v1.0.6 APK</a>
             <a href="blog.html" class="nav-link" onclick="toggleMobileNav()">📖 Official Blog & Guides</a>
             <a href="#showcase-section" class="nav-link" onclick="toggleMobileNav()">📱 App Showcase & Screenshots</a>
             <a href="#faq-section" class="nav-link" onclick="toggleMobileNav()">❓ FAQ & Game Rules</a>
             <a onclick="openModal('privacy'); toggleMobileNav();" class="nav-link">🛡️ Privacy Policy</a>
-            <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.6/Cup.And.Coin.apk" class="nav-cta-btn" style="text-align: center; margin-top: 6px;" onclick="openDownloadModal(event, this.href)" target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.6/Cup.And.Coin.apk" class="nav-cta-btn" data-apk-download-btn="true" data-apk-nav-text="true" style="text-align: center; margin-top: 6px;" onclick="openDownloadModal(event, this.href)" target="_blank" rel="noopener noreferrer">
                 🚀 Download v1.0.6 APK
             </a>
         </div>
@@ -1208,14 +1216,14 @@
             <h2>⚡ GET THE OFFICIAL CAP AND COIN APP NOW!</h2>
             <p style="color: #94a3b8; font-size: 1rem; margin: 0 0 20px 0;">Experience the premier 3D shell focus game on your Android device with lightning-fast 60 FPS orbital animations and offline gameplay!</p>
             <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; align-items: center;">
-                <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.6/Cup.And.Coin.apk" class="btn-download-apk" onclick="openDownloadModal(event, this.href)" target="_blank" rel="noopener noreferrer">
+                <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.6/Cup.And.Coin.apk" class="btn-download-apk" data-apk-download-btn="true" data-apk-hero-btn="true" onclick="openDownloadModal(event, this.href)" target="_blank" rel="noopener noreferrer">
                     🚀 Download Official APK (v1.0.6)
                 </a>
                 <a href="#showcase-section" class="btn-play-hero">
                     📱 View Screenshots & Features
                 </a>
             </div>
-            <p style="margin: 12px 0 0 0; font-size: 0.8rem; color: #64748b;">Filename: <strong>Cup.And.Coin.apk</strong> • Version: <strong>v1.0.6 (Latest Release)</strong> • 18.5 MB • 100% Virus-Free & SHA-256 Verified</p>
+            <p style="margin: 12px 0 0 0; font-size: 0.8rem; color: #64748b;" data-apk-meta="true">Filename: <strong>Cup.And.Coin.apk</strong> • Version: <strong>v1.0.6 (Latest Release)</strong> • 18.5 MB • 100% Virus-Free & SHA-256 Verified</p>
         </section>
 
         <!-- Features Showcase Grid -->
@@ -1715,10 +1723,62 @@
     </script>
     <!-- Mobile Sticky Bottom Quick Action Bar for High Mobile Conversion & Ad Visibility -->
     <div class="mobile-sticky-cta">
-        <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.6/Cup.And.Coin.apk" class="mobile-sticky-btn mobile-sticky-btn-apk" onclick="openDownloadModal(event, this.href)" target="_blank" rel="noopener noreferrer" style="width: 100%; text-align: center;">
+        <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.6/Cup.And.Coin.apk" class="mobile-sticky-btn mobile-sticky-btn-apk" data-apk-download-btn="true" data-apk-mobile-btn="true" onclick="openDownloadModal(event, this.href)" target="_blank" rel="noopener noreferrer" style="width: 100%; text-align: center;">
             🚀 Download v1.0.6 APK (Fast Direct)
         </a>
     </div>
+
+    <!-- Real-Time Client-Side Dynamic Live Version Engine (Instant Refreshless Sync) -->
+    <script>
+        (function() {
+            async function syncLiveVersion() {
+                try {
+                    const response = await fetch('/version.json?_nocache=' + Date.now(), {
+                        cache: 'no-store',
+                        headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+                    });
+                    if (!response.ok) return;
+                    const data = await response.json();
+                    if (!data || !data.apkUrl) return;
+
+                    // Update all APK download buttons and links instantly
+                    document.querySelectorAll('[data-apk-download-btn]').forEach(el => {
+                        el.href = data.apkUrl;
+                        if (el.getAttribute('data-apk-hero-btn') === 'true') {
+                            el.innerHTML = `🚀 Download Official APK (${data.releaseTag})`;
+                        } else if (el.getAttribute('data-apk-mobile-btn') === 'true') {
+                            el.innerHTML = `🚀 Download ${data.releaseTag} APK (Fast Direct)`;
+                        } else if (el.getAttribute('data-apk-nav-text') === 'true') {
+                            el.innerHTML = `🚀 Download ${data.releaseTag} APK`;
+                        }
+                    });
+
+                    // Update metadata label
+                    document.querySelectorAll('[data-apk-meta]').forEach(el => {
+                        el.innerHTML = `Filename: <strong>${data.filename}</strong> • Version: <strong>${data.releaseTag} (Latest Release)</strong> • ${data.size} • 100% Virus-Free & SHA-256 Verified`;
+                    });
+
+                    // Update active download modal URL if open
+                    const finalBtn = document.getElementById('download-final-btn');
+                    if (finalBtn) finalBtn.href = data.apkUrl;
+                } catch (e) {
+                    console.log('Live version sync silent fallback:', e);
+                }
+            }
+
+            // Sync on immediate run & on page load
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', syncLiveVersion);
+            } else {
+                syncLiveVersion();
+            }
+            window.addEventListener('load', syncLiveVersion);
+            // Re-sync when user tabs back into the page
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'visible') syncLiveVersion();
+            });
+        })();
+    </script>
 
     <!-- Adsterra Social Bar Ad - Deferred execution for 95+ PageSpeed Performance -->
     <script>
