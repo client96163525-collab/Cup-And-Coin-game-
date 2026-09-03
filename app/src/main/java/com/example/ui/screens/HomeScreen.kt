@@ -38,6 +38,10 @@ import com.example.model.*
 import com.example.ui.components.CoinVisual
 import com.example.ui.components.CupVisual
 import com.example.ui.theme.*
+import androidx.compose.foundation.BorderStroke
+import android.app.Activity
+import com.example.util.AdManager
+import com.example.util.BannerAdView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
@@ -51,6 +55,8 @@ enum class HomeTab {
 
 @Composable
 fun AnimatedMeshBackground() {
+    val theme = LocalAppTheme.current
+    val themeColors = LocalThemeColors.current
     val infiniteTransition = rememberInfiniteTransition(label = "mesh_bg")
     val offset1 by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -71,20 +77,32 @@ fun AnimatedMeshBackground() {
         label = "mesh_offset_2"
     )
     
+    val baseBg = themeColors.background
+    val glow1 = when (theme) {
+        AppTheme.WHITE -> VioletPrimary.copy(alpha = 0.08f)
+        AppTheme.BLACK -> GoldAccent.copy(alpha = 0.06f)
+        else -> LavenderAccent.copy(alpha = 0.15f)
+    }
+    val glow2 = when (theme) {
+        AppTheme.WHITE -> Color(0xFF4A90E2).copy(alpha = 0.05f)
+        AppTheme.BLACK -> VioletPrimary.copy(alpha = 0.06f)
+        else -> NeonCyan.copy(alpha = 0.08f)
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MidnightNavy)
+            .background(baseBg)
             .background(
                 Brush.radialGradient(
-                    colors = listOf(LavenderAccent.copy(alpha = 0.15f), Color.Transparent),
+                    colors = listOf(glow1, Color.Transparent),
                     center = Offset(offset1, offset2),
                     radius = 2000f
                 )
             )
             .background(
                 Brush.radialGradient(
-                    colors = listOf(NeonCyan.copy(alpha = 0.08f), Color.Transparent),
+                    colors = listOf(glow2, Color.Transparent),
                     center = Offset(offset2, offset1),
                     radius = 1600f
                 )
@@ -93,15 +111,25 @@ fun AnimatedMeshBackground() {
 }
 
 @Composable
-fun borderStrokeGradient() = androidx.compose.foundation.BorderStroke(
-    width = 1.dp,
-    brush = Brush.linearGradient(
-        colors = listOf(
-            Color.White.copy(alpha = 0.25f),
-            Color.White.copy(alpha = 0.05f)
+fun borderStrokeGradient(): BorderStroke {
+    val themeColors = LocalThemeColors.current
+    return BorderStroke(
+        width = 1.dp,
+        brush = Brush.linearGradient(
+            colors = if (themeColors.isLight) {
+                listOf(
+                    themeColors.border,
+                    themeColors.border.copy(alpha = 0.5f)
+                )
+            } else {
+                listOf(
+                    Color.White.copy(alpha = 0.25f),
+                    Color.White.copy(alpha = 0.05f)
+                )
+            }
         )
     )
-)
+}
 
 @Composable
 fun AnimatedEntrance(
@@ -142,6 +170,7 @@ fun Glowing3DCard(
     shape: RoundedCornerShape = RoundedCornerShape(20.dp),
     content: @Composable BoxScope.() -> Unit
 ) {
+    val themeColors = LocalThemeColors.current
     val infiniteTransition = rememberInfiniteTransition(label = "card_glow")
     val glowIntensity by if (isGlowing) {
         infiniteTransition.animateFloat(
@@ -166,7 +195,7 @@ fun Glowing3DCard(
                     drawCircle(
                         brush = Brush.radialGradient(
                             colors = listOf(
-                                glowColor.copy(alpha = glowIntensity * 0.22f),
+                                glowColor.copy(alpha = if (themeColors.isLight) glowIntensity * 0.12f else glowIntensity * 0.22f),
                                 Color.Transparent
                             ),
                             center = Offset(w / 2f, h / 2f),
@@ -179,19 +208,27 @@ fun Glowing3DCard(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        PurpleNightSurface.copy(alpha = 0.85f),
-                        Color.Black.copy(alpha = 0.95f)
+                        themeColors.cardGradientTop,
+                        themeColors.cardGradientBottom
                     )
                 )
             )
             .border(
                 width = 1.5.dp,
                 brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color.White.copy(alpha = 0.28f),
-                        glowColor.copy(alpha = 0.65f),
-                        Color.Transparent
-                    )
+                    colors = if (themeColors.isLight) {
+                        listOf(
+                            themeColors.border,
+                            glowColor.copy(alpha = 0.45f),
+                            themeColors.border.copy(alpha = 0.3f)
+                        )
+                    } else {
+                        listOf(
+                            Color.White.copy(alpha = 0.28f),
+                            glowColor.copy(alpha = 0.65f),
+                            Color.Transparent
+                        )
+                    }
                 ),
                 shape = shape
             )
@@ -203,10 +240,17 @@ fun Glowing3DCard(
                 .border(
                     width = 1.dp,
                     brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color.White.copy(alpha = 0.08f),
-                            Color.Transparent
-                        )
+                        colors = if (themeColors.isLight) {
+                            listOf(
+                                themeColors.border.copy(alpha = 0.2f),
+                                Color.Transparent
+                            )
+                        } else {
+                            listOf(
+                                Color.White.copy(alpha = 0.08f),
+                                Color.Transparent
+                            )
+                        }
                     ),
                     shape = shape
                 )
@@ -296,7 +340,9 @@ fun HomeScreen(
                         onLuckySpinTrigger = {
                             onPlaySound("tap")
                             showLuckySpinDialog = true
-                        }
+                        },
+                        onSpinClaimed = onSpinClaimed,
+                        onPlaySound = onPlaySound
                     )
                 }
                 HomeTab.STATS -> {
@@ -348,8 +394,8 @@ fun HomeScreen(
             }
         }
 
-        // Floating Bottom Navigation Bar (Persistent across all tabs!)
-        Row(
+        // Bottom Container: Persistent Banner Ad + Floating Bottom Navigation Bar
+        Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
@@ -358,74 +404,91 @@ fun HomeScreen(
                         colors = listOf(Color.Transparent, PurpleNightBg.copy(alpha = 0.95f))
                     )
                 )
-                .navigationBarsPadding()
-                .padding(bottom = 12.dp)
-                .padding(horizontal = 24.dp)
-                .background(
-                    brush = Brush.verticalGradient(
-                        listOf(PurpleNightSurface.copy(alpha = 0.95f), Color.Black.copy(alpha = 0.97f))
-                    ),
-                    shape = RoundedCornerShape(26.dp)
-                )
-                .border(
-                    width = 1.5.dp,
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color.White.copy(alpha = 0.22f),
-                            LavenderAccent.copy(alpha = 0.45f),
-                            Color.Transparent
-                        )
-                    ),
-                    shape = RoundedCornerShape(26.dp)
-                )
-                .padding(vertical = 10.dp, horizontal = 12.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
+                .navigationBarsPadding(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            BottomNavItem(
-                label = "HOME",
-                icon = Icons.Default.Home,
-                isActive = currentTab == HomeTab.HOME,
-                onClick = { 
-                    if (currentTab != HomeTab.HOME) {
-                        onPlaySound("tab")
-                        currentTab = HomeTab.HOME 
+            // Live Ad Banner Display
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 2.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                BannerAdView(modifier = Modifier.fillMaxWidth())
+            }
+
+            // Floating Bottom Navigation Bar
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 10.dp, top = 4.dp)
+                    .padding(horizontal = 24.dp)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            listOf(PurpleNightSurface.copy(alpha = 0.95f), Color.Black.copy(alpha = 0.97f))
+                        ),
+                        shape = RoundedCornerShape(26.dp)
+                    )
+                    .border(
+                        width = 1.5.dp,
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.White.copy(alpha = 0.22f),
+                                LavenderAccent.copy(alpha = 0.45f),
+                                Color.Transparent
+                            )
+                        ),
+                        shape = RoundedCornerShape(26.dp)
+                    )
+                    .padding(vertical = 10.dp, horizontal = 12.dp),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                BottomNavItem(
+                    label = "HOME",
+                    icon = Icons.Default.Home,
+                    isActive = currentTab == HomeTab.HOME,
+                    onClick = { 
+                        if (currentTab != HomeTab.HOME) {
+                            onPlaySound("tab")
+                            currentTab = HomeTab.HOME 
+                        }
                     }
-                }
-            )
-            BottomNavItem(
-                label = "STATS",
-                icon = Icons.Outlined.Leaderboard,
-                isActive = currentTab == HomeTab.STATS,
-                onClick = { 
-                    if (currentTab != HomeTab.STATS) {
-                        onPlaySound("tab")
-                        currentTab = HomeTab.STATS 
+                )
+                BottomNavItem(
+                    label = "STATS",
+                    icon = Icons.Outlined.Leaderboard,
+                    isActive = currentTab == HomeTab.STATS,
+                    onClick = { 
+                        if (currentTab != HomeTab.STATS) {
+                            onPlaySound("tab")
+                            currentTab = HomeTab.STATS 
+                        }
                     }
-                }
-            )
-            BottomNavItem(
-                label = "THEMES",
-                icon = Icons.Outlined.Palette,
-                isActive = currentTab == HomeTab.THEMES,
-                onClick = { 
-                    if (currentTab != HomeTab.THEMES) {
-                        onPlaySound("tab")
-                        currentTab = HomeTab.THEMES 
+                )
+                BottomNavItem(
+                    label = "THEMES",
+                    icon = Icons.Outlined.Palette,
+                    isActive = currentTab == HomeTab.THEMES,
+                    onClick = { 
+                        if (currentTab != HomeTab.THEMES) {
+                            onPlaySound("tab")
+                            currentTab = HomeTab.THEMES 
+                        }
                     }
-                }
-            )
-            BottomNavItem(
-                label = "SETTINGS",
-                icon = Icons.Outlined.Settings,
-                isActive = currentTab == HomeTab.SETTINGS,
-                onClick = { 
-                    if (currentTab != HomeTab.SETTINGS) {
-                        onPlaySound("tab")
-                        currentTab = HomeTab.SETTINGS 
+                )
+                BottomNavItem(
+                    label = "SETTINGS",
+                    icon = Icons.Outlined.Settings,
+                    isActive = currentTab == HomeTab.SETTINGS,
+                    onClick = { 
+                        if (currentTab != HomeTab.SETTINGS) {
+                            onPlaySound("tab")
+                            currentTab = HomeTab.SETTINGS 
+                        }
                     }
-                }
-            )
+                )
+            }
         }
 
         if (showDailyChallengeDialog) {
@@ -469,7 +532,9 @@ fun HomeTabContent(
     onStartGame: (GameMode) -> Unit,
     onOpenSettings: () -> Unit,
     onDailyTrigger: () -> Unit,
-    onLuckySpinTrigger: () -> Unit
+    onLuckySpinTrigger: () -> Unit,
+    onSpinClaimed: (String) -> Unit = {},
+    onPlaySound: (String) -> Unit = {}
 ) {
     var selectedMode by remember { mutableStateOf(GameMode.CLASSIC) }
 
@@ -702,6 +767,17 @@ fun HomeTabContent(
             }
         }
 
+        // WATCH VIDEO AD FOR BONUS REWARD CARD
+        item {
+            AnimatedEntrance(isVisible = isVisible, delayMillis = 390) {
+                WatchAdRewardCard(
+                    stats = stats,
+                    onRewardEarned = onSpinClaimed,
+                    onPlaySound = onPlaySound
+                )
+            }
+        }
+
         // TODAY Stats Row Section
         item {
             AnimatedEntrance(isVisible = isVisible, delayMillis = 400) {
@@ -745,6 +821,114 @@ fun HomeTabContent(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun WatchAdRewardCard(
+    stats: PlayerStats,
+    onRewardEarned: (String) -> Unit,
+    onPlaySound: (String) -> Unit
+) {
+    val context = LocalContext.current
+    var isShowingAd by remember { mutableStateOf(false) }
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(enabled = !isShowingAd) {
+                onPlaySound("tap")
+                val activity = context as? Activity
+                if (activity != null) {
+                    isShowingAd = true
+                    AdManager.showRewardedAd(
+                        activity = activity,
+                        onRewardEarned = {
+                            isShowingAd = false
+                            onPlaySound("reward")
+                            onRewardEarned("500PTS")
+                            Toast.makeText(context, "🎉 +500 Coins Earned from Video Ad!", Toast.LENGTH_LONG).show()
+                        },
+                        onAdClosed = {
+                            isShowingAd = false
+                        }
+                    )
+                } else {
+                    Toast.makeText(context, "Ad loading... please try again", Toast.LENGTH_SHORT).show()
+                }
+            },
+        shape = RoundedCornerShape(22.dp),
+        color = PurpleNightSurfaceElevated,
+        border = BorderStroke(
+            width = 1.5.dp,
+            brush = Brush.horizontalGradient(
+                listOf(GoldAccent.copy(alpha = 0.9f), Color(0xFFFF4081), NeonCyan)
+            )
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(50.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        brush = Brush.linearGradient(
+                            listOf(GoldAccent, Color(0xFFFF6D00))
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("📺", fontSize = 24.sp)
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = "WATCH AD FOR +500 PTS",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Black,
+                        color = GoldAccent,
+                        letterSpacing = 0.8.sp
+                    )
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = Color(0xFFFF4081).copy(alpha = 0.25f),
+                        border = BorderStroke(1.dp, Color(0xFFFF4081).copy(alpha = 0.6f))
+                    ) {
+                        Text(
+                            text = "BONUS",
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFFFF4081),
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = if (isShowingAd) "Loading video ad..." else "Tap to watch a video ad & claim instant points & rewards!",
+                    fontSize = 11.sp,
+                    color = Color.White.copy(alpha = 0.7f),
+                    lineHeight = 14.sp
+                )
+            }
+
+            Icon(
+                imageVector = Icons.Default.PlayArrow,
+                contentDescription = "Watch Ad",
+                tint = GoldAccent,
+                modifier = Modifier.size(24.dp)
+            )
         }
     }
 }
@@ -1982,8 +2166,14 @@ fun SettingsTabContent(
             }
         }
 
-        // Offline Info
+        // Device Cloud Backup Status
         item {
+            val context = LocalContext.current
+            val deviceId = remember { com.example.util.DeviceCloudSyncManager.getDeviceId(context) }
+            val maskedId = remember(deviceId) { 
+                if (deviceId.length > 8) "${deviceId.take(4)}...${deviceId.takeLast(4)}" else deviceId 
+            }
+            
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
@@ -1999,13 +2189,13 @@ fun SettingsTabContent(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.CloudOff,
+                            imageVector = Icons.Default.CloudDone,
                             contentDescription = null,
                             tint = EmeraldGreen,
                             modifier = Modifier.size(16.dp)
                         )
                         Text(
-                            text = "100% Offline Ready • Zero Internet Required",
+                            text = "Cloud Backup Active • Device ID: $maskedId",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = EmeraldGreen

@@ -2,12 +2,14 @@ package com.example.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.example.model.AppTheme
 import com.example.model.CoinTheme
 import com.example.model.CupTheme
 import com.example.model.GameMode
 import com.example.model.GameSettings
 import com.example.model.PlayerStats
 import com.example.model.ShuffleTheme
+import com.example.util.DeviceCloudSyncManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,7 +17,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class GameRepository(context: Context) {
+class GameRepository(private val context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences("three_cup_coin_prefs", Context.MODE_PRIVATE)
 
     private val _stats = MutableStateFlow(loadStats())
@@ -23,6 +25,18 @@ class GameRepository(context: Context) {
 
     private val _settings = MutableStateFlow(loadSettings())
     val settings: StateFlow<GameSettings> = _settings.asStateFlow()
+
+    init {
+        // If fresh install or empty data, check if previous backup exists for this device hardware ID
+        val current = _stats.value
+        if (current.gamesPlayed == 0 && current.bestScore == 0) {
+            DeviceCloudSyncManager.restoreStatsFromCloudIfAvailable(context) { restored ->
+                if (restored.bestScore > 0 || restored.highestLevel > 1) {
+                    restoreStats(restored)
+                }
+            }
+        }
+    }
 
     private fun loadStats(): PlayerStats {
         return PlayerStats(
@@ -42,7 +56,6 @@ class GameRepository(context: Context) {
             doubleScoreActive = prefs.getBoolean("doubleScoreActive", false),
             lastSpinDate = prefs.getString("lastSpinDate", "") ?: "",
             isTutorialCompleted = prefs.getBoolean("isTutorialCompleted", false)
-            // ModeStats persistence would go here in a full implementation
         )
     }
 
@@ -50,10 +63,12 @@ class GameRepository(context: Context) {
         val cupThemeId = prefs.getString("selectedCupTheme", CupTheme.ROYAL_CRIMSON.id) ?: CupTheme.ROYAL_CRIMSON.id
         val coinThemeId = prefs.getString("selectedCoinTheme", CoinTheme.GOLD_STAR.id) ?: CoinTheme.GOLD_STAR.id
         val shuffleThemeId = prefs.getString("selectedShuffleTheme", ShuffleTheme.CLASSIC_SLIDE.id) ?: ShuffleTheme.CLASSIC_SLIDE.id
+        val appThemeName = prefs.getString("appTheme", AppTheme.ORIGINAL.name) ?: AppTheme.ORIGINAL.name
 
         val cupTheme = CupTheme.entries.find { it.id == cupThemeId } ?: CupTheme.ROYAL_CRIMSON
         val coinTheme = CoinTheme.entries.find { it.id == coinThemeId } ?: CoinTheme.GOLD_STAR
         val shuffleTheme = ShuffleTheme.entries.find { it.id == shuffleThemeId } ?: ShuffleTheme.CLASSIC_SLIDE
+        val appTheme = try { AppTheme.valueOf(appThemeName) } catch (_: Exception) { AppTheme.ORIGINAL }
 
         return GameSettings(
             soundEnabled = prefs.getBoolean("soundEnabled", true),
@@ -61,8 +76,37 @@ class GameRepository(context: Context) {
             reducedMotion = prefs.getBoolean("reducedMotion", false),
             selectedCupTheme = cupTheme,
             selectedCoinTheme = coinTheme,
-            selectedShuffleTheme = shuffleTheme
+            selectedShuffleTheme = shuffleTheme,
+            appTheme = appTheme
         )
+    }
+
+    fun restoreStats(restored: PlayerStats) {
+        val updated = _stats.value.copy(
+            bestScore = maxOf(_stats.value.bestScore, restored.bestScore),
+            highestLevel = maxOf(_stats.value.highestLevel, restored.highestLevel),
+            gamesPlayed = maxOf(_stats.value.gamesPlayed, restored.gamesPlayed),
+            gamesWon = maxOf(_stats.value.gamesWon, restored.gamesWon),
+            shieldCount = maxOf(_stats.value.shieldCount, restored.shieldCount),
+            dailyStreak = maxOf(_stats.value.dailyStreak, restored.dailyStreak),
+            bestStreak = maxOf(_stats.value.bestStreak, restored.bestStreak),
+            bestCombo = maxOf(_stats.value.bestCombo, restored.bestCombo),
+            isTutorialCompleted = _stats.value.isTutorialCompleted || restored.isTutorialCompleted
+        )
+
+        prefs.edit()
+            .putInt("gamesPlayed", updated.gamesPlayed)
+            .putInt("gamesWon", updated.gamesWon)
+            .putInt("bestScore", updated.bestScore)
+            .putInt("highestLevel", updated.highestLevel)
+            .putInt("shieldCount", updated.shieldCount)
+            .putInt("dailyStreak", updated.dailyStreak)
+            .putInt("bestStreak", updated.bestStreak)
+            .putInt("bestCombo", updated.bestCombo)
+            .putBoolean("isTutorialCompleted", updated.isTutorialCompleted)
+            .apply()
+
+        _stats.value = updated
     }
 
     fun recordGameRound(isWin: Boolean, score: Int, level: Int, combo: Int, mode: GameMode = GameMode.CLASSIC, streak: Int = 0) {
@@ -102,6 +146,9 @@ class GameRepository(context: Context) {
             .apply()
 
         _stats.value = updated
+
+        // Sync updated stats to device cloud backup
+        DeviceCloudSyncManager.syncStatsToCloud(context, updated)
     }
 
     fun recordDailyChallengeCompletion() {
@@ -125,6 +172,7 @@ class GameRepository(context: Context) {
             .apply()
 
         _stats.value = updated
+        DeviceCloudSyncManager.syncStatsToCloud(context, updated)
     }
 
     fun isDailyChallengeCompletedToday(): Boolean {
@@ -164,6 +212,7 @@ class GameRepository(context: Context) {
             .apply()
 
         _stats.value = updated
+        DeviceCloudSyncManager.syncStatsToCloud(context, updated)
     }
 
     fun useShield() {
@@ -172,6 +221,7 @@ class GameRepository(context: Context) {
         val updated = current.copy(shieldCount = newShieldCount)
         prefs.edit().putInt("shieldCount", newShieldCount).apply()
         _stats.value = updated
+        DeviceCloudSyncManager.syncStatsToCloud(context, updated)
     }
 
     fun consumeDoubleScore() {
@@ -189,6 +239,7 @@ class GameRepository(context: Context) {
             .putInt("bestScore", updated.bestScore)
             .apply()
         _stats.value = updated
+        DeviceCloudSyncManager.syncStatsToCloud(context, updated)
     }
 
     fun updateSettings(newSettings: GameSettings) {
@@ -199,6 +250,7 @@ class GameRepository(context: Context) {
             .putString("selectedCupTheme", newSettings.selectedCupTheme.id)
             .putString("selectedCoinTheme", newSettings.selectedCoinTheme.id)
             .putString("selectedShuffleTheme", newSettings.selectedShuffleTheme.id)
+            .putString("appTheme", newSettings.appTheme.name)
             .apply()
 
         _settings.value = newSettings

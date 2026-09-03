@@ -30,6 +30,9 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import android.app.Activity
+import com.example.util.AdManager
+import android.widget.Toast
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -477,28 +480,86 @@ fun LuckySpinDialog(
                     // 3D INTERACTIVE SPIN TRIGGER BUTTON
                     // ═══════════════════════════════════════════
                     if (isCompletedToday && !showRewardDialog) {
-                        Surface(
-                            shape = RoundedCornerShape(16.dp),
-                            color = EmeraldGreen.copy(alpha = 0.12f),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, EmeraldGreen.copy(alpha = 0.4f)),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(46.dp)
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 12.dp)) {
+                            Surface(
+                                shape = RoundedCornerShape(14.dp),
+                                color = EmeraldGreen.copy(alpha = 0.12f),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, EmeraldGreen.copy(alpha = 0.4f)),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(42.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 12.dp)) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Text("✓", color = EmeraldGreen, fontWeight = FontWeight.Black, fontSize = 14.sp)
+                                        Text(
+                                            text = "FREE DAILY SPIN CLAIMED",
+                                            color = Color.White,
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            letterSpacing = 0.5.sp,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Watch Ad for extra spin button
+                            Button(
+                                onClick = {
+                                    onPlaySound("tap")
+                                    val activity = context as? Activity
+                                    if (activity != null) {
+                                        AdManager.showRewardedAd(
+                                            activity = activity,
+                                            onRewardEarned = {
+                                                onPlaySound("reward")
+                                                Toast.makeText(context, "🎁 Bonus Spin Unlocked! Spinning wheel...", Toast.LENGTH_SHORT).show()
+                                                if (!isSpinning) {
+                                                    isSpinning = true
+                                                    val randomSpinDegrees = 360f * (8 + Random.nextInt(5)) + Random.nextInt(360)
+                                                    rotationAngle += randomSpinDegrees
+
+                                                    scope.launch {
+                                                        for (tick in 1..28) {
+                                                            val delayTime = (tick * tick * 4L).coerceIn(40L, 340L)
+                                                            delay(delayTime)
+                                                            pegNeedleVibration = if (tick % 2 == 0) 12f else -12f
+                                                            onPlaySound("wheel_tick")
+                                                        }
+                                                        pegNeedleVibration = 0f
+                                                    }
+                                                }
+                                            },
+                                            onAdClosed = {}
+                                        )
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = GoldAccent
+                                ),
+                                shape = RoundedCornerShape(16.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(48.dp)
+                            ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    Text("✓", color = EmeraldGreen, fontWeight = FontWeight.Black, fontSize = 14.sp)
+                                    Text("📺", fontSize = 18.sp)
                                     Text(
-                                        text = "SPIN COMPLETED TODAY",
-                                        color = Color.White,
+                                        text = "WATCH AD FOR EXTRA SPIN",
+                                        color = Color.Black,
                                         fontSize = 12.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        letterSpacing = 0.5.sp,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
+                                        fontWeight = FontWeight.Black
                                     )
                                 }
                             }
@@ -695,25 +756,52 @@ fun LuckySpinDialog(
 
                             Spacer(modifier = Modifier.height(6.dp))
 
+                            var isClaimingAd by remember { mutableStateOf(false) }
+
                             Button(
                                 onClick = {
-                                    onPlaySound("coin")
-                                    showRewardDialog = false
-                                    onSpinClaimed(winningSegment.rewardType)
-                                    onDismiss()
+                                    val activity = context as? Activity
+                                    if (activity != null) {
+                                        isClaimingAd = true
+                                        onPlaySound("tap")
+                                        AdManager.showRewardedAd(
+                                            activity = activity,
+                                            onRewardEarned = {
+                                                isClaimingAd = false
+                                                onPlaySound("coin")
+                                                showRewardDialog = false
+                                                onSpinClaimed(winningSegment.rewardType)
+                                                Toast.makeText(context, "🎉 ${winningSegment.title} Claimed Successfully!", Toast.LENGTH_LONG).show()
+                                                onDismiss()
+                                            },
+                                            onAdClosed = {
+                                                isClaimingAd = false
+                                            }
+                                        )
+                                    } else {
+                                        Toast.makeText(context, "Ad loading... Please try again", Toast.LENGTH_SHORT).show()
+                                    }
                                 },
+                                enabled = !isClaimingAd,
                                 colors = ButtonDefaults.buttonColors(containerColor = GoldAccent),
                                 shape = RoundedCornerShape(16.dp),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(52.dp)
                             ) {
-                                Text(
-                                    text = "CLAIM REWARD ➔",
-                                    color = Color.Black,
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Black
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    Text("📺", fontSize = 20.sp)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = if (isClaimingAd) "LOADING AD..." else "WATCH AD TO CLAIM REWARD",
+                                        color = Color.Black,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Black
+                                    )
+                                }
                             }
                         }
                     }

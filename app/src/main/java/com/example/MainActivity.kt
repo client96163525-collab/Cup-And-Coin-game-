@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Initialize Google AdMob
+        // Initialize Unity Ads SDK
         com.example.util.AdManager.initialize(this)
 
         // Report app install to official website backend
@@ -76,10 +76,10 @@ class MainActivity : ComponentActivity() {
                 else -> MidnightNavy
             }
 
-            MyApplicationTheme {
+            MyApplicationTheme(appTheme = appTheme) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = backgroundColor
+                    color = MaterialTheme.colorScheme.background
                 ) {
                     var showSplash by remember { mutableStateOf(true) }
 

@@ -27,6 +27,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import android.app.Activity
+import androidx.compose.ui.platform.LocalContext
+import com.example.util.AdManager
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -301,6 +304,18 @@ fun GameScreen(
 ) {
     var showExitConfirmDialog by remember { mutableStateOf(false) }
     val visualTheme = remember(uiState.gameMode) { ModeThemeFactory.getTheme(uiState.gameMode) }
+    val context = LocalContext.current
+
+    val safeReturnToHome = {
+        val activity = context as? Activity
+        if (activity != null) {
+            AdManager.showInterstitialAd(activity) {
+                onReturnToHome()
+            }
+        } else {
+            onReturnToHome()
+        }
+    }
 
     // Intercept back button during gameplay to safely confirm quit
     BackHandler(enabled = true) {
@@ -396,7 +411,7 @@ fun GameScreen(
                 onNextRound = onNextRound,
                 onRetryRound = onRetryRound,
                 onRestartGame = onRestartGame,
-                onReturnToHome = onReturnToHome,
+                onReturnToHome = safeReturnToHome,
                 onCupSelected = onCupSelected
             )
         }
@@ -449,7 +464,7 @@ fun GameScreen(
                     Button(
                         onClick = {
                             showExitConfirmDialog = false
-                            onReturnToHome()
+                            safeReturnToHome()
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = visualTheme.primaryAccent),
                         shape = RoundedCornerShape(14.dp),
