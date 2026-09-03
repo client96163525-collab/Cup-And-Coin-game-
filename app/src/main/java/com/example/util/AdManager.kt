@@ -161,10 +161,6 @@ object AdManager {
             initialize(activity)
         }
 
-        if (!isUnityRewardedLoaded) {
-            loadUnityRewarded(activity)
-        }
-
         if (UnityAds.isInitialized && isUnityRewardedLoaded) {
             PostHogAnalyticsManager.trackAdDisplayed("REWARDED", UNITY_REWARDED_PLACEMENT_ID)
             UnityAds.show(activity, UNITY_REWARDED_PLACEMENT_ID, object : IUnityAdsShowListener {
@@ -175,7 +171,7 @@ object AdManager {
                     loadUnityRewarded(activity)
                     Toast.makeText(
                         activity,
-                        "Ad failed to display: $message. Please try again in a moment.",
+                        "Ad is preparing, please tap once more in 2 seconds!",
                         Toast.LENGTH_SHORT
                     ).show()
                     onAdClosed()
@@ -201,7 +197,7 @@ object AdManager {
                         DebugLogger.d("UnityAds", "Unity Rewarded Skipped ($state)")
                         Toast.makeText(
                             activity,
-                            "Ad was skipped. Watch complete ad to claim reward!",
+                            "Ad was skipped. Watch full ad to get reward!",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
@@ -209,11 +205,11 @@ object AdManager {
                 }
             })
         } else {
-            DebugLogger.d("UnityAds", "Unity Rewarded not ready yet. Preloading...")
+            DebugLogger.d("UnityAds", "Unity Rewarded not cached yet. Requesting load now...")
             loadUnityRewarded(activity)
             Toast.makeText(
                 activity,
-                "Ad is loading... Please check internet and tap again in a moment.",
+                "Loading video ad... Please tap again in 2 seconds!",
                 Toast.LENGTH_SHORT
             ).show()
             onAdClosed()
