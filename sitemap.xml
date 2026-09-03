@@ -1,30 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
   <url>
     <loc>https://cupandcoin.vercel.app/</loc>
-    <lastmod>2026-08-22T00:00:00+00:00</lastmod>
+    <lastmod>2026-09-03T09:59:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303827/App_icon_ldn6l9.png</image:loc>
+      <image:title>Cap and Coin 3D - Official Shell Game</image:title>
+      <image:caption>Track the golden coin in 3D realistic orbital shuffles.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://cupandcoin.vercel.app/blog.html</loc>
-    <lastmod>2026-08-22T00:00:00+00:00</lastmod>
+    <lastmod>2026-09-03T09:59:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://cupandcoin.vercel.app/privacy.html</loc>
-    <lastmod>2026-08-22T00:00:00+00:00</lastmod>
+    <lastmod>2026-09-03T09:59:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://cupandcoin.vercel.app/terms.html</loc>
-    <lastmod>2026-08-22T00:00:00+00:00</lastmod>
+    <lastmod>2026-09-03T09:59:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 </urlset>
+
