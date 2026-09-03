@@ -36,10 +36,7 @@
     <meta name="twitter:description" content="Play the official Cap and Coin game online! Track the hidden coin under 3D caps, beat orbital shuffles, and train your focus.">
     <meta name="twitter:image" content="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303823/cup_and_coin_v2_screenshot_1_uo3gnn.jpg">
 
-    <!-- Preload Official High-Resolution In-Game Screenshots -->
-    <link rel="preload" as="image" href="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303823/cup_and_coin_v2_screenshot_1_uo3gnn.jpg">
-    <link rel="preload" as="image" href="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303823/cup_and_coin_v2_screenshot_3_cvtw2f.jpg">
-    <link rel="preload" as="image" href="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303822/cup_and_coin_v2_screenshot_4_nhxsxs.jpg">
+
 
     <!-- Schema.org Comprehensive Structured Data (JSON-LD) with FAQ Schema for Top Google Ranking -->
     <script type="application/ld+json">
@@ -388,185 +385,7 @@
             box-shadow: 0 15px 35px rgba(0, 230, 118, 0.55);
         }
 
-        /* ----------------------------------------------------
-           INTERACTIVE 3D CUP SHUFFLING MINI GAME
-           ---------------------------------------------------- */
-        .game-wrapper {
-            background: var(--card-bg);
-            border: 1.5px solid rgba(0, 229, 255, 0.25);
-            border-radius: 24px;
-            padding: 35px 25px;
-            margin-bottom: 50px;
-            position: relative;
-            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-        }
 
-        .game-header {
-            margin-bottom: 24px;
-        }
-
-        .game-header h2 {
-            font-size: 1.6rem;
-            font-weight: 850;
-            color: #ffffff;
-            margin: 0 0 10px 0;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .game-header p {
-            color: #94a3b8;
-            font-size: 0.95rem;
-            max-width: 650px;
-            margin: 0 auto;
-        }
-
-        /* 3D Play Stage */
-        .stage-3d {
-            height: 220px;
-            position: relative;
-            perspective: 800px;
-            border-bottom: 4px solid #1e293b;
-            box-shadow: 0 8px 0 rgba(0, 0, 0, 0.3);
-            border-radius: 8px;
-            margin: 24px 0;
-            display: flex;
-            justify-content: space-around;
-            align-items: flex-end;
-            padding-bottom: 25px;
-        }
-
-        /* 3D Cylindrical Cup Design */
-        .cup-3d {
-            width: 80px;
-            height: 110px;
-            position: absolute;
-            bottom: 25px;
-            transform-style: preserve-3d;
-            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), left 0.4s ease-in-out;
-            cursor: pointer;
-            z-index: 10;
-        }
-
-        /* Initial horizontal offsets */
-        #cup-0 { left: calc(16.66% - 40px); }
-        #cup-1 { left: calc(50% - 40px); }
-        #cup-2 { left: calc(83.33% - 40px); }
-
-        .cup-body {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to right, #7c3aed, #d500f9, #7c3aed);
-            border-radius: 12px 12px 6px 6px;
-            box-shadow: 
-                0 10px 20px rgba(0, 0, 0, 0.5),
-                inset 0 15px 25px rgba(255, 255, 255, 0.25),
-                inset 0 -15px 25px rgba(0, 0, 0, 0.5),
-                0 0 20px rgba(213, 0, 249, 0.3);
-            border: 2px solid rgba(255, 255, 255, 0.15);
-        }
-
-        /* Cyber-neon details on the cups */
-        .cup-ring {
-            position: absolute;
-            width: 100%;
-            height: 8px;
-            background: var(--neon-cyan);
-            top: 25%;
-            box-shadow: 0 0 15px var(--neon-cyan);
-            border-radius: 2px;
-        }
-        .cup-ring-bottom {
-            position: absolute;
-            width: 100%;
-            height: 6px;
-            background: var(--neon-cyan);
-            bottom: 12%;
-            box-shadow: 0 0 12px var(--neon-cyan);
-            border-radius: 2px;
-        }
-
-        .cup-rim {
-            position: absolute;
-            top: 0;
-            left: -2px;
-            width: calc(100% + 4px);
-            height: 14px;
-            background: #ffffff;
-            border-radius: 50%;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
-        }
-
-        /* Cup Lifted State */
-        .cup-3d.lifted {
-            transform: translateY(-70px) rotateX(15deg);
-            z-index: 20;
-        }
-
-        /* Glowing Coin */
-        .coin-3d {
-            width: 38px;
-            height: 38px;
-            background: radial-gradient(circle, #ffe082 20%, #ffb300 100%);
-            border: 2px solid #ffffff;
-            border-radius: 50%;
-            position: absolute;
-            bottom: 25px;
-            left: calc(50% - 19px);
-            box-shadow: 0 0 20px #ffea00, 0 5px 10px rgba(0,0,0,0.5);
-            transform: translateZ(-1px);
-            display: none;
-            z-index: 5;
-            animation: spinCoin 1.5s linear infinite;
-        }
-
-        @keyframes spinCoin {
-            0% { transform: rotateY(0deg); }
-            100% { transform: rotateY(360deg); }
-        }
-
-        /* Interactive Action Buttons */
-        .btn-action {
-            background: linear-gradient(135deg, var(--neon-cyan) 0%, #00838f 100%);
-            border: none;
-            color: #000000;
-            padding: 14px 28px;
-            font-size: 1rem;
-            font-weight: 800;
-            border-radius: 14px;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
-            transition: all 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 10px;
-        }
-
-        .btn-action:hover:not(:disabled) {
-            transform: scale(1.05);
-            box-shadow: 0 0 30px rgba(0, 229, 255, 0.7);
-        }
-
-        .btn-action:disabled {
-            background: #1e293b;
-            color: #475569;
-            box-shadow: none;
-            cursor: not-allowed;
-        }
-
-        .game-status {
-            font-size: 1.1rem;
-            font-weight: bold;
-            height: 30px;
-            margin-top: 15px;
-            color: var(--neon-cyan);
-            text-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
-        }
 
         /* ----------------------------------------------------
            FEATURES SECTION
@@ -1302,14 +1121,14 @@
                 <span class="nav-brand-title">Cap & Coin 3D</span>
             </a>
             <nav class="nav-links-desktop">
-                <a href="#play-online" class="nav-link">Play 3D Online</a>
+                <a href="#download-section" class="nav-link">📥 Download APK</a>
                 <a href="blog.html" class="nav-link">📖 Blog</a>
                 <a href="#showcase-section" class="nav-link">App Showcase</a>
                 <a href="#faq-section" class="nav-link">FAQ</a>
                 <a onclick="openModal('privacy')" class="nav-link" style="cursor: pointer;">Privacy</a>
             </nav>
             <div style="display: flex; align-items: center; gap: 14px;">
-                <a href="#play-online" class="nav-cta-btn">🎮 Play Now</a>
+                <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.5/Cup.And.Coin.apk" class="nav-cta-btn" onclick="openDownloadModal(event, this.href)" target="_blank" rel="noopener noreferrer">🚀 Download APK</a>
                 <button class="mobile-menu-toggle" onclick="toggleMobileNav()" aria-label="Toggle navigation menu">
                     ☰
                 </button>
@@ -1317,12 +1136,12 @@
         </div>
         <!-- Mobile Navigation Drawer -->
         <div class="mobile-nav-drawer" id="mobileNavDrawer">
-            <a href="#play-online" class="nav-link" onclick="toggleMobileNav()">🎮 Play 3D Online</a>
+            <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.5/Cup.And.Coin.apk" class="nav-link" onclick="openDownloadModal(event, this.href); toggleMobileNav();" target="_blank" rel="noopener noreferrer">🚀 Download v1.0.5 APK</a>
             <a href="blog.html" class="nav-link" onclick="toggleMobileNav()">📖 Official Blog & Guides</a>
             <a href="#showcase-section" class="nav-link" onclick="toggleMobileNav()">📱 App Showcase & Screenshots</a>
             <a href="#faq-section" class="nav-link" onclick="toggleMobileNav()">❓ FAQ & Game Rules</a>
             <a onclick="openModal('privacy'); toggleMobileNav();" class="nav-link">🛡️ Privacy Policy</a>
-            <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.5/Cup.And.Coin.apk" class="nav-cta-btn" style="text-align: center; margin-top: 6px;" target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.5/Cup.And.Coin.apk" class="nav-cta-btn" style="text-align: center; margin-top: 6px;" onclick="openDownloadModal(event, this.href)" target="_blank" rel="noopener noreferrer">
                 🚀 Download v1.0.5 APK
             </a>
         </div>
@@ -1335,7 +1154,7 @@
             <span>/</span>
             <span style="color: #cbd5e1;">Cap and Coin Game</span>
             <span>/</span>
-            <a href="#play-online" style="color: var(--neon-cyan); text-decoration: none;">Play Online</a>
+            <a href="#showcase-section" style="color: var(--neon-cyan); text-decoration: none;">App Showcase</a>
             <span>/</span>
             <a href="#faq-section" style="color: var(--neon-cyan); text-decoration: none;">FAQ</a>
         </nav>
@@ -1346,11 +1165,11 @@
                 <img src="https://res.cloudinary.com/djhgkdqwl/image/upload/v1787303827/App_icon_ldn6l9.png" alt="Cap and Coin (Cup and Coin 3D) Logo" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%;">
             </div>
             <h1>Cap and Coin (Cup and Coin 3D)</h1>
-            <p class="subtitle">The Official 3D Cap & Coin Brain Trainer Game – Track the golden coin under rapid 3D shuffling caps, test your concentration, and boost your focus online!</p>
+            <p class="subtitle">The Official 3D Cap & Coin Brain Trainer Game – Track the golden coin under rapid 3D shuffling caps, test your concentration, and boost your focus!</p>
 
             <div class="badge-container">
                 <span class="badge">🧠 Cap & Coin Focus Trainer</span>
-                <span class="badge">🎮 Play Online Free</span>
+                <span class="badge">🚀 Fast 60 FPS Engine</span>
                 <span class="badge">🛡️ 100% Privacy Safe</span>
                 <span class="badge">🎨 3D Neon Glow Graphics</span>
             </div>
@@ -1379,62 +1198,18 @@
             <div id="container-6b6e6518244d38844cf75951b76ae4fc"></div>
         </div>
 
-        <section class="hero-action-bar">
-            <h2>⚡ READY TO TEST YOUR FOCUS IN CAP AND COIN?</h2>
-            <p style="color: #94a3b8; font-size: 1rem; margin: 0 0 20px 0;">Play the classic 3-cup shell game with dynamic 3D spiral shuffles in your browser, or download the official Android APK directly!</p>
+        <section class="hero-action-bar" id="download-section">
+            <h2>⚡ GET THE OFFICIAL CAP AND COIN APP NOW!</h2>
+            <p style="color: #94a3b8; font-size: 1rem; margin: 0 0 20px 0;">Experience the premier 3D shell focus game on your Android device with lightning-fast 60 FPS orbital animations and offline gameplay!</p>
             <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; align-items: center;">
-                <a href="#play-online" class="btn-play-hero">
-                    🎮 Play 3D Online Now
-                </a>
                 <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.5/Cup.And.Coin.apk" class="btn-download-apk" onclick="openDownloadModal(event, this.href)" target="_blank" rel="noopener noreferrer">
-                    🚀 Download APK (v1.0.5)
+                    🚀 Download Official APK (v1.0.5)
+                </a>
+                <a href="#showcase-section" class="btn-play-hero">
+                    📱 View Screenshots & Features
                 </a>
             </div>
             <p style="margin: 12px 0 0 0; font-size: 0.8rem; color: #64748b;">Filename: <strong>Cup.And.Coin.apk</strong> • Version: <strong>v1.0.5 (Latest Release)</strong> • 18.5 MB • 100% Virus-Free & SHA-256 Verified</p>
-        </section>
-
-        <!-- ----------------------------------------------------
-           3D GAMEPLAY DEMO (MINI-GAME SHUFFLE SHOWCASE)
-           ---------------------------------------------------- -->
-        <section class="game-wrapper" id="play-online">
-            <div class="game-header">
-                <h2>🎮 PLAY CAP AND COIN 3D ONLINE!</h2>
-                <p>The golden coin is placed inside the middle cap. Click <strong>Start Cap & Coin Shuffle</strong>, follow the 3D orbital swaps with your eyes, and tap the winning cap to reveal the coin!</p>
-            </div>
-
-            <!-- Play stage for 3D cylinders -->
-            <div class="stage-3d">
-                <!-- Golden coin -->
-                <div class="coin-3d" id="target-coin"></div>
-
-                <!-- Three 3D Cups -->
-                <div class="cup-3d" id="cup-0" onclick="selectCup(0)">
-                    <div class="cup-rim"></div>
-                    <div class="cup-body">
-                        <div class="cup-ring"></div>
-                        <div class="cup-ring-bottom"></div>
-                    </div>
-                </div>
-
-                <div class="cup-3d" id="cup-1" onclick="selectCup(1)">
-                    <div class="cup-rim"></div>
-                    <div class="cup-body">
-                        <div class="cup-ring"></div>
-                        <div class="cup-ring-bottom"></div>
-                    </div>
-                </div>
-
-                <div class="cup-3d" id="cup-2" onclick="selectCup(2)">
-                    <div class="cup-rim"></div>
-                    <div class="cup-body">
-                        <div class="cup-ring"></div>
-                        <div class="cup-ring-bottom"></div>
-                    </div>
-                </div>
-            </div>
-
-            <button class="btn-action" id="shuffle-btn" onclick="startDemoShuffle()">⚡ Start Cap & Coin Shuffle</button>
-            <div class="game-status" id="game-status-text">The golden coin is in the center cap. Click Start Shuffle!</div>
         </section>
 
         <!-- Features Showcase Grid -->
@@ -1794,156 +1569,9 @@
     </div>
 
     <!-- ----------------------------------------------------
-       INTERACTIVE JAVASCRIPT GAME LOGIC & MODALS ROUTING
+       JAVASCRIPT MODALS & APP SHOWCASE ROUTING
        ---------------------------------------------------- -->
     <script>
-        // Game state variables
-        let coinPosition = 1; // 0 = Left, 1 = Middle, 2 = Right
-        let isShuffling = false;
-        let shuffleFinished = false;
-        let originalCupPositions = [0, 1, 2]; // tracking actual indexes
-
-        const cups = [
-            document.getElementById('cup-0'),
-            document.getElementById('cup-1'),
-            document.getElementById('cup-2')
-        ];
-        const coin = document.getElementById('target-coin');
-        const shuffleBtn = document.getElementById('shuffle-btn');
-        const statusText = document.getElementById('game-status-text');
-
-        // Position multipliers (mapping cup left offsets dynamically)
-        const leftPositions = [
-            'calc(16.66% - 40px)',
-            'calc(50% - 40px)',
-            'calc(83.33% - 40px)'
-        ];
-
-        // Ensure initially middle cup has the coin
-        function resetGameStage() {
-            isShuffling = false;
-            shuffleFinished = false;
-            originalCupPositions = [0, 1, 2];
-            coinPosition = 1;
-
-            // Align cups
-            cups.forEach((cup, idx) => {
-                cup.style.left = leftPositions[idx];
-                cup.classList.remove('lifted');
-            });
-
-            // Put coin in middle
-            coin.style.left = 'calc(50% - 19px)';
-            coin.style.display = 'block';
-            statusText.innerText = 'The golden coin is in the center cap. Click Start Shuffle!';
-            shuffleBtn.disabled = false;
-        }
-
-        // Lift central cup, hide coin under it, lower cup, and perform 3D swap loops
-        function startDemoShuffle() {
-            if (isShuffling) return;
-            isShuffling = true;
-            shuffleBtn.disabled = true;
-            statusText.innerText = 'Lock your focus! Coin is hiding under the cap...';
-
-            // Reset lifts
-            cups.forEach(cup => cup.classList.remove('lifted'));
-
-            // Step 1: Lift middle cup to reveal coin
-            cups[1].classList.add('lifted');
-            coin.style.display = 'block';
-
-            setTimeout(() => {
-                // Step 2: Drop middle cup over coin & hide coin
-                cups[1].classList.remove('lifted');
-                setTimeout(() => {
-                    coin.style.display = 'none';
-                    performShuffles();
-                }, 400);
-            }, 1000);
-        }
-
-        // Animated shuffle moves
-        function performShuffles() {
-            let moves = 5; // number of quick shuffles
-            let currentStep = 0;
-
-            function runStep() {
-                if (currentStep >= moves) {
-                    // Shuffling complete
-                    isShuffling = false;
-                    shuffleFinished = true;
-                    statusText.innerText = '👁️ SHUFFLE COMPLETE! Tap the cap containing the coin!';
-                    return;
-                }
-
-                // Randomly select two cups to swap
-                let idxA = Math.floor(Math.random() * 3);
-                let idxB = Math.floor(Math.random() * 3);
-                while (idxA === idxB) {
-                    idxB = Math.floor(Math.random() * 3);
-                }
-
-                statusText.innerText = `Orbit Loop swap ${currentStep + 1} of ${moves}...`;
-
-                // Swap positions in tracker
-                let tempPos = originalCupPositions[idxA];
-                originalCupPositions[idxA] = originalCupPositions[idxB];
-                originalCupPositions[idxB] = tempPos;
-
-                // Visual CSS updates
-                cups[idxA].style.left = leftPositions[originalCupPositions[idxA]];
-                cups[idxB].style.left = leftPositions[originalCupPositions[idxB]];
-
-                currentStep++;
-                setTimeout(runStep, 600); // speed of shuffle intervals
-            }
-
-            runStep();
-        }
-
-        // Selection handle
-        function selectCup(clickedCupId) {
-            if (isShuffling) return;
-            if (!shuffleFinished) {
-                // If they click before shuffling, just show them the coin
-                cups[clickedCupId].classList.toggle('lifted');
-                return;
-            }
-
-            // We are looking for cup ID 1 (which holds the coin initially)
-            // Let's see where cup 1 is now
-            const coinCupCurrentPosIdx = originalCupPositions[1];
-
-            // Lift all cups to show result
-            cups.forEach((cup, idx) => {
-                cup.classList.add('lifted');
-                if (idx === 1) {
-                    // Update coin location to match the middle cup's ending position
-                    coin.style.left = `calc(${16.66 + (coinCupCurrentPosIdx * 33.33)}% - 19px)`;
-                    coin.style.display = 'block';
-                }
-            });
-
-            // Evaluate Win / Lose
-            if (clickedCupId === 1) {
-                statusText.innerHTML = '<span style="color: var(--neon-green)">🎯 EXCELLENT FOCUS! YOU FOUND THE COIN! 🎉</span>';
-            } else {
-                statusText.innerHTML = '<span style="color: var(--neon-pink)">❌ ALMOST! Focus closer next time! Try again! 👁️</span>';
-            }
-
-            shuffleFinished = false;
-            
-            // Allow restart after a quick delay
-            setTimeout(() => {
-                shuffleBtn.disabled = false;
-                shuffleBtn.innerText = '🔄 Play Again';
-            }, 1500);
-        }
-
-        // Initialize stage on load
-        window.addEventListener('DOMContentLoaded', resetGameStage);
-
         // ----------------------------------------------------
         // SCREENSHOTS SHOWCASE TAB SWITCHER
         // ----------------------------------------------------
@@ -2081,11 +1709,8 @@
     </script>
     <!-- Mobile Sticky Bottom Quick Action Bar for High Mobile Conversion & Ad Visibility -->
     <div class="mobile-sticky-cta">
-        <a href="#play-online" class="mobile-sticky-btn">
-            🎮 Play 3D Online
-        </a>
-        <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.5/Cup.And.Coin.apk" class="mobile-sticky-btn mobile-sticky-btn-apk" onclick="openDownloadModal(event, this.href)" target="_blank" rel="noopener noreferrer">
-            🚀 Download v1.0.5 APK
+        <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.5/Cup.And.Coin.apk" class="mobile-sticky-btn mobile-sticky-btn-apk" onclick="openDownloadModal(event, this.href)" target="_blank" rel="noopener noreferrer" style="width: 100%; text-align: center;">
+            🚀 Download v1.0.5 APK (Fast Direct)
         </a>
     </div>
 
