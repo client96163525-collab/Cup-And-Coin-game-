@@ -50,9 +50,6 @@ class MainActivity : ComponentActivity() {
         // Initialize PostHog Analytics Engine
         com.example.util.PostHogAnalyticsManager.initialize(this)
 
-        // Report app install to official website backend
-        com.example.util.AppInstallReporter.reportInstallIfNeeded(this)
-
         // Global Crash Reporting & Logging Handler
         val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
