@@ -15,8 +15,6 @@ import com.unity3d.ads.UnityAds
 import com.unity3d.ads.IUnityAdsInitializationListener
 import com.unity3d.ads.IUnityAdsLoadListener
 import com.unity3d.ads.IUnityAdsShowListener
-import com.unity3d.ads.UnityAdsShowOptions
-import com.unity3d.ads.UnityAdsLoadOptions
 import com.unity3d.services.banners.BannerView
 import com.unity3d.services.banners.UnityBannerSize
 import com.unity3d.services.banners.BannerErrorInfo
@@ -70,8 +68,7 @@ object AdManager {
     // ----------------------------------------------------
     fun loadUnityInterstitial(context: Context) {
         try {
-            val loadOptions = UnityAdsLoadOptions()
-            UnityAds.load(UNITY_INTERSTITIAL_PLACEMENT_ID, loadOptions, object : IUnityAdsLoadListener {
+            UnityAds.load(UNITY_INTERSTITIAL_PLACEMENT_ID, object : IUnityAdsLoadListener {
                 override fun onUnityAdsAdLoaded(placementId: String?) {
                     isUnityInterstitialLoaded = true
                     DebugLogger.d("UnityAds", "Unity Interstitial Ad Loaded Successfully ($placementId)")
@@ -89,8 +86,7 @@ object AdManager {
 
     fun loadUnityRewarded(context: Context) {
         try {
-            val loadOptions = UnityAdsLoadOptions()
-            UnityAds.load(UNITY_REWARDED_PLACEMENT_ID, loadOptions, object : IUnityAdsLoadListener {
+            UnityAds.load(UNITY_REWARDED_PLACEMENT_ID, object : IUnityAdsLoadListener {
                 override fun onUnityAdsAdLoaded(placementId: String?) {
                     isUnityRewardedLoaded = true
                     DebugLogger.d("UnityAds", "Unity Rewarded Ad Loaded Successfully ($placementId)")
@@ -115,7 +111,7 @@ object AdManager {
         }
 
         if (UnityAds.isInitialized && isUnityInterstitialLoaded) {
-            UnityAds.show(activity, UNITY_INTERSTITIAL_PLACEMENT_ID, UnityAdsShowOptions(), object : IUnityAdsShowListener {
+            UnityAds.show(activity, UNITY_INTERSTITIAL_PLACEMENT_ID, object : IUnityAdsShowListener {
                 override fun onUnityAdsShowFailure(placementId: String?, error: UnityAds.UnityAdsShowError?, message: String?) {
                     DebugLogger.e("UnityAds", "Unity Interstitial show failed: $message")
                     isUnityInterstitialLoaded = false
@@ -159,7 +155,7 @@ object AdManager {
         }
 
         if (UnityAds.isInitialized && isUnityRewardedLoaded) {
-            UnityAds.show(activity, UNITY_REWARDED_PLACEMENT_ID, UnityAdsShowOptions(), object : IUnityAdsShowListener {
+            UnityAds.show(activity, UNITY_REWARDED_PLACEMENT_ID, object : IUnityAdsShowListener {
                 override fun onUnityAdsShowFailure(placementId: String?, error: UnityAds.UnityAdsShowError?, message: String?) {
                     DebugLogger.e("UnityAds", "Unity Rewarded show failed: $message (Error: $error)")
                     isUnityRewardedLoaded = false
