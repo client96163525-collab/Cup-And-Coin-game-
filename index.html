@@ -1121,6 +1121,471 @@
         body {
             padding-top: 75px;
         }
+
+        /* ----------------------------------------------------
+           🎮 WEB 3D INTERACTIVE GAME SECTION STYLES
+           ---------------------------------------------------- */
+        .web-game-section {
+            margin-top: 35px;
+            margin-bottom: 25px;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(10, 15, 30, 0.98) 100%);
+            border: 1px solid var(--border-glow);
+            border-radius: 24px;
+            padding: 30px 20px;
+            box-shadow: 0 15px 50px rgba(0, 242, 254, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+        .web-game-section::before {
+            content: '';
+            position: absolute;
+            top: -40%;
+            left: -40%;
+            width: 180%;
+            height: 180%;
+            background: radial-gradient(circle at center, rgba(0, 242, 254, 0.08) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .game-header-bar {
+            margin-bottom: 18px;
+            position: relative;
+            z-index: 2;
+        }
+        .game-badge-tag {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: rgba(0, 242, 254, 0.15);
+            color: var(--neon-cyan);
+            border: 1px solid rgba(0, 242, 254, 0.4);
+            margin-bottom: 8px;
+        }
+        .game-headline {
+            font-size: 2.1rem;
+            font-weight: 900;
+            margin: 0 0 8px 0;
+            background: linear-gradient(135deg, #ffffff, var(--neon-cyan), #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .game-subheadline {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            max-width: 620px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+        .game-hud {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin: 20px 0 16px 0;
+            position: relative;
+            z-index: 2;
+        }
+        .hud-item {
+            background: rgba(3, 7, 18, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 8px 18px;
+            min-width: 95px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+        .hud-label {
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            color: #94a3b8;
+            margin-bottom: 2px;
+        }
+        .hud-val {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: #ffffff;
+        }
+        .hud-val.highlight {
+            color: #f59e0b;
+            text-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
+        }
+        .hud-sub {
+            font-size: 0.68rem;
+            color: #64748b;
+        }
+        .hud-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 2px;
+            transition: all 0.2s;
+        }
+        .hud-btn:hover {
+            background: var(--neon-cyan);
+            color: #030712;
+        }
+        .difficulty-picker {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 2;
+        }
+        .diff-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #94a3b8;
+        }
+        .diff-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: #cbd5e1;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 5px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .diff-btn.active {
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            color: #030712;
+            font-weight: 900;
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.5);
+        }
+        .game-status-banner {
+            background: rgba(0, 242, 254, 0.1);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            color: #e2e8f0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 30px;
+            margin: 0 auto 20px auto;
+            max-width: 520px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s;
+            position: relative;
+            z-index: 2;
+        }
+        .game-status-banner.win {
+            background: rgba(5, 255, 161, 0.18);
+            border-color: #05ffa1;
+            color: #05ffa1;
+        }
+        .game-status-banner.miss {
+            background: rgba(255, 42, 109, 0.18);
+            border-color: #ff2a6d;
+            color: #ff85a8;
+        }
+        .game-status-banner.pick {
+            background: rgba(245, 158, 11, 0.22);
+            border-color: #f59e0b;
+            color: #fde68a;
+            animation: pulseBanner 1s infinite alternate;
+        }
+        @keyframes pulseBanner {
+            from { transform: scale(1); box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
+            to { transform: scale(1.02); box-shadow: 0 0 20px rgba(245, 158, 11, 0.6); }
+        }
+
+        /* 3D Cyber Table & Stage */
+        .game-stage-wrapper {
+            position: relative;
+            max-width: 680px;
+            height: 270px;
+            margin: 0 auto;
+            perspective: 800px;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .game-table-surface {
+            position: absolute;
+            inset: 20px 0 0 0;
+            background: radial-gradient(ellipse at center, #102a45 0%, #081729 60%, #030a14 100%);
+            border-radius: 50%;
+            transform: rotateX(25deg);
+            border: 2px solid rgba(0, 242, 254, 0.4);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 242, 254, 0.25), inset 0 0 35px rgba(0, 242, 254, 0.2);
+        }
+        .table-neon-rim {
+            position: absolute;
+            inset: 12px;
+            border-radius: 50%;
+            border: 1px dashed rgba(0, 242, 254, 0.25);
+            pointer-events: none;
+        }
+
+        /* 3 Cup Slots (Static positions on table) */
+        .cup-slot {
+            position: absolute;
+            top: 48%;
+            transform: translateY(-50%);
+            width: 90px;
+            height: 120px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            z-index: 5;
+        }
+        .cup-slot-0 { left: 16%; margin-left: -45px; }
+        .cup-slot-1 { left: 50%; margin-left: -45px; }
+        .cup-slot-2 { left: 84%; margin-left: -45px; }
+
+        .cup-pedestal {
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 76px;
+            height: 22px;
+            background: radial-gradient(ellipse, rgba(0, 242, 254, 0.35) 0%, rgba(0,0,0,0.8) 70%);
+            border-radius: 50%;
+            box-shadow: 0 0 16px rgba(0, 242, 254, 0.4);
+        }
+
+        /* The Cyber Cup Graphic */
+        .cyber-cup {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 76px;
+            height: 96px;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s;
+            filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.8));
+            pointer-events: none;
+        }
+        .cyber-cup.lifted {
+            transform: translateX(-50%) translateY(-85px);
+            filter: drop-shadow(0 25px 25px rgba(0, 242, 254, 0.45));
+        }
+        .cup-slot.ready-to-pick:hover .cyber-cup:not(.lifted) {
+            transform: translateX(-50%) translateY(-10px);
+            filter: drop-shadow(0 20px 22px rgba(0, 242, 254, 0.5));
+        }
+
+        .cup-lid-handle {
+            width: 20px;
+            height: 10px;
+            margin: 0 auto;
+            background: linear-gradient(180deg, #f59e0b, #d97706);
+            border-radius: 6px 6px 0 0;
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+        }
+        .cup-lid-ring {
+            width: 64px;
+            height: 12px;
+            margin: 0 auto;
+            background: linear-gradient(90deg, #00f2fe, #9b51e5, #00f2fe);
+            border-radius: 10px;
+            box-shadow: 0 0 12px rgba(0, 242, 254, 0.7);
+        }
+        .cup-body {
+            width: 74px;
+            height: 74px;
+            margin: -3px auto 0 auto;
+            background: linear-gradient(175deg, #1e293b 0%, #0f172a 60%, #030712 100%);
+            border: 2px solid var(--neon-cyan);
+            border-top: none;
+            clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%);
+            border-radius: 0 0 16px 16px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 20px rgba(0, 242, 254, 0.35);
+        }
+        .cup-accent-lines {
+            position: absolute;
+            inset: 10px 12px;
+            border-top: 1px solid rgba(0, 242, 254, 0.4);
+            border-bottom: 1px solid rgba(155, 81, 229, 0.4);
+            pointer-events: none;
+        }
+        .cup-number {
+            font-size: 1.35rem;
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 0 0 10px var(--neon-cyan);
+        }
+        .cup-base-glow {
+            width: 68px;
+            height: 8px;
+            margin: -3px auto 0 auto;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+            filter: blur(4px);
+            opacity: 0.8;
+        }
+
+        /* 3D Golden Coin Graphic */
+        .cyber-coin {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            bottom: 38px;
+            transform: translate(-50%, 0);
+            pointer-events: none;
+            z-index: 2;
+            transition: left 0.35s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s;
+        }
+        .coin-pos-0 { left: 16%; }
+        .coin-pos-1 { left: 50%; }
+        .coin-pos-2 { left: 84%; }
+
+        .coin-inner {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 35% 35%, #fffbeb 0%, #fde047 30%, #f59e0b 70%, #b45309 100%);
+            border-radius: 50%;
+            border: 2px solid #fef08a;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.9), 0 4px 10px rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: coinGleam 2.5s infinite linear;
+        }
+        @keyframes coinGleam {
+            0% { transform: rotateY(0deg); }
+            50% { transform: rotateY(180deg); }
+            100% { transform: rotateY(360deg); }
+        }
+        .coin-symbol {
+            font-size: 1.25rem;
+            color: #78350f;
+            font-weight: 900;
+        }
+        .cyber-coin.reveal-win {
+            animation: coinWinJump 0.8s ease-out forwards;
+        }
+        @keyframes coinWinJump {
+            0% { transform: translate(-50%, 0) scale(1); }
+            45% { transform: translate(-50%, -40px) scale(1.35); }
+            100% { transform: translate(-50%, -20px) scale(1.2); }
+        }
+
+        /* Controls Bar */
+        .game-controls-bar {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 2;
+        }
+        .btn-game-primary {
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+            color: #030712;
+            font-size: 1.15rem;
+            font-weight: 900;
+            padding: 13px 38px;
+            border-radius: 35px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 30px rgba(0, 242, 254, 0.45);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-game-primary:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(0, 242, 254, 0.65);
+        }
+        .btn-game-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Upsell Card below Game */
+        .game-app-upsell {
+            margin-top: 28px;
+            padding: 22px 18px;
+            background: rgba(3, 7, 18, 0.85);
+            border: 1px solid rgba(0, 242, 254, 0.25);
+            border-radius: 18px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        .upsell-badge {
+            display: inline-block;
+            color: #f59e0b;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+        .upsell-title {
+            color: #ffffff;
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin: 0 0 6px 0;
+        }
+        .upsell-desc {
+            color: #94a3b8;
+            font-size: 0.88rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Mobile adjustments for Game */
+        @media screen and (max-width: 600px) {
+            .web-game-section {
+                padding: 22px 12px;
+            }
+            .game-headline {
+                font-size: 1.55rem;
+            }
+            .game-stage-wrapper {
+                height: 240px;
+            }
+            .cup-slot {
+                width: 70px;
+                height: 100px;
+            }
+            .cup-slot-0 { left: 18%; margin-left: -35px; }
+            .cup-slot-1 { left: 50%; margin-left: -35px; }
+            .cup-slot-2 { left: 82%; margin-left: -35px; }
+            .coin-pos-0 { left: 18%; }
+            .coin-pos-1 { left: 50%; }
+            .coin-pos-2 { left: 82%; }
+            .cyber-cup {
+                width: 64px;
+                height: 84px;
+            }
+            .cup-body {
+                width: 62px;
+                height: 62px;
+            }
+            .cup-lid-ring {
+                width: 52px;
+            }
+            .hud-item {
+                padding: 6px 12px;
+                min-width: 75px;
+            }
+            .btn-game-primary {
+                width: 100%;
+                padding: 13px 20px;
+                font-size: 1.05rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1135,6 +1600,7 @@
                 <span class="nav-brand-title">Cap & Coin 3D</span>
             </a>
             <nav class="nav-links-desktop">
+                <a href="#play-online" class="nav-link">🎮 Play Online</a>
                 <a href="#download-section" class="nav-link">📥 Download APK</a>
                 <a href="blog.html" class="nav-link">📖 Blog</a>
                 <a href="#showcase-section" class="nav-link">App Showcase</a>
@@ -1150,6 +1616,7 @@
         </div>
         <!-- Mobile Navigation Drawer -->
         <div class="mobile-nav-drawer" id="mobileNavDrawer">
+            <a href="#play-online" class="nav-link" onclick="toggleMobileNav()">🎮 Play Online (Instant Web)</a>
             <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.6/Cup.And.Coin.apk" class="nav-link" data-apk-download-btn="true" data-apk-nav-text="true" onclick="openDownloadModal(event, this.href); toggleMobileNav();" target="_blank" rel="noopener noreferrer">🚀 Download v1.0.6 APK</a>
             <a href="blog.html" class="nav-link" onclick="toggleMobileNav()">📖 Official Blog & Guides</a>
             <a href="#showcase-section" class="nav-link" onclick="toggleMobileNav()">📱 App Showcase & Screenshots</a>
@@ -1216,6 +1683,9 @@
             <h2>⚡ GET THE OFFICIAL CAP AND COIN APP NOW!</h2>
             <p style="color: #94a3b8; font-size: 1rem; margin: 0 0 20px 0;">Experience the premier 3D shell focus game on your Android device with lightning-fast 60 FPS orbital animations and offline gameplay!</p>
             <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; align-items: center;">
+                <a href="#play-online" class="btn-play-hero" style="background: linear-gradient(135deg, #f59e0b, #ec4899); color: #ffffff; font-weight: 800; border: none; box-shadow: 0 6px 25px rgba(245, 158, 11, 0.45); padding: 14px 28px; border-radius: 30px; text-decoration: none; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 8px;">
+                    🎮 Play in Browser (Free)
+                </a>
                 <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.6/Cup.And.Coin.apk" class="btn-download-apk" data-apk-download-btn="true" data-apk-hero-btn="true" onclick="openDownloadModal(event, this.href)" target="_blank" rel="noopener noreferrer">
                     🚀 Download Official APK (v1.0.6)
                 </a>
@@ -1224,6 +1694,131 @@
                 </a>
             </div>
             <p style="margin: 12px 0 0 0; font-size: 0.8rem; color: #64748b;" data-apk-meta="true">Filename: <strong>Cup.And.Coin.apk</strong> • Version: <strong>v1.0.6 (Latest Release)</strong> • 18.5 MB • 100% Virus-Free & SHA-256 Verified</p>
+        </section>
+
+        <!-- ----------------------------------------------------
+           🎮 PLAY ONLINE: OFFICIAL 3D WEB GAME ENGINE
+           ---------------------------------------------------- -->
+        <section class="web-game-section" id="play-online">
+            <div class="game-header-bar">
+                <div class="game-badge-tag">⚡ INSTANT BROWSER EDITION • NO INSTALL REQUIRED</div>
+                <h2 class="game-headline">🎮 Play Cap and Coin 3D Online</h2>
+                <p class="game-subheadline">Lock your gaze on the glowing golden coin as the cyber caps perform high-speed 3D orbital shuffles! Can you keep up and find the coin?</p>
+            </div>
+
+            <!-- Game HUD / Stats Panel -->
+            <div class="game-hud">
+                <div class="hud-item">
+                    <span class="hud-label">🪙 COINS</span>
+                    <span class="hud-val" id="web-coin-count">100</span>
+                    <span class="hud-sub">+50 Per Win</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">🔥 WIN STREAK</span>
+                    <span class="hud-val highlight" id="web-streak-count">0</span>
+                    <span class="hud-sub" id="web-best-streak">Best: 0</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">🏆 HIGH SCORE</span>
+                    <span class="hud-val" id="web-score-count">0</span>
+                    <span class="hud-sub" id="web-high-score">Record: 0</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">🔊 AUDIO FX</span>
+                    <button class="hud-btn" id="web-sound-toggle" onclick="toggleWebGameAudio()" title="Toggle Web Audio">🔊 SFX ON</button>
+                    <span class="hud-sub">Web Audio API</span>
+                </div>
+            </div>
+
+            <!-- Difficulty Picker -->
+            <div class="difficulty-picker">
+                <span class="diff-label">Mode & Swaps:</span>
+                <button class="diff-btn active" id="diff-easy" data-diff="easy" onclick="setWebGameDifficulty('easy')">Easy (3 Swaps)</button>
+                <button class="diff-btn" id="diff-medium" data-diff="medium" onclick="setWebGameDifficulty('medium')">Normal (5 Swaps)</button>
+                <button class="diff-btn" id="diff-hard" data-diff="hard" onclick="setWebGameDifficulty('hard')">Hard (8 Swaps)</button>
+                <button class="diff-btn" id="diff-insane" data-diff="insane" onclick="setWebGameDifficulty('insane')">Insane (12 Swaps)</button>
+            </div>
+
+            <!-- Status Banner Indicator -->
+            <div class="game-status-banner" id="web-game-status">
+                👉 Click <strong>"▶️ START SHUFFLE"</strong> to reveal coin and begin!
+            </div>
+
+            <!-- 3D Arena & Cups Stage -->
+            <div class="game-stage-wrapper" id="game-stage-area">
+                <div class="game-table-surface">
+                    <div class="table-neon-rim"></div>
+                </div>
+
+                <!-- 3 Cup Slots (Left: 0, Middle: 1, Right: 2) -->
+                <div class="cup-slot cup-slot-0" id="slot-0" onclick="handleCupSelection(0)">
+                    <div class="cup-pedestal"></div>
+                    <div class="cyber-cup" id="cup-elem-0">
+                        <div class="cup-lid-handle"></div>
+                        <div class="cup-lid-ring"></div>
+                        <div class="cup-body">
+                            <div class="cup-accent-lines"></div>
+                            <div class="cup-number" id="cup-label-0">1</div>
+                        </div>
+                        <div class="cup-base-glow"></div>
+                    </div>
+                </div>
+
+                <div class="cup-slot cup-slot-1" id="slot-1" onclick="handleCupSelection(1)">
+                    <div class="cup-pedestal"></div>
+                    <div class="cyber-cup" id="cup-elem-1">
+                        <div class="cup-lid-handle"></div>
+                        <div class="cup-lid-ring"></div>
+                        <div class="cup-body">
+                            <div class="cup-accent-lines"></div>
+                            <div class="cup-number" id="cup-label-1">2</div>
+                        </div>
+                        <div class="cup-base-glow"></div>
+                    </div>
+                </div>
+
+                <div class="cup-slot cup-slot-2" id="slot-2" onclick="handleCupSelection(2)">
+                    <div class="cup-pedestal"></div>
+                    <div class="cyber-cup" id="cup-elem-2">
+                        <div class="cup-lid-handle"></div>
+                        <div class="cup-lid-ring"></div>
+                        <div class="cup-body">
+                            <div class="cup-accent-lines"></div>
+                            <div class="cup-number" id="cup-label-2">3</div>
+                        </div>
+                        <div class="cup-base-glow"></div>
+                    </div>
+                </div>
+
+                <!-- Golden Coin Element -->
+                <div class="cyber-coin coin-pos-1" id="cyber-coin-elem">
+                    <div class="coin-inner">
+                        <div class="coin-symbol">★</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Primary Action Controls -->
+            <div class="game-controls-bar">
+                <button class="btn-game-primary" id="btn-start-game" onclick="startWebGameRound()">
+                    ▶️ START SHUFFLE
+                </button>
+            </div>
+
+            <!-- App Upsell Banner Directly Below Web Game -->
+            <div class="game-app-upsell">
+                <div class="upsell-badge">🚀 UPGRADE TO 60 FPS NATIVE ANDROID APP</div>
+                <h4 class="upsell-title">Enjoying the Browser Version? Get the Full Game on Android!</h4>
+                <p class="upsell-desc">Play offline with buttery smooth 60 FPS OpenGL 3D physics, unlock 10+ glowing neon tables, spin the daily lucky prize wheel, and save your streak forever!</p>
+                <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 14px; align-items: center;">
+                    <a href="https://github.com/client96163525-collab/Cup-And-Coin-game-/releases/download/v1.0.6/Cup.And.Coin.apk" class="btn-download-apk" data-apk-download-btn="true" onclick="openDownloadModal(event, this.href)" target="_blank" rel="noopener noreferrer" style="padding: 12px 28px; font-size: 0.95rem;">
+                        🚀 Download Cap & Coin APK (v1.0.6)
+                    </a>
+                    <a href="#showcase-section" class="btn-play-hero" style="padding: 12px 24px; font-size: 0.95rem;">
+                        📱 View App Screenshots
+                    </a>
+                </div>
+            </div>
         </section>
 
         <!-- Features Showcase Grid -->
@@ -1720,6 +2315,421 @@
         function escapeHtml(str) {
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
         }
+    </script>
+
+    <!-- ----------------------------------------------------
+       🎮 CAP AND COIN 3D WEB GAME ENGINE
+       ---------------------------------------------------- -->
+    <script>
+    (function() {
+        // Audio synthesis engine using Web Audio API
+        const WebSFX = {
+            ctx: null,
+            enabled: true,
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) this.ctx = new AudioContext();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            },
+            playLift() {
+                if (!this.enabled || !this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(240, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(560, this.ctx.currentTime + 0.16);
+                    gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.16);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.16);
+                } catch(e) {}
+            },
+            playLower() {
+                if (!this.enabled || !this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(320, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(140, this.ctx.currentTime + 0.14);
+                    gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.14);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.14);
+                } catch(e) {}
+            },
+            playSwap() {
+                if (!this.enabled || !this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(480, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(220, this.ctx.currentTime + 0.18);
+                    gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.18);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.18);
+                } catch(e) {}
+            },
+            playWin() {
+                if (!this.enabled || !this.ctx) return;
+                try {
+                    const freqs = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                    freqs.forEach((f, i) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(f, this.ctx.currentTime + i * 0.08);
+                        gain.gain.setValueAtTime(0.3, this.ctx.currentTime + i * 0.08);
+                        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + i * 0.08 + 0.28);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(this.ctx.currentTime + i * 0.08);
+                        osc.stop(this.ctx.currentTime + i * 0.08 + 0.28);
+                    });
+                } catch(e) {}
+            },
+            playLose() {
+                if (!this.enabled || !this.ctx) return;
+                try {
+                    const freqs = [280, 210, 160];
+                    freqs.forEach((f, i) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(f, this.ctx.currentTime + i * 0.12);
+                        gain.gain.setValueAtTime(0.18, this.ctx.currentTime + i * 0.12);
+                        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + i * 0.12 + 0.22);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(this.ctx.currentTime + i * 0.12);
+                        osc.stop(this.ctx.currentTime + i * 0.12 + 0.22);
+                    });
+                } catch(e) {}
+            }
+        };
+
+        // Game State Variables
+        let webCoins = parseInt(localStorage.getItem('cnc_web_coins') || '100', 10);
+        let webStreak = 0;
+        let webBestStreak = parseInt(localStorage.getItem('cnc_web_best_streak') || '0', 10);
+        let webScore = 0;
+        let webHighScore = parseInt(localStorage.getItem('cnc_web_high_score') || '0', 10);
+        let webDifficulty = 'easy';
+        let isShuffling = false;
+        let canPick = false;
+        let coinSlotIndex = 1; // 0=Left, 1=Middle, 2=Right
+        let currentCupInSlot = [0, 1, 2]; // slot 0 has cup 0, slot 1 has cup 1, etc.
+        let roundActive = false;
+
+        const diffSettings = {
+            easy: { swaps: 3, speed: 500, multiplier: 1, name: 'Easy' },
+            medium: { swaps: 5, speed: 380, multiplier: 1.5, name: 'Normal' },
+            hard: { swaps: 8, speed: 280, multiplier: 2, name: 'Hard' },
+            insane: { swaps: 12, speed: 190, multiplier: 3, name: 'Insane' }
+        };
+
+        function updateHUD() {
+            const coinEl = document.getElementById('web-coin-count');
+            const streakEl = document.getElementById('web-streak-count');
+            const bestStreakEl = document.getElementById('web-best-streak');
+            const scoreEl = document.getElementById('web-score-count');
+            const highScoreEl = document.getElementById('web-high-score');
+
+            if (coinEl) coinEl.textContent = webCoins;
+            if (streakEl) streakEl.textContent = webStreak;
+            if (bestStreakEl) bestStreakEl.textContent = `Best: ${webBestStreak}`;
+            if (scoreEl) scoreEl.textContent = webScore;
+            if (highScoreEl) highScoreEl.textContent = `Record: ${webHighScore}`;
+        }
+
+        function setStatus(text, type = '') {
+            const statusEl = document.getElementById('web-game-status');
+            if (!statusEl) return;
+            statusEl.innerHTML = text;
+            statusEl.className = 'game-status-banner' + (type ? ' ' + type : '');
+        }
+
+        window.toggleWebGameAudio = function() {
+            WebSFX.init();
+            WebSFX.enabled = !WebSFX.enabled;
+            const btn = document.getElementById('web-sound-toggle');
+            if (btn) {
+                btn.textContent = WebSFX.enabled ? '🔊 SFX ON' : '🔇 SFX MUTED';
+                btn.style.opacity = WebSFX.enabled ? '1' : '0.6';
+            }
+        };
+
+        window.setWebGameDifficulty = function(diff) {
+            if (isShuffling) return;
+            webDifficulty = diff;
+            document.querySelectorAll('.diff-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-diff') === diff);
+            });
+            setStatus(`Difficulty set to <strong>${diffSettings[diff].name}</strong> (${diffSettings[diff].swaps} orbital swaps). Ready!`);
+        };
+
+        function positionCoinAtSlot(slotIdx, animated = true) {
+            const coinEl = document.getElementById('cyber-coin-elem');
+            if (!coinEl) return;
+            coinEl.classList.remove('coin-pos-0', 'coin-pos-1', 'coin-pos-2', 'reveal-win');
+            coinEl.classList.add(`coin-pos-${slotIdx}`);
+            coinEl.style.opacity = '1';
+        }
+
+        function setCupLifted(cupId, lifted) {
+            const cup = document.getElementById(`cup-elem-${cupId}`);
+            if (cup) {
+                if (lifted) {
+                    cup.classList.add('lifted');
+                } else {
+                    cup.classList.remove('lifted');
+                }
+            }
+        }
+
+        function resetAllCupsLifted() {
+            for (let i = 0; i < 3; i++) {
+                setCupLifted(i, false);
+            }
+        }
+
+        window.startWebGameRound = async function() {
+            if (isShuffling) return;
+            WebSFX.init();
+
+            const startBtn = document.getElementById('btn-start-game');
+            if (startBtn) startBtn.disabled = true;
+
+            // Pick a random starting slot for the coin
+            coinSlotIndex = Math.floor(Math.random() * 3);
+            positionCoinAtSlot(coinSlotIndex);
+
+            // Lift the cup at the coin slot to reveal it
+            resetAllCupsLifted();
+            const cupOverCoin = currentCupInSlot[coinSlotIndex];
+            setCupLifted(cupOverCoin, true);
+            WebSFX.playLift();
+
+            setStatus(`👀 <strong>WATCH CLOSELY!</strong> The golden coin is under Cup #${coinSlotIndex + 1}!`, 'pick');
+
+            // Wait 1.1s so player sees the coin clearly
+            await new Promise(r => setTimeout(r, 1100));
+
+            // Lower the cup back down
+            setCupLifted(cupOverCoin, false);
+            WebSFX.playLower();
+
+            await new Promise(r => setTimeout(r, 450));
+
+            // Start 3D Shuffle Sequence
+            isShuffling = true;
+            canPick = false;
+            document.querySelectorAll('.cup-slot').forEach(s => s.classList.remove('ready-to-pick'));
+
+            const config = diffSettings[webDifficulty];
+            setStatus(`🌀 <strong>3D SHUFFLE IN PROGRESS...</strong> Track the coin!`, '');
+
+            let lastSwap = [-1, -1];
+            for (let s = 0; s < config.swaps; s++) {
+                // Pick two distinct slots to swap
+                const slots = [0, 1, 2];
+                let slotA = Math.floor(Math.random() * 3);
+                let remaining = slots.filter(x => x !== slotA);
+                let slotB = remaining[Math.floor(Math.random() * remaining.length)];
+
+                // Prevent immediate exact reverse swap for more dynamic variety
+                if (s > 0 && ((slotA === lastSwap[0] && slotB === lastSwap[1]) || (slotA === lastSwap[1] && slotB === lastSwap[0]))) {
+                    slotB = slots.find(x => x !== slotA && x !== lastSwap[0] && x !== lastSwap[1]) ?? slotB;
+                }
+                lastSwap = [slotA, slotB];
+
+                await executeSwap(slotA, slotB, config.speed);
+            }
+
+            // Shuffle finished! Ready for player choice
+            isShuffling = false;
+            canPick = true;
+            roundActive = true;
+
+            document.querySelectorAll('.cup-slot').forEach(s => s.classList.add('ready-to-pick'));
+            setStatus(`👉 <strong>WHERE IS THE COIN?</strong> Tap any cup to reveal!`, 'pick');
+            if (startBtn) {
+                startBtn.disabled = false;
+                startBtn.textContent = '🔄 RESTART SHUFFLE';
+            }
+        };
+
+        function executeSwap(slotA, slotB, duration) {
+            return new Promise(resolve => {
+                WebSFX.playSwap();
+
+                const cupIdA = currentCupInSlot[slotA];
+                const cupIdB = currentCupInSlot[slotB];
+
+                const cupElA = document.getElementById(`cup-elem-${cupIdA}`);
+                const cupElB = document.getElementById(`cup-elem-${cupIdB}`);
+
+                // Add 3D orbital trajectory styles
+                if (cupElA && cupElB) {
+                    cupElA.style.transform = 'translateX(-50%) translateY(20px) scale(1.1)';
+                    cupElA.style.zIndex = '10';
+                    cupElB.style.transform = 'translateX(-50%) translateY(-20px) scale(0.9)';
+                    cupElB.style.zIndex = '4';
+                }
+
+                // Swap slot data
+                currentCupInSlot[slotA] = cupIdB;
+                currentCupInSlot[slotB] = cupIdA;
+
+                // Track coin position
+                if (coinSlotIndex === slotA) {
+                    coinSlotIndex = slotB;
+                } else if (coinSlotIndex === slotB) {
+                    coinSlotIndex = slotA;
+                }
+                positionCoinAtSlot(coinSlotIndex, true);
+
+                setTimeout(() => {
+                    if (cupElA && cupElB) {
+                        cupElA.style.transform = '';
+                        cupElA.style.zIndex = '';
+                        cupElB.style.transform = '';
+                        cupElB.style.zIndex = '';
+                    }
+                    resolve();
+                }, duration);
+            });
+        }
+
+        window.handleCupSelection = function(slotIndex) {
+            if (!canPick || isShuffling) return;
+            canPick = false;
+            WebSFX.init();
+
+            document.querySelectorAll('.cup-slot').forEach(s => s.classList.remove('ready-to-pick'));
+
+            const pickedCupId = currentCupInSlot[slotIndex];
+            setCupLifted(pickedCupId, true);
+            WebSFX.playLift();
+
+            const coinEl = document.getElementById('cyber-coin-elem');
+
+            if (slotIndex === coinSlotIndex) {
+                // WIN!
+                WebSFX.playWin();
+                if (coinEl) coinEl.classList.add('reveal-win');
+
+                const multiplier = diffSettings[webDifficulty].multiplier;
+                const ptsEarned = Math.round(100 * multiplier);
+                const coinsEarned = Math.round(50 * multiplier);
+
+                webStreak += 1;
+                if (webStreak > webBestStreak) {
+                    webBestStreak = webStreak;
+                    localStorage.setItem('cnc_web_best_streak', webBestStreak);
+                }
+
+                webScore += ptsEarned;
+                if (webScore > webHighScore) {
+                    webHighScore = webScore;
+                    localStorage.setItem('cnc_web_high_score', webHighScore);
+                }
+
+                webCoins += coinsEarned;
+                localStorage.setItem('cnc_web_coins', webCoins);
+
+                updateHUD();
+                setStatus(`🎉 <strong>BRILLIANT EYE TRACKING!</strong> You found the coin! (+${ptsEarned} PTS, +${coinsEarned} 🪙)`, 'win');
+
+                triggerSparkleBurst(slotIndex);
+            } else {
+                // MISS!
+                WebSFX.playLose();
+                webStreak = 0;
+                updateHUD();
+                setStatus(`❌ <strong>MISSED!</strong> Cup #${slotIndex + 1} was empty! Revealing coin...`, 'miss');
+
+                // After 500ms, lift the correct cup to show where the coin was
+                setTimeout(() => {
+                    const winningCupId = currentCupInSlot[coinSlotIndex];
+                    setCupLifted(winningCupId, true);
+                    WebSFX.playLift();
+                    setStatus(`🪙 The golden coin was under <strong>Cup #${coinSlotIndex + 1}</strong>! Keep practicing!`, 'miss');
+                }, 550);
+            }
+
+            const startBtn = document.getElementById('btn-start-game');
+            if (startBtn) {
+                startBtn.disabled = false;
+                startBtn.textContent = '▶️ PLAY NEXT ROUND';
+            }
+        };
+
+        function triggerSparkleBurst(slotIdx) {
+            const stage = document.getElementById('game-stage-area');
+            if (!stage) return;
+            const colors = ['#f59e0b', '#00f2fe', '#05ffa1', '#ffffff', '#ff2a6d'];
+            const leftPercents = [16, 50, 84];
+            const originLeft = leftPercents[slotIdx] || 50;
+
+            for (let i = 0; i < 24; i++) {
+                const p = document.createElement('div');
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const size = Math.floor(Math.random() * 8) + 6;
+                const angle = Math.random() * Math.PI * 2;
+                const dist = Math.random() * 90 + 30;
+                const targetX = Math.cos(angle) * dist;
+                const targetY = Math.sin(angle) * dist - 30;
+
+                p.style.position = 'absolute';
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.style.backgroundColor = color;
+                p.style.borderRadius = '50%';
+                p.style.left = originLeft + '%';
+                p.style.bottom = '80px';
+                p.style.boxShadow = `0 0 10px ${color}`;
+                p.style.zIndex = '30';
+                p.style.pointerEvents = 'none';
+                p.style.transition = 'transform 0.7s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.7s';
+
+                stage.appendChild(p);
+
+                requestAnimationFrame(() => {
+                    p.style.transform = `translate(${targetX}px, ${targetY}px) scale(0)`;
+                    p.style.opacity = '0';
+                });
+
+                setTimeout(() => {
+                    if (p.parentNode) p.parentNode.removeChild(p);
+                }, 750);
+            }
+        }
+
+        // Init on DOM ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                updateHUD();
+                positionCoinAtSlot(1);
+            });
+        } else {
+            updateHUD();
+            positionCoinAtSlot(1);
+        }
+    })();
     </script>
     <!-- Mobile Sticky Bottom Quick Action Bar for High Mobile Conversion & Ad Visibility -->
     <div class="mobile-sticky-cta">

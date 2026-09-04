@@ -32,15 +32,29 @@ object AdManager {
     // and disabled for release builds for live production ads.
     val UNITY_TEST_MODE: Boolean = BuildConfig.DEBUG
     
-    // Unity Placements
+    // Unity Placements with Waterfall Fallbacks
     const val UNITY_BANNER_PLACEMENT_ID = "Banner_Android"
+    const val UNITY_BANNER_FALLBACK_ID = "banner"
+
     const val UNITY_INTERSTITIAL_PLACEMENT_ID = "Interstitial_Android"
+    const val UNITY_INTERSTITIAL_FALLBACK_ID = "video"
+
     const val UNITY_REWARDED_PLACEMENT_ID = "Rewarded_Android"
+    const val UNITY_REWARDED_FALLBACK_ID = "rewardedVideo"
 
     var isUnityInterstitialLoaded = false
         private set
     var isUnityRewardedLoaded = false
         private set
+
+    private var activeInterstitialPlacementId: String = UNITY_INTERSTITIAL_PLACEMENT_ID
+    private var activeRewardedPlacementId: String = UNITY_REWARDED_PLACEMENT_ID
+
+    private var currentInterstitialObjectId: String? = null
+    private var currentRewardedObjectId: String? = null
+
+    private var isInterstitialLoading = false
+    private var isRewardedLoading = false
 
     fun initialize(context: Context) {
         try {
@@ -66,62 +80,95 @@ object AdManager {
         }
     }
 
-    private var currentInterstitialObjectId: String? = null
-    private var currentRewardedObjectId: String? = null
-
     // ----------------------------------------------------
-    // Unity Ads Load Methods
+    // Unity Ads Load Methods (Using UnityAdsLoadOptions)
     // ----------------------------------------------------
-    fun loadUnityInterstitial(context: Context) {
+    fun loadUnityInterstitial(context: Context, useFallback: Boolean = false) {
         if (!UnityAds.isInitialized) return
+        if (isInterstitialLoading) return
+        isInterstitialLoading = true
+
+        val placementId = if (useFallback) UNITY_INTERSTITIAL_FALLBACK_ID else UNITY_INTERSTITIAL_PLACEMENT_ID
+        val objectId = UUID.randomUUID().toString()
+        currentInterstitialObjectId = objectId
+
+        val loadOptions = UnityAdsLoadOptions().apply {
+            this.objectId = objectId
+        }
+
         try {
-            val objectId = UUID.randomUUID().toString()
-            currentInterstitialObjectId = objectId
-            val loadOptions = UnityAdsLoadOptions().apply {
-                this.objectId = objectId
-            }
-            PostHogAnalyticsManager.trackAdRequested("INTERSTITIAL", UNITY_INTERSTITIAL_PLACEMENT_ID, "background_preload")
-            UnityAds.load(UNITY_INTERSTITIAL_PLACEMENT_ID, loadOptions, object : IUnityAdsLoadListener {
-                override fun onUnityAdsAdLoaded(placementId: String?) {
+            PostHogAnalyticsManager.trackAdRequested("INTERSTITIAL", placementId, "background_preload")
+            DebugLogger.d("UnityAds", "Requesting Interstitial ad ($placementId, objectId=$objectId)")
+
+            UnityAds.load(placementId, loadOptions, object : IUnityAdsLoadListener {
+                override fun onUnityAdsAdLoaded(loadedPlacementId: String?) {
+                    isInterstitialLoading = false
                     isUnityInterstitialLoaded = true
-                    PostHogAnalyticsManager.trackAdLoaded("INTERSTITIAL", placementId ?: UNITY_INTERSTITIAL_PLACEMENT_ID)
-                    DebugLogger.d("UnityAds", "Unity Interstitial Ad Loaded Successfully ($placementId)")
+                    activeInterstitialPlacementId = loadedPlacementId ?: placementId
+                    PostHogAnalyticsManager.trackAdLoaded("INTERSTITIAL", activeInterstitialPlacementId)
+                    DebugLogger.d("UnityAds", "Unity Interstitial Ad Loaded Successfully ($activeInterstitialPlacementId)")
                 }
 
-                override fun onUnityAdsFailedToLoad(placementId: String?, error: UnityAds.UnityAdsLoadError?, message: String?) {
+                override fun onUnityAdsFailedToLoad(failedPlacementId: String?, error: UnityAds.UnityAdsLoadError?, message: String?) {
+                    isInterstitialLoading = false
                     isUnityInterstitialLoaded = false
-                    PostHogAnalyticsManager.trackAdFailed("INTERSTITIAL", placementId ?: UNITY_INTERSTITIAL_PLACEMENT_ID, message ?: "Unknown error")
-                    DebugLogger.w("UnityAds", "Unity Interstitial failed to load: $message (Error: $error)")
+                    PostHogAnalyticsManager.trackAdFailed("INTERSTITIAL", failedPlacementId ?: placementId, message ?: "Unknown error")
+                    DebugLogger.w("UnityAds", "Unity Interstitial failed to load on $placementId: $message (Error: $error)")
+
+                    // If primary placement failed (e.g., configured as Header Bidding on dashboard), try waterfall fallback 'video'
+                    if (!useFallback && placementId == UNITY_INTERSTITIAL_PLACEMENT_ID) {
+                        DebugLogger.i("UnityAds", "Retrying Interstitial with standard waterfall placement: $UNITY_INTERSTITIAL_FALLBACK_ID")
+                        loadUnityInterstitial(context, useFallback = true)
+                    }
                 }
             })
         } catch (e: Throwable) {
+            isInterstitialLoading = false
             DebugLogger.e("UnityAds", "Exception loading Unity Interstitial: ${e.message}")
         }
     }
 
-    fun loadUnityRewarded(context: Context) {
+    fun loadUnityRewarded(context: Context, useFallback: Boolean = false) {
         if (!UnityAds.isInitialized) return
+        if (isRewardedLoading) return
+        isRewardedLoading = true
+
+        val placementId = if (useFallback) UNITY_REWARDED_FALLBACK_ID else UNITY_REWARDED_PLACEMENT_ID
+        val objectId = UUID.randomUUID().toString()
+        currentRewardedObjectId = objectId
+
+        val loadOptions = UnityAdsLoadOptions().apply {
+            this.objectId = objectId
+        }
+
         try {
-            val objectId = UUID.randomUUID().toString()
-            currentRewardedObjectId = objectId
-            val loadOptions = UnityAdsLoadOptions().apply {
-                this.objectId = objectId
-            }
-            PostHogAnalyticsManager.trackAdRequested("REWARDED", UNITY_REWARDED_PLACEMENT_ID, "background_preload")
-            UnityAds.load(UNITY_REWARDED_PLACEMENT_ID, loadOptions, object : IUnityAdsLoadListener {
-                override fun onUnityAdsAdLoaded(placementId: String?) {
+            PostHogAnalyticsManager.trackAdRequested("REWARDED", placementId, "background_preload")
+            DebugLogger.d("UnityAds", "Requesting Rewarded ad ($placementId, objectId=$objectId)")
+
+            UnityAds.load(placementId, loadOptions, object : IUnityAdsLoadListener {
+                override fun onUnityAdsAdLoaded(loadedPlacementId: String?) {
+                    isRewardedLoading = false
                     isUnityRewardedLoaded = true
-                    PostHogAnalyticsManager.trackAdLoaded("REWARDED", placementId ?: UNITY_REWARDED_PLACEMENT_ID)
-                    DebugLogger.d("UnityAds", "Unity Rewarded Ad Loaded Successfully ($placementId)")
+                    activeRewardedPlacementId = loadedPlacementId ?: placementId
+                    PostHogAnalyticsManager.trackAdLoaded("REWARDED", activeRewardedPlacementId)
+                    DebugLogger.d("UnityAds", "Unity Rewarded Ad Loaded Successfully ($activeRewardedPlacementId)")
                 }
 
-                override fun onUnityAdsFailedToLoad(placementId: String?, error: UnityAds.UnityAdsLoadError?, message: String?) {
+                override fun onUnityAdsFailedToLoad(failedPlacementId: String?, error: UnityAds.UnityAdsLoadError?, message: String?) {
+                    isRewardedLoading = false
                     isUnityRewardedLoaded = false
-                    PostHogAnalyticsManager.trackAdFailed("REWARDED", placementId ?: UNITY_REWARDED_PLACEMENT_ID, message ?: "Unknown error")
-                    DebugLogger.w("UnityAds", "Unity Rewarded failed to load: $message (Error: $error)")
+                    PostHogAnalyticsManager.trackAdFailed("REWARDED", failedPlacementId ?: placementId, message ?: "Unknown error")
+                    DebugLogger.w("UnityAds", "Unity Rewarded failed to load on $placementId: $message (Error: $error)")
+
+                    // If primary placement failed (e.g., configured as Header Bidding on dashboard), try waterfall fallback 'rewardedVideo'
+                    if (!useFallback && placementId == UNITY_REWARDED_PLACEMENT_ID) {
+                        DebugLogger.i("UnityAds", "Retrying Rewarded with standard waterfall placement: $UNITY_REWARDED_FALLBACK_ID")
+                        loadUnityRewarded(context, useFallback = true)
+                    }
                 }
             })
         } catch (e: Throwable) {
+            isRewardedLoading = false
             DebugLogger.e("UnityAds", "Exception loading Unity Rewarded: ${e.message}")
         }
     }
@@ -135,26 +182,31 @@ object AdManager {
         }
 
         if (UnityAds.isInitialized && isUnityInterstitialLoaded) {
-            PostHogAnalyticsManager.trackAdDisplayed("INTERSTITIAL", UNITY_INTERSTITIAL_PLACEMENT_ID)
-            UnityAds.show(activity, UNITY_INTERSTITIAL_PLACEMENT_ID, object : IUnityAdsShowListener {
-                override fun onUnityAdsShowFailure(placementId: String?, error: UnityAds.UnityAdsShowError?, message: String?) {
+            val placementId = activeInterstitialPlacementId
+            val showOptions = UnityAdsShowOptions().apply {
+                currentInterstitialObjectId?.let { this.objectId = it }
+            }
+
+            PostHogAnalyticsManager.trackAdDisplayed("INTERSTITIAL", placementId)
+            UnityAds.show(activity, placementId, showOptions, object : IUnityAdsShowListener {
+                override fun onUnityAdsShowFailure(failedPlacementId: String?, error: UnityAds.UnityAdsShowError?, message: String?) {
                     DebugLogger.e("UnityAds", "Unity Interstitial show failed: $message")
-                    PostHogAnalyticsManager.trackAdFailed("INTERSTITIAL", placementId ?: UNITY_INTERSTITIAL_PLACEMENT_ID, message ?: "Show failure")
+                    PostHogAnalyticsManager.trackAdFailed("INTERSTITIAL", failedPlacementId ?: placementId, message ?: "Show failure")
                     isUnityInterstitialLoaded = false
                     loadUnityInterstitial(activity)
                     onAdDismissed()
                 }
 
-                override fun onUnityAdsShowStart(placementId: String?) {
-                    DebugLogger.d("UnityAds", "Unity Interstitial Started Showing")
+                override fun onUnityAdsShowStart(startedPlacementId: String?) {
+                    DebugLogger.d("UnityAds", "Unity Interstitial Started Showing ($startedPlacementId)")
                 }
 
-                override fun onUnityAdsShowClick(placementId: String?) {
-                    PostHogAnalyticsManager.trackButtonClick("ad_clicked", "InterstitialAd", mapOf("placement_id" to (placementId ?: "")))
+                override fun onUnityAdsShowClick(clickedPlacementId: String?) {
+                    PostHogAnalyticsManager.trackButtonClick("ad_clicked", "InterstitialAd", mapOf("placement_id" to (clickedPlacementId ?: "")))
                     DebugLogger.d("UnityAds", "Unity Interstitial Clicked")
                 }
 
-                override fun onUnityAdsShowComplete(placementId: String?, state: UnityAds.UnityAdsShowCompletionState?) {
+                override fun onUnityAdsShowComplete(completedPlacementId: String?, state: UnityAds.UnityAdsShowCompletionState?) {
                     DebugLogger.d("UnityAds", "Unity Interstitial Closed ($state)")
                     isUnityInterstitialLoaded = false
                     loadUnityInterstitial(activity)
@@ -178,31 +230,36 @@ object AdManager {
         }
 
         if (UnityAds.isInitialized && isUnityRewardedLoaded) {
-            PostHogAnalyticsManager.trackAdDisplayed("REWARDED", UNITY_REWARDED_PLACEMENT_ID)
-            UnityAds.show(activity, UNITY_REWARDED_PLACEMENT_ID, object : IUnityAdsShowListener {
-                override fun onUnityAdsShowFailure(placementId: String?, error: UnityAds.UnityAdsShowError?, message: String?) {
+            val placementId = activeRewardedPlacementId
+            val showOptions = UnityAdsShowOptions().apply {
+                currentRewardedObjectId?.let { this.objectId = it }
+            }
+
+            PostHogAnalyticsManager.trackAdDisplayed("REWARDED", placementId)
+            UnityAds.show(activity, placementId, showOptions, object : IUnityAdsShowListener {
+                override fun onUnityAdsShowFailure(failedPlacementId: String?, error: UnityAds.UnityAdsShowError?, message: String?) {
                     DebugLogger.e("UnityAds", "Unity Rewarded show failed: $message (Error: $error)")
-                    PostHogAnalyticsManager.trackAdFailed("REWARDED", placementId ?: UNITY_REWARDED_PLACEMENT_ID, message ?: "Show failure")
+                    PostHogAnalyticsManager.trackAdFailed("REWARDED", failedPlacementId ?: placementId, message ?: "Show failure")
                     isUnityRewardedLoaded = false
                     loadUnityRewarded(activity)
                     Toast.makeText(
                         activity,
-                        "Ad is preparing, please tap once more in 2 seconds!",
+                        "Ad is loading, please try again in a moment!",
                         Toast.LENGTH_SHORT
                     ).show()
                     onAdClosed()
                 }
 
-                override fun onUnityAdsShowStart(placementId: String?) {
-                    DebugLogger.d("UnityAds", "Unity Rewarded Started Showing")
+                override fun onUnityAdsShowStart(startedPlacementId: String?) {
+                    DebugLogger.d("UnityAds", "Unity Rewarded Started Showing ($startedPlacementId)")
                 }
 
-                override fun onUnityAdsShowClick(placementId: String?) {
-                    PostHogAnalyticsManager.trackButtonClick("ad_clicked", "RewardedAd", mapOf("placement_id" to (placementId ?: "")))
+                override fun onUnityAdsShowClick(clickedPlacementId: String?) {
+                    PostHogAnalyticsManager.trackButtonClick("ad_clicked", "RewardedAd", mapOf("placement_id" to (clickedPlacementId ?: "")))
                     DebugLogger.d("UnityAds", "Unity Rewarded Clicked")
                 }
 
-                override fun onUnityAdsShowComplete(placementId: String?, state: UnityAds.UnityAdsShowCompletionState?) {
+                override fun onUnityAdsShowComplete(completedPlacementId: String?, state: UnityAds.UnityAdsShowCompletionState?) {
                     isUnityRewardedLoaded = false
                     loadUnityRewarded(activity)
                     if (state == UnityAds.UnityAdsShowCompletionState.COMPLETED) {
@@ -258,6 +315,28 @@ fun BannerAdView(modifier: Modifier = Modifier) {
 
                         override fun onBannerFailedToLoad(bannerView: BannerView?, errorInfo: BannerErrorInfo?) {
                             DebugLogger.w("UnityAds", "Unity Banner failed to load: ${errorInfo?.errorMessage} (${errorInfo?.errorCode})")
+                            if (bannerView?.placementId == AdManager.UNITY_BANNER_PLACEMENT_ID) {
+                                DebugLogger.i("UnityAds", "Retrying Banner with fallback placement: ${AdManager.UNITY_BANNER_FALLBACK_ID}")
+                                try {
+                                    val fallbackBanner = BannerView(activity, AdManager.UNITY_BANNER_FALLBACK_ID, UnityBannerSize(320, 50))
+                                    fallbackBanner.listener = object : BannerView.IListener {
+                                        override fun onBannerLoaded(b: BannerView?) {
+                                            DebugLogger.d("UnityAds", "Unity Fallback Banner Loaded Successfully")
+                                        }
+                                        override fun onBannerFailedToLoad(b: BannerView?, err: BannerErrorInfo?) {
+                                            DebugLogger.w("UnityAds", "Unity Fallback Banner failed: ${err?.errorMessage}")
+                                        }
+                                        override fun onBannerClick(b: BannerView?) {}
+                                        override fun onBannerLeftApplication(b: BannerView?) {}
+                                        override fun onBannerShown(b: BannerView?) {}
+                                    }
+                                    frameLayout.removeAllViews()
+                                    frameLayout.addView(fallbackBanner)
+                                    fallbackBanner.load()
+                                } catch (e: Throwable) {
+                                    DebugLogger.e("UnityAds", "Error loading fallback banner: ${e.message}")
+                                }
+                            }
                         }
 
                         override fun onBannerClick(bannerView: BannerView?) {

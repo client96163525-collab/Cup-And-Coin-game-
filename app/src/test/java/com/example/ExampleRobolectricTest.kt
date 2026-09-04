@@ -21,7 +21,7 @@ class ExampleRobolectricTest {
     fun `read app name string from context`() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val appName = context.getString(R.string.app_name)
-        assertEquals("3 Cup Coin", appName)
+        assertEquals("Cup & Coin", appName)
     }
 
     @Test
@@ -46,7 +46,8 @@ class ExampleRobolectricTest {
 
     @Test
     fun `verify game modes available`() {
-        assertEquals(5, GameMode.entries.size)
+        assertEquals(6, GameMode.entries.size)
+        assertTrue(GameMode.entries.contains(GameMode.TUTORIAL))
         assertTrue(GameMode.entries.contains(GameMode.CLASSIC))
         assertTrue(GameMode.entries.contains(GameMode.TIME_ATTACK))
         assertTrue(GameMode.entries.contains(GameMode.ENDLESS))

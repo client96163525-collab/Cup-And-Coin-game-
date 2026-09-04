@@ -41,6 +41,7 @@ class GreetingScreenshotTest {
                     onToggleSound = {},
                     onToggleVibration = {},
                     onToggleReducedMotion = {},
+                    onAppThemeChange = {},
                     onResetProgress = {}
                 )
             }
